@@ -81,6 +81,7 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
 
 # 🔥 News
 
+- **[2025.03.10]**: We have cleaned up the code and move most of the toolkit implementation into CAMEL.
 - **[2025.03.07]**: We open-source the codebase of 🦉 OWL project.
 
 # 🎬 Demo Video
