@@ -7,8 +7,12 @@ from contextlib import AsyncExitStack, asynccontextmanager
 
 
 class MCPToolkitManager:
-    """
-    负责管理多个 MCPToolkit 实例，并提供统一的连接管理。
+    r"""MCPToolkitManager is a class for managing multiple MCPToolkit
+    instances and providing unified connection management.
+
+    Attributes:
+        toolkits (List[MCPToolkit]): A list of MCPToolkit instances to be
+            managed.
     """
 
     def __init__(self, toolkits: List[MCPToolkit]):
@@ -19,17 +23,21 @@ class MCPToolkitManager:
 
     @staticmethod
     def from_config(config_path: str) -> "MCPToolkitManager":
-        """从 JSON 配置文件加载 MCPToolkit 实例，并返回 MCPToolkitManager 实例。
+        r"""Loads an MCPToolkit instance from a JSON configuration file and
+        returns an MCPToolkitManager instance.
 
-        :param config_path: JSON 配置文件路径
-        :return: MCPToolkitManager 实例
+        Args:
+            config_path (str): The path to the JSON configuration file.
+
+        Returns:
+            MCPToolkitManager: The MCPToolkitManager instance.
         """
         with open(config_path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
         all_toolkits = []
 
-        # 处理本地 MCP 服务器
+        # "mcpServers" is the MCP server configuration running as stdio mode
         mcp_servers = data.get("mcpServers", {})
         for name, cfg in mcp_servers.items():
             toolkit = MCPToolkit(
@@ -40,7 +48,7 @@ class MCPToolkitManager:
             )
             all_toolkits.append(toolkit)
 
-        # 处理远程 MCP Web 服务器
+        # "mcpWebServers" is the MCP server configuration running as sse mode
         mcp_web_servers = data.get("mcpWebServers", {})
         for name, cfg in mcp_web_servers.items():
             toolkit = MCPToolkit(
@@ -53,10 +61,10 @@ class MCPToolkitManager:
 
     @asynccontextmanager
     async def connection(self) -> AsyncGenerator["MCPToolkitManager", None]:
-        """统一打开多个 MCPToolkit 的连接，并在离开上下文时关闭。"""
+        r"""Connect multiple MCPToolkit instances and close them when
+        leaving"""
         self._exit_stack = AsyncExitStack()
         try:
-            # 顺序进入每个 toolkit 的 async context
             for tk in self.toolkits:
                 await self._exit_stack.enter_async_context(tk.connection())
             self._connected = True
@@ -67,10 +75,11 @@ class MCPToolkitManager:
             self._exit_stack = None
 
     def is_connected(self) -> bool:
+        r"""Returns whether the MCPToolkitManager is connected."""
         return self._connected
 
     def get_all_tools(self):
-        """合并所有 MCPToolkit 提供的工具"""
+        r"""Returns all tools from all MCPToolkit instances."""
         all_tools = []
         for tk in self.toolkits:
             all_tools.extend(tk.get_tools())
