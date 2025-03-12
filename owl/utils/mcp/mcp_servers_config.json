@@ -3,8 +3,8 @@
     "filesystem": {
       "command": "mcp-filesystem-server",
       "args": [
-        "/Users/coco/Desktop",
-        "/Users/coco/Downloads"
+        "/Users/username/Desktop",
+        "/Users/username/Downloads"
       ]
     },
     "simple-arxiv": {
