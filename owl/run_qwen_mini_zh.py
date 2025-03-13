@@ -19,7 +19,7 @@
 from dotenv import load_dotenv
 
 from camel.models import ModelFactory
-from camel.toolkits import WebToolkit, SearchToolkit, FileWriteToolkit
+from camel.toolkits import BrowserToolkit, SearchToolkit, FileWriteToolkit
 from camel.types import ModelPlatformType, ModelType
 
 from utils import OwlRolePlaying, run_society
@@ -62,7 +62,7 @@ def construct_society(question: str) -> OwlRolePlaying:
     )
 
     tools_list = [
-        *WebToolkit(
+        *BrowserToolkit(
             headless=False,
             web_agent_model=web_model,
             planning_agent_model=planning_model,
