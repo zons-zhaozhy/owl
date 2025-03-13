@@ -414,10 +414,10 @@ OWL 现在包含一个基于网页的用户界面，使与系统交互变得更�
 
 ```bash
 # 中文版本
-python run_app_zh.py
+python owl/webapp_zh.py
 
 # 英文版本
-python run_app.py
+python owl/webapp.py
 ```
 
 网页界面提供以下功能：
