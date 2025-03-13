@@ -486,7 +486,13 @@ def create_ui():
         return ""
     
     with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as app:
-       
+            gr.Markdown(
+                """
+                # 🦉 OWL 多智能体协作系统
+
+                基于CAMEL框架开发的先进多智能体协作系统，旨在通过智能体协作解决复杂问题。
+                """
+            )
             
             with gr.Row():
                 with gr.Column(scale=1):
@@ -526,7 +532,7 @@ def create_ui():
                 
            
                 
-                with gr.Tabs(scale=2):
+                with gr.Tabs():
                     with gr.TabItem("回答"):
                         answer_output = gr.Textbox(
                             label="回答", 
