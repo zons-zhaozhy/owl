@@ -22,7 +22,8 @@ import os
 import sys
 from pathlib import Path
 
-os.environ['PYTHONIOENCODING'] = 'utf-8'
+os.environ["PYTHONIOENCODING"] = "utf-8"
+
 
 def main():
     """Main function to launch the OWL Intelligent Assistant Platform"""

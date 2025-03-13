@@ -105,7 +105,7 @@
 </div>
 
 - **[2025.03.12]**: 在SearchToolkit中添加了Bocha搜索功能，集成了火山引擎模型平台，并更新了Azure和OpenAI Compatible模型的结构化输出和工具调用能力。
-- **[2025.03.11]**: 我们添加了 MCPToolkit、FileWriteToolkit 和 TerminalToolkit，增强 OWL Agent的工具调用、文件写入能力和终端命令执行功能。
+- **[2025.03.11]**: 我们添加了 MCPToolkit、FileWriteToolkit 和 TerminalToolkit，增强了 OWL Agent 的 MCP（模型上下文协议）集成、文件写入能力和终端命令执行功能。MCP 作为一个通用协议层，标准化了 AI 模型与各种数据源和工具的交互方式。
 - **[2025.03.09]**: 我们添加了基于网页的用户界面，使系统交互变得更加简便。
 - **[2025.03.07]**: 我们开源了 🦉 OWL 项目的代码库。
 - **[2025.03.03]**: OWL 在 GAIA 基准测试中取得 58.18 平均分，在开源框架中排名第一！
@@ -272,6 +272,23 @@ chmod +x build_docker.sh
 更多详细的Docker使用说明，包括跨平台支持、优化配置和故障排除，请参阅 [DOCKER_README.md](.container/DOCKER_README.md)
 
 # 🚀 快速开始
+
+## 尝试 MCP（模型上下文协议）集成
+
+体验 MCP 的强大功能，运行我们的示例来展示多智能体信息检索和处理：
+
+```bash
+# 设置 MCP 服务器（仅需一次性设置）
+npx -y @smithery/cli install @wonderwhy-er/desktop-commander --client claude
+npx @wonderwhy-er/desktop-commander setup
+
+# 运行 MCP 示例
+python owl/run_mcp.py
+```
+
+这个示例展示了 OWL 智能体如何通过 MCP 协议无缝地与文件系统、网页自动化和信息检索进行交互。查看 `owl/run_mcp.py` 了解完整实现。
+
+## 基本用法
    
 运行以下示例：
 
@@ -351,6 +368,14 @@ OWL 将自动调用与文档相关的工具来处理文件并提取答案。
 - "总结这篇研究论文的主要观点：[论文URL]"
 
 # 🧰 工具包与功能
+
+## 模型上下文协议（MCP）
+
+OWL 的 MCP 集成为 AI 模型与各种工具和数据源的交互提供了标准化的方式。
+
+查看我们的综合示例 `owl/run_mcp.py` 来体验这些功能！
+
+## 可用工具包
 
 > **重要提示**：有效使用工具包需要具备强大工具调用能力的模型。对于多模态工具包（Web、图像、视频），模型还必须具备多模态理解能力。
 
