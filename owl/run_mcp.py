@@ -39,7 +39,7 @@ Environment Setup:
    go install github.com/mark3labs/mcp-filesystem-server@latest
    npm install -g @modelcontextprotocol/server-filesystem
    
-   # Configure mcp_servers_config.json in owl/utils/mcp/
+   # Configure mcp_servers_config.json in owl/
    {
      "mcpServers": {
        "filesystem": {
