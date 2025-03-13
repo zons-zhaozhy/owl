@@ -485,6 +485,38 @@ def create_ui():
         """清空日志显示"""
         return ""
     
+    # 创建一个实时日志更新函数
+    def process_with_live_logs(question, module_name):
+        """处理问题并实时更新日志"""
+        # 创建一个后台线程来处理问题
+        result_queue = queue.Queue()
+        
+        def process_in_background():
+            try:
+                result = run_owl(question, module_name)
+                result_queue.put(result)
+            except Exception as e:
+                result_queue.put((f"发生错误: {str(e)}", [], "0", f"❌ 错误: {str(e)}"))
+        
+        # 启动后台处理线程
+        bg_thread = threading.Thread(target=process_in_background)
+        bg_thread.start()
+        
+        # 在等待处理完成的同时，每秒更新一次日志
+        while bg_thread.is_alive():
+            # 更新日志显示
+            logs = get_latest_logs(100)
+            yield None, None, None, "⏳ 处理中...", logs
+            time.sleep(1)
+        
+        # 处理完成，获取结果
+        result = result_queue.get()
+        answer, chat_history, token_count, status = result
+        
+        # 最后一次更新日志
+        logs = get_latest_logs(100)
+        yield answer, chat_history, token_count, status, logs
+    
     with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as app:
             gr.Markdown(
                 """
@@ -692,12 +724,9 @@ def create_ui():
             
             # 设置事件处理
             run_button.click(
-                fn=run_owl,
+                fn=process_with_live_logs,
                 inputs=[question_input, module_dropdown], 
-                outputs=[answer_output, chat_output, token_count_output, status_output]
-            ).then(
-                fn=update_logs,  # 任务完成后自动更新日志
-                outputs=[log_display]
+                outputs=[answer_output, chat_output, token_count_output, status_output, log_display]
             )
             
             # 模块选择更新描述
@@ -763,7 +792,7 @@ def main():
             STOP_LOG_THREAD.set()
             logging.info("应用程序关闭，停止日志线程")
             
-        app.launch(share=False)
+        app.launch(share=False,enable_queue=True,server_name="127.0.0.1",server_port=7860)
     except Exception as e:
         logging.error(f"启动应用程序时发生错误: {str(e)}")
         print(f"启动应用程序时发生错误: {str(e)}")
