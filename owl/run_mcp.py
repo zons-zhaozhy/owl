@@ -4,21 +4,33 @@ This example demonstrates how to use MCP (Model Context Protocol) with CAMEL age
 for advanced information retrieval and processing tasks.
 
 Environment Setup:
-1. Configure the required dependencies of owl library.
+1. Configure the required dependencies of owl library
+   Refer to: https://github.com/camel-ai/owl for installation guide
 
-2. Go Environment (v1.23.2+):
+2. MCP Server Setup:
+
+   2.1 MCP Desktop Commander (File System Service):
+   Prerequisites: Node.js and npm
    ```bash
-   # Verify Go installation
-   go version
+   # Install MCP service
+   npx -y @smithery/cli install @wonderwhy-er/desktop-commander --client claude
+   npx @wonderwhy-er/desktop-commander setup
    
-   # Add Go binary path to PATH
-   export PATH=$PATH:~/go/bin
-   # Note: Add to ~/.bashrc or ~/.zshrc for persistence
+   # Configure in owl/mcp_servers_config.json:
+   {
+     "desktop-commander": {
+       "command": "npx",
+       "args": [
+         "-y",
+         "@wonderwhy-er/desktop-commander"
+       ]
+     }
+   }
    ```
 
-3. Playwright Setup:
+   2.2 MCP Playwright Service:
    ```bash
-   # Install Node.js and npm first
+   # Install MCP service
    npm install -g @executeautomation/playwright-mcp-server
    npx playwright install-deps
    
@@ -33,22 +45,17 @@ Environment Setup:
    }
    ```
 
-4. MCP Filesystem Server Setup:
+   2.3 MCP Fetch Service (Optional - for better retrieval):
    ```bash
-   # Install MCP filesystem server
-   go install github.com/mark3labs/mcp-filesystem-server@latest
-   npm install -g @modelcontextprotocol/server-filesystem
+   # Install MCP service
+   pip install mcp-server-fetch
    
-   # Configure mcp_servers_config.json in owl/
+   # Configure in mcp_servers_config.json:
    {
      "mcpServers": {
-       "filesystem": {
-         "command": "mcp-filesystem-server",
-         "args": [
-           "/home/your_path",
-           "/home/your_path"
-         ],
-         "type": "filesystem"
+       "fetch": {
+         "command": "python",
+         "args": ["-m", "mcp_server_fetch"]
        }
      }
    }
@@ -57,11 +64,12 @@ Environment Setup:
 Usage:
 1. Ensure all MCP servers are properly configured in mcp_servers_config.json
 2. Run this script to create a multi-agent system that can:
-   - Access and manipulate files through MCP filesystem server
+   - Access and manipulate files through MCP Desktop Commander
    - Perform web automation tasks using Playwright
    - Process and generate information using GPT-4o
+   - Fetch web content (if fetch service is configured)
 3. The system will execute the specified task while maintaining security through
-   relative paths and controlled access
+   controlled access
 
 Note:
 - All file operations are restricted to configured directories
@@ -135,27 +143,29 @@ async def construct_society(
 
 async def main():
     config_path = Path(__file__).parent / "mcp_servers_config.json"
-
     mcp_toolkit = MCPToolkit(config_path=str(config_path))
 
-    question = (
-        "I'd like a academic report about Guohao Li, including his research "
-        "direction, published papers (At least 3), institutions, etc." 
-        "Then organize the report in Markdown format and save it to my desktop"
-    )
+    try:
+        await mcp_toolkit.connect()
 
-    await mcp_toolkit.connect()
+        question = (
+            "I'd like a academic report about Andrew Ng, including his research "
+            "direction, published papers (At least 3), institutions, etc." 
+            "Then organize the report in Markdown format and save it to my desktop"
+        )
 
-    # # Connect to all MCP toolkits
-    tools = [*mcp_toolkit.get_tools()]
+        # Connect to all MCP toolkits
+        tools = [*mcp_toolkit.get_tools()]
+        society = await construct_society(question, tools)
+        answer, chat_history, token_count = await run_society(society)
+        print(f"\033[94mAnswer: {answer}\033[0m")
 
-    society = await construct_society(question, tools)
-
-    answer, chat_history, token_count = await run_society(society)
-
-    print(f"\033[94mAnswer: {answer}\033[0m")
-
-    await mcp_toolkit.disconnect()
+    finally:
+        # Make sure to disconnect safely after all operations are completed.
+        try:
+            await mcp_toolkit.disconnect()
+        except Exception as e:
+            print(f"Warning: Error during disconnect: {e}")
 
 if __name__ == "__main__":
     asyncio.run(main())
