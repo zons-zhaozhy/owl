@@ -251,10 +251,10 @@ def create_ui():
                     </div>
                     <div class="navbar-menu">
                         <a href="#home">首页</a>
-                        <a href="#features">功能</a>
-                        <a href="#about">关于</a>
-                        <a href="#docs">文档</a>
-                        <a href="#contact">联系我们</a>
+                        <a href="https://github.com/camel-ai/owl/blob/main/README.md#-community">加入交流群</a>
+                        <a href="https://github.com/camel-ai/owl/blob/main/README.md">OWL文档</a>
+                        <a href="https://github.com/camel-ai/camel">CAMEL框架</a>
+                        <a href="https://camel-ai.org">CAMEL-AI官网</a>
                     </div>
                 </div>
                 <div class="header" id="home">
