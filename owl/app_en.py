@@ -40,6 +40,7 @@ SCRIPTS = {
     "Default": "run.py",
     "GAIA Roleplaying": "run_gaia_roleplaying.py",
     "OpenAI Compatible": "run_openai_compatiable_model.py",
+    "Azure OpenAI": "run_azure_openai.py",
     "Ollama": "run_ollama.py",
     "Terminal": "run_terminal.py",
 }
@@ -53,6 +54,7 @@ SCRIPT_DESCRIPTIONS = {
     "Default": "Default OWL implementation, uses OpenAI GPT-4o model and full set of tools",
     "GAIA Roleplaying": "GAIA benchmark implementation, used to evaluate model capabilities",
     "OpenAI Compatible": "Uses third-party models compatible with OpenAI API, supports custom API endpoints",
+    "Azure OpenAI": "Uses Azure OpenAI API",
     "Ollama": "Uses Ollama API",
     "Terminal": "Uses local terminal to execute python files",
 }
@@ -73,6 +75,34 @@ ENV_GROUPS = {
             "type": "text",
             "required": False,
             "help": "Base URL for OpenAI API, optional. Set this if using a proxy or custom endpoint.",
+        },
+        {
+            "name": "AZURE_OPENAI_KEY",
+            "label": "Azure OpenAI API Key",
+            "type": "password",
+            "required": False,
+            "help": "Azure OpenAI API key for accessing Azure deployed GPT models. Get it from: https://portal.azure.com/",
+        },
+        {
+            "name": "AZURE_OPENAI_ENDPOINT",
+            "label": "Azure OpenAI Endpoint",
+            "type": "text",
+            "required": False,
+            "help": "Azure OpenAI service endpoint URL",
+        },
+        {
+            "name": "AZURE_DEPLOYMENT_NAME",
+            "label": "Azure OpenAI Deployment Name",
+            "type": "text",
+            "required": False,
+            "help": "Azure OpenAI service deployment name",
+        },
+        {
+            "name": "AZURE_OPENAI_VERSION",
+            "label": "Azure OpenAI API Version",
+            "type": "text",
+            "required": False,
+            "help": "Azure OpenAI API version, e.g. 2023-12-01-preview",
         },
         {
             "name": "QWEN_API_KEY",
