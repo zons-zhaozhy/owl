@@ -122,7 +122,7 @@ https://private-user-images.githubusercontent.com/55657767/420212194-e813fc05-13
 - **Browser Automation**: Utilize the Playwright framework for simulating browser interactions, including scrolling, clicking, input handling, downloading, navigation, and more.
 - **Document Parsing**: Extract content from Word, Excel, PDF, and PowerPoint files, converting them into text or Markdown format.
 - **Code Execution**: Write and execute Python code using interpreter.
-- **Built-in Toolkits**: Access to a comprehensive set of built-in toolkits including ArxivToolkit, AudioAnalysisToolkit, CodeExecutionToolkit, DalleToolkit, DataCommonsToolkit, ExcelToolkit, GitHubToolkit, GoogleMapsToolkit, GoogleScholarToolkit, ImageAnalysisToolkit, MathToolkit, NetworkXToolkit, NotionToolkit, OpenAPIToolkit, RedditToolkit, SearchToolkit, SemanticScholarToolkit, SymPyToolkit, VideoAnalysisToolkit, WeatherToolkit, WebToolkit, and many more for specialized tasks.
+- **Built-in Toolkits**: Access to a comprehensive set of built-in toolkits including ArxivToolkit, AudioAnalysisToolkit, CodeExecutionToolkit, DalleToolkit, DataCommonsToolkit, ExcelToolkit, GitHubToolkit, GoogleMapsToolkit, GoogleScholarToolkit, ImageAnalysisToolkit, MathToolkit, NetworkXToolkit, NotionToolkit, OpenAPIToolkit, RedditToolkit, SearchToolkit, SemanticScholarToolkit, SymPyToolkit, VideoAnalysisToolkit, WeatherToolkit, BrowserToolkit, and many more for specialized tasks.
 
 # 🛠️ Installation
 
@@ -362,7 +362,7 @@ OWL supports various toolkits that can be customized by modifying the `tools` li
 ```python
 # Configure toolkits
 tools = [
-    *WebToolkit(headless=False).get_tools(),  # Browser automation
+    *BrowserToolkit(headless=False).get_tools(),  # Browser automation
     *VideoAnalysisToolkit(model=models["video"]).get_tools(),
     *AudioAnalysisToolkit().get_tools(),  # Requires OpenAI Key
     *CodeExecutionToolkit(sandbox="subprocess").get_tools(),
@@ -381,7 +381,7 @@ tools = [
 Key toolkits include:
 
 ### Multimodal Toolkits (Require multimodal model capabilities)
-- **WebToolkit**: Browser automation for web interaction and navigation
+- **BrowserToolkit**: Browser automation for web interaction and navigation
 - **VideoAnalysisToolkit**: Video processing and content analysis
 - **ImageAnalysisToolkit**: Image analysis and interpretation
 
@@ -399,11 +399,11 @@ To customize available tools:
 
 ```python
 # 1. Import toolkits
-from camel.toolkits import WebToolkit, SearchToolkit, CodeExecutionToolkit
+from camel.toolkits import BrowserToolkit, SearchToolkit, CodeExecutionToolkit
 
 # 2. Configure tools list
 tools = [
-    *WebToolkit(headless=True).get_tools(),
+    *BrowserToolkit(headless=True).get_tools(),
     SearchToolkit().search_wiki,
     *CodeExecutionToolkit(sandbox="subprocess").get_tools(),
 ]
