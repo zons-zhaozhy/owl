@@ -40,6 +40,7 @@ SCRIPTS = {
     "Default": "run.py",
     "GAIA Roleplaying": "run_gaia_roleplaying.py",
     "OpenAI Compatible": "run_openai_compatiable_model.py",
+    "Azure OpenAI": "run_azure_openai.py",
     "Ollama": "run_ollama.py",
     "Terminal": "run_terminal_zh.py",
 }
@@ -53,6 +54,7 @@ SCRIPT_DESCRIPTIONS = {
     "Default": "默认OWL实现，使用OpenAI GPT-4o模型和全套工具",
     "GAIA Roleplaying": "GAIA基准测试实现，用于评估模型能力",
     "OpenAI Compatible": "使用兼容OpenAI API的第三方模型，支持自定义API端点",
+    "Azure OpenAI": "使用Azure OpenAI API",
     "Ollama": "使用Ollama API",
     "Terminal": "使用本地终端执行python文件",
 }
@@ -73,6 +75,34 @@ ENV_GROUPS = {
             "type": "text",
             "required": False,
             "help": "OpenAI API的基础URL，可选。如果使用代理或自定义端点，请设置此项。",
+        },
+        {
+            "name": "AZURE_OPENAI_KEY",
+            "label": "Azure OpenAI API密钥",
+            "type": "password",
+            "required": False,
+            "help": "Azure OpenAI API密钥，用于访问Azure部署的GPT模型",
+        },
+        {
+            "name": "AZURE_OPENAI_ENDPOINT",
+            "label": "Azure OpenAI端点",
+            "type": "text",
+            "required": False,
+            "help": "Azure OpenAI服务的端点URL",
+        },
+        {
+            "name": "AZURE_DEPLOYMENT_NAME",
+            "label": "Azure OpenAI部署名称",
+            "type": "text",
+            "required": False,
+            "help": "Azure OpenAI服务的部署名称",
+        },
+        {
+            "name": "AZURE_OPENAI_VERSION",
+            "label": "Azure OpenAI API版本",
+            "type": "text",
+            "required": False,
+            "help": "Azure OpenAI API版本，例如：2023-12-01-preview",
         },
         {
             "name": "QWEN_API_KEY",

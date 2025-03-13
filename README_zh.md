@@ -311,6 +311,9 @@ python owl/run_deepseek_zh.py
 # 使用其他 OpenAI 兼容模型运行
 python owl/run_openai_compatiable_model.py
 
+# 使用 Azure OpenAI模型运行
+python owl/run_azure_openai.py
+
 # 使用 Ollama 运行
 python owl/run_ollama.py
 ```
