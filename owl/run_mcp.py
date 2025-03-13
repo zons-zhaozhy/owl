@@ -134,11 +134,9 @@ async def construct_society(
 
 
 async def main():
-    config_path = str(
-        Path(__file__).parent / "utils/mcp/mcp_servers_config.json"
-    )
+    config_path = Path(__file__).parent / "mcp_servers_config.json"
 
-    mcp_toolkit = MCPToolkit(config_path=config_path)
+    mcp_toolkit = MCPToolkit(config_path=str(config_path))
 
     question = (
         "I'd like a academic report about Guohao Li, including his research "
