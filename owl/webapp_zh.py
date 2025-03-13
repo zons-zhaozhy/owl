@@ -409,7 +409,7 @@ def create_ui():
                 <div class="footer" id="about">
                     <h3>关于 OWL 多智能体协作系统</h3>
                     <p>OWL 是一个基于CAMEL框架开发的先进多智能体协作系统，旨在通过智能体协作解决复杂问题。</p>
-                    <p>© 2024 CAMEL-AI.org. 基于Apache License 2.0开源协议</p>
+                    <p>© 2025 CAMEL-AI.org. 基于Apache License 2.0开源协议</p>
                     <p><a href="https://github.com/camel-ai/owl" target="_blank">GitHub</a> 
                       
                 </div>
