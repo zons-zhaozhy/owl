@@ -31,7 +31,7 @@ from camel.toolkits import (
 from camel.types import ModelPlatformType, ModelType
 
 
-from utils import OwlRolePlaying, run_society, DocumentProcessingToolkit
+from utils import OwlRolePlaying, run_society
 
 from camel.logger import set_log_level
 
@@ -99,9 +99,7 @@ def construct_society(question: str) -> OwlRolePlaying:
 def main():
     r"""Main function to run the OWL system with an example question."""
     # Example research question
-    question = (
-        "搜索OWL项目最近的新闻并生成一篇报告，最后保存到本地。"
-    )
+    question = "搜索OWL项目最近的新闻并生成一篇报告，最后保存到本地。"
 
     # Construct and run the society
     society = construct_society(question)

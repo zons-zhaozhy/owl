@@ -12,13 +12,13 @@
 # limitations under the License.
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
 from dotenv import load_dotenv
-
+import os
 from camel.models import ModelFactory
 from camel.toolkits import (
     SearchToolkit,
     BrowserToolkit,
     FileWriteToolkit,
-    TerminalToolkit
+    TerminalToolkit,
 )
 from camel.types import ModelPlatformType, ModelType
 from camel.logger import set_log_level
@@ -27,9 +27,11 @@ from utils import OwlRolePlaying, run_society
 
 load_dotenv()
 set_log_level(level="DEBUG")
-import os
+
+
 # Get current script directory
 base_dir = os.path.dirname(os.path.abspath(__file__))
+
 
 def construct_society(question: str) -> OwlRolePlaying:
     r"""Construct a society of agents based on the given question.
@@ -112,7 +114,9 @@ def main():
     answer, chat_history, token_count = run_society(society)
 
     # Output the result
-    print(f"\033[94mAnswer: {answer}\nChat History: {chat_history}\ntoken_count:{token_count}\033[0m")
+    print(
+        f"\033[94mAnswer: {answer}\nChat History: {chat_history}\ntoken_count:{token_count}\033[0m"
+    )
 
 
 if __name__ == "__main__":

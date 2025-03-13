@@ -122,7 +122,9 @@ https://private-user-images.githubusercontent.com/55657767/420212194-e813fc05-13
 - **Browser Automation**: Utilize the Playwright framework for simulating browser interactions, including scrolling, clicking, input handling, downloading, navigation, and more.
 - **Document Parsing**: Extract content from Word, Excel, PDF, and PowerPoint files, converting them into text or Markdown format.
 - **Code Execution**: Write and execute Python code using interpreter.
-- **Built-in Toolkits**: Access to a comprehensive set of built-in toolkits including ArxivToolkit, AudioAnalysisToolkit, CodeExecutionToolkit, DalleToolkit, DataCommonsToolkit, ExcelToolkit, GitHubToolkit, GoogleMapsToolkit, GoogleScholarToolkit, ImageAnalysisToolkit, MathToolkit, NetworkXToolkit, NotionToolkit, OpenAPIToolkit, RedditToolkit, SearchToolkit, SemanticScholarToolkit, SymPyToolkit, VideoAnalysisToolkit, WeatherToolkit, BrowserToolkit, and many more for specialized tasks.
+- **Built-in Toolkits**: Access to a comprehensive set of built-in toolkits including:
+  - **Model Context Protocol (MCP)**: A universal protocol layer that standardizes AI model interactions with various tools and data sources
+  - **Core Toolkits**: ArxivToolkit, AudioAnalysisToolkit, CodeExecutionToolkit, DalleToolkit, DataCommonsToolkit, ExcelToolkit, GitHubToolkit, GoogleMapsToolkit, GoogleScholarToolkit, ImageAnalysisToolkit, MathToolkit, NetworkXToolkit, NotionToolkit, OpenAPIToolkit, RedditToolkit, SearchToolkit, SemanticScholarToolkit, SymPyToolkit, VideoAnalysisToolkit, WeatherToolkit, BrowserToolkit, and many more for specialized tasks
 
 # 🛠️ Installation
 
@@ -275,6 +277,23 @@ For more detailed Docker usage instructions, including cross-platform support, o
 
 # 🚀 Quick Start
 
+## Try MCP (Model Context Protocol) Integration
+
+Experience the power of MCP by running our example that demonstrates multi-agent information retrieval and processing:
+
+```bash
+# Set up MCP servers (one-time setup)
+npx -y @smithery/cli install @wonderwhy-er/desktop-commander --client claude
+npx @wonderwhy-er/desktop-commander setup
+
+# Run the MCP example
+python owl/run_mcp.py
+```
+
+This example showcases how OWL agents can seamlessly interact with file systems, web automation, and information retrieval through the MCP protocol. Check out `owl/run_mcp.py` for the full implementation.
+
+## Basic Usage
+
 After installation and setting up your environment variables, you can start using OWL right away:
 
 ```bash
@@ -354,6 +373,14 @@ Here are some tasks you can try with OWL:
 - "Create a data visualization for this dataset: [dataset path]"
 
 # 🧰 Toolkits and Capabilities
+
+## Model Context Protocol (MCP)
+
+OWL's MCP integration provides a standardized way for AI models to interact with various tools and data sources:
+
+Try our comprehensive MCP example in `owl/run_mcp.py` to see these capabilities in action!
+
+## Available Toolkits
 
 > **Important**: Effective use of toolkits requires models with strong tool calling capabilities. For multimodal toolkits (Web, Image, Video), models must also have multimodal understanding abilities.
 

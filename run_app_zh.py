@@ -22,7 +22,8 @@ import os
 import sys
 from pathlib import Path
 
-os.environ['PYTHONIOENCODING'] = 'utf-8'
+os.environ["PYTHONIOENCODING"] = "utf-8"
+
 
 def main():
     """主函数，启动OWL智能助手运行平台"""

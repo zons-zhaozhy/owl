@@ -1,3 +1,16 @@
+# ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
 """MCP Multi-Agent System Example
 
 This example demonstrates how to use MCP (Model Context Protocol) with CAMEL agents
@@ -15,7 +28,7 @@ Environment Setup:
    # Install MCP service
    npx -y @smithery/cli install @wonderwhy-er/desktop-commander --client claude
    npx @wonderwhy-er/desktop-commander setup
-   
+
    # Configure in owl/mcp_servers_config.json:
    {
      "desktop-commander": {
@@ -33,7 +46,7 @@ Environment Setup:
    # Install MCP service
    npm install -g @executeautomation/playwright-mcp-server
    npx playwright install-deps
-   
+
    # Configure in mcp_servers_config.json:
    {
      "mcpServers": {
@@ -49,7 +62,7 @@ Environment Setup:
    ```bash
    # Install MCP service
    pip install mcp-server-fetch
-   
+
    # Configure in mcp_servers_config.json:
    {
      "mcpServers": {
@@ -90,7 +103,6 @@ from camel.logger import set_log_level
 from camel.toolkits import MCPToolkit
 
 from utils.enhanced_role_playing import OwlRolePlaying, run_society
-
 
 
 load_dotenv()
@@ -150,7 +162,7 @@ async def main():
 
         question = (
             "I'd like a academic report about Andrew Ng, including his research "
-            "direction, published papers (At least 3), institutions, etc." 
+            "direction, published papers (At least 3), institutions, etc."
             "Then organize the report in Markdown format and save it to my desktop"
         )
 
@@ -164,8 +176,9 @@ async def main():
         # Make sure to disconnect safely after all operations are completed.
         try:
             await mcp_toolkit.disconnect()
-        except Exception as e:
-            print(f"Warning: Error during disconnect: {e}")
+        except Exception:
+            print("Disconnect failed")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

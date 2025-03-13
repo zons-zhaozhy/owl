@@ -191,7 +191,9 @@ class GAIABenchmark(BaseBenchmark):
             except Exception as e:
                 logger.warning(e)
                 # raise FileNotFoundError(f"{self.save_to} does not exist.")
-        datas = [data for data in datas if not self._check_task_completed(data["task_id"])]
+        datas = [
+            data for data in datas if not self._check_task_completed(data["task_id"])
+        ]
         logger.info(f"Number of tasks to be processed: {len(datas)}")
         # Process tasks
         for task in tqdm(datas, desc="Running"):
