@@ -13,7 +13,12 @@
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
 
 from .common import extract_pattern
-from .enhanced_role_playing import OwlRolePlaying, OwlGAIARolePlaying, run_society
+from .enhanced_role_playing import (
+    OwlRolePlaying,
+    OwlGAIARolePlaying,
+    run_society,
+    arun_society,
+)
 from .gaia import GAIABenchmark
 from .document_toolkit import DocumentProcessingToolkit
 
@@ -22,6 +27,7 @@ __all__ = [
     "OwlRolePlaying",
     "OwlGAIARolePlaying",
     "run_society",
+    "arun_society",
     "GAIABenchmark",
     "DocumentProcessingToolkit",
 ]

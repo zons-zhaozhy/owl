@@ -102,7 +102,7 @@ from camel.types import ModelPlatformType, ModelType
 from camel.logger import set_log_level
 from camel.toolkits import MCPToolkit
 
-from utils.enhanced_role_playing import OwlRolePlaying, run_society
+from utils.enhanced_role_playing import OwlRolePlaying, arun_society
 
 
 load_dotenv()
@@ -169,7 +169,7 @@ async def main():
         # Connect to all MCP toolkits
         tools = [*mcp_toolkit.get_tools()]
         society = await construct_society(question, tools)
-        answer, chat_history, token_count = await run_society(society)
+        answer, chat_history, token_count = await arun_society(society)
         print(f"\033[94mAnswer: {answer}\033[0m")
 
     finally:
