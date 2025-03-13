@@ -7,6 +7,7 @@ import json
 from typing import Tuple, List, Dict, Any
 import importlib
 
+os.environ['PYTHONIOENCODING'] = 'utf-8'
 # Enhanced CSS with navigation bar and additional styling
 custom_css = """
 :root {
