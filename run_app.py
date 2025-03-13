@@ -49,7 +49,9 @@ def main():
         print(
             f"Error: Unable to import necessary modules. Please ensure all dependencies are installed: {e}"
         )
-        print("Tip: Run 'pip install -r requirements.txt' to install all dependencies")
+        print(
+            "Tip: Run 'pip install -r requirements.txt --use-pep517' to install all dependencies"
+        )
         sys.exit(1)
     except Exception as e:
         print(f"Error occurred while starting the application: {e}")

@@ -437,7 +437,61 @@ class OwlGAIARolePlaying(OwlRolePlaying):
         )
 
 
-async def run_society(
+def run_society(
+    society: OwlRolePlaying,
+    round_limit: int = 15,
+) -> Tuple[str, List[dict], dict]:
+    overall_completion_token_count = 0
+    overall_prompt_token_count = 0
+
+    chat_history = []
+    init_prompt = """
+    Now please give me instructions to solve over overall task step by step. If the task requires some specific knowledge, please instruct me to use tools to complete the task.
+        """
+    input_msg = society.init_chat(init_prompt)
+    for _round in range(round_limit):
+        assistant_response, user_response = society.step(input_msg)
+        overall_completion_token_count += (
+            assistant_response.info["usage"]["completion_tokens"]
+            + user_response.info["usage"]["completion_tokens"]
+        )
+
+        # convert tool call to dict
+        tool_call_records: List[dict] = []
+        for tool_call in assistant_response.info["tool_calls"]:
+            tool_call_records.append(tool_call.as_dict())
+
+        _data = {
+            "user": user_response.msg.content,
+            "assistant": assistant_response.msg.content,
+            "tool_calls": tool_call_records,
+        }
+
+        chat_history.append(_data)
+        logger.info(f"Round #{_round} user_response:\n {user_response.msgs[0].content}")
+        logger.info(
+            f"Round #{_round} assistant_response:\n {assistant_response.msgs[0].content}"
+        )
+
+        if (
+            assistant_response.terminated
+            or user_response.terminated
+            or "TASK_DONE" in user_response.msg.content
+        ):
+            break
+
+        input_msg = assistant_response.msg
+
+    answer = chat_history[-1]["assistant"]
+    token_info = {
+        "completion_token_count": overall_completion_token_count,
+        "prompt_token_count": overall_prompt_token_count,
+    }
+
+    return answer, chat_history, token_info
+
+
+async def arun_society(
     society: OwlRolePlaying,
     round_limit: int = 15,
 ) -> Tuple[str, List[dict], dict]:

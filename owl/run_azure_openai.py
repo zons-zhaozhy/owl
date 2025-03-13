@@ -47,7 +47,7 @@ def construct_society(question: str) -> OwlRolePlaying:
     # Create models for different components using Azure OpenAI
     base_model_config = {
         "model_platform": ModelPlatformType.AZURE,
-         "model_type": os.getenv("AZURE_OPENAI_MODEL_TYPE"),
+        "model_type": os.getenv("AZURE_OPENAI_MODEL_TYPE"),
         "model_config_dict": ChatGPTConfig(temperature=0.4, max_tokens=4096).as_dict(),
     }
 

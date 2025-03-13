@@ -47,7 +47,9 @@ def main():
 
     except ImportError as e:
         print(f"错误: 无法导入必要的模块。请确保已安装所有依赖项: {e}")
-        print("提示: 运行 'pip install -r requirements.txt' 安装所有依赖项")
+        print(
+            "提示: 运行 'pip install -r requirements.txt --use-pep517' 安装所有依赖项"
+        )
         sys.exit(1)
     except Exception as e:
         print(f"启动应用程序时出错: {e}")

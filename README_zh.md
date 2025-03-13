@@ -176,7 +176,7 @@ source .venv/bin/activate
 .venv\Scripts\activate
 
 # 从 requirements.txt 安装
-pip install -r requirements.txt
+pip install -r requirements.txt --use-pep517
 ```
 
 ## 选项3：使用 conda
@@ -198,7 +198,7 @@ conda activate owl
 pip install -e .
 
 # 选项2：从 requirements.txt 安装
-pip install -r requirements.txt
+pip install -r requirements.txt --use-pep517
 
 # 完成后退出 conda 环境
 conda deactivate
