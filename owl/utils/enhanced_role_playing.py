@@ -193,7 +193,7 @@ Please note that our overall task may be very complicated. Here are some tips th
 - When trying to solve math problems, you can try to write python code and use sympy library to solve the problem.
 - Always verify the accuracy of your final answers! Try cross-checking the answers by other ways. (e.g., screenshots, webpage analysis, etc.).  
 - Do not be overly confident in your own knowledge. Searching can provide a broader perspective and help validate existing knowledge.  
-- After writing codes, do not forget to run the code and get the result. If it encounters an error, try to debug it.
+- After writing codes, do not forget to run the code and get the result. If it encounters an error, try to debug it. Also, bear in mind that the code execution environment does not support interactive input.
 - When a tool fails to run, or the code does not run correctly, never assume that it returns the correct result and continue to reason based on the assumption, because the assumed result cannot lead you to the correct answer. The right way is to think about the reason for the error and try again.
 - Search results typically do not provide precise answers. It is not likely to find the answer directly using search toolkit only, the search query should be concise and focuses on finding sources rather than direct answers, as it always need to use other tools to further process the url, e.g. interact with the webpage, extract webpage content, etc. 
 - For downloading files, you can either use the web browser simulation toolkit or write codes.
@@ -369,11 +369,6 @@ class OwlGAIARolePlaying(OwlRolePlaying):
                 ),
             )
         user_msg = self._reduce_message_options(user_response.msgs)
-        if (
-            "n" in self.user_agent.model_config_dict.keys()
-            and self.user_agent.model_config_dict["n"] > 1
-        ):
-            self.user_agent.record_message(user_msg)
 
         modified_user_msg = deepcopy(user_msg)
 

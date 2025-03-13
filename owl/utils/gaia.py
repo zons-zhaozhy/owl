@@ -195,7 +195,7 @@ class GAIABenchmark(BaseBenchmark):
         # Process tasks
         for task in tqdm(datas, desc="Running"):
             if self._check_task_completed(task["task_id"]):
-                logger.success(
+                logger.info(
                     f"The following task is already completed:\n task id: {task['task_id']}, question: {task['Question']}"
                 )
                 continue

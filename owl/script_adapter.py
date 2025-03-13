@@ -68,7 +68,11 @@ def run_script_with_env_question(script_name):
 
         # 转义问题中的特殊字符
         escaped_question = (
-            question.replace("\\", "\\\\").replace('"', '\\"').replace("'", "\\'")
+            question.replace("\\", "\\\\")
+            .replace('"', '\\"')
+            .replace("'", "\\'")
+            .replace("\n", "\\n")  # 转义换行符
+            .replace("\r", "\\r")  # 转义回车符
         )
 
         # 查找脚本中所有的question赋值 - 改进的正则表达式

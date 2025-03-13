@@ -76,8 +76,6 @@ COPY assets/ ./assets/
 COPY README.md .
 COPY README_zh.md .
 
-# 设置环境变量文件 | Set environment variables file
-COPY owl/.env_template ./owl/.env
 
 # 创建启动脚本 | Create startup script
 RUN echo '#!/bin/bash\nxvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" python "$@"' > /usr/local/bin/xvfb-python && \
@@ -93,7 +91,10 @@ WORKDIR /app/owl
 # 设置适当的权限 | Set appropriate permissions
 RUN chown -R owl:owl /app
 RUN mkdir -p /root/.cache && chown -R owl:owl /root/.cache
+RUN chmod 644 /app/owl/.env
 
+
+USER owl
 # 切换到非root用户 | Switch to non-root user
 # 注意：如果需要访问/dev/shm，可能仍需要root用户 | Note: If you need to access /dev/shm, you may still need root user
 # USER owl

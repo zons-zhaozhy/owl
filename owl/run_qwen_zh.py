@@ -25,6 +25,7 @@ from camel.toolkits import (
     SearchToolkit,
     VideoAnalysisToolkit,
     WebToolkit,
+    FileWriteToolkit,
 )
 from camel.types import ModelPlatformType, ModelType
 
@@ -52,12 +53,12 @@ def construct_society(question: str) -> OwlRolePlaying:
     models = {
         "user": ModelFactory.create(
             model_platform=ModelPlatformType.QWEN,
-            model_type=ModelType.QWEN_VL_MAX,
+            model_type=ModelType.QWEN_MAX,
             model_config_dict={"temperature": 0},
         ),
         "assistant": ModelFactory.create(
             model_platform=ModelPlatformType.QWEN,
-            model_type=ModelType.QWEN_VL_MAX,
+            model_type=ModelType.QWEN_MAX,
             model_config_dict={"temperature": 0},
         ),
         "web": ModelFactory.create(
@@ -67,7 +68,7 @@ def construct_society(question: str) -> OwlRolePlaying:
         ),
         "planning": ModelFactory.create(
             model_platform=ModelPlatformType.QWEN,
-            model_type=ModelType.QWEN_VL_MAX,
+            model_type=ModelType.QWEN_MAX,
             model_config_dict={"temperature": 0},
         ),
         "video": ModelFactory.create(
@@ -103,6 +104,7 @@ def construct_society(question: str) -> OwlRolePlaying:
         SearchToolkit().search_wiki,
         *ExcelToolkit().get_tools(),
         *DocumentProcessingToolkit(model=models["document"]).get_tools(),
+        *FileWriteToolkit(output_dir="./").get_tools(),
     ]
 
     # Configure agent roles and parameters

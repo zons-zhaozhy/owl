@@ -27,6 +27,7 @@ from camel.toolkits import (
     SearchToolkit,
     VideoAnalysisToolkit,
     WebToolkit,
+    FileWriteToolkit,
 )
 from camel.types import ModelPlatformType, ModelType
 from camel.configs import ChatGPTConfig
@@ -51,6 +52,8 @@ def main():
     # Create cache directory
     cache_dir = "tmp/"
     os.makedirs(cache_dir, exist_ok=True)
+    result_dir = "results/"
+    os.makedirs(result_dir, exist_ok=True)
 
     # Create models for different components
     models = {
@@ -101,6 +104,7 @@ def main():
         *ImageAnalysisToolkit(model=models["image"]).get_tools(),
         *SearchToolkit().get_tools(),
         *ExcelToolkit().get_tools(),
+        *FileWriteToolkit(output_dir="./").get_tools(),
     ]
 
     # Configure agent roles and parameters
@@ -127,8 +131,8 @@ def main():
     )
 
     # Output results
-    logger.success(f"Correct: {result['correct']}, Total: {result['total']}")
-    logger.success(f"Accuracy: {result['accuracy']}")
+    logger.info(f"Correct: {result['correct']}, Total: {result['total']}")
+    logger.info(f"Accuracy: {result['accuracy']}")
 
 
 if __name__ == "__main__":

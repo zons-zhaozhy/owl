@@ -11,27 +11,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
-
-
-# To run this file, you need to configure the DeepSeek API key
-# You can obtain your API key from DeepSeek platform: https://platform.deepseek.com/api_keys
-# Set it as DEEPSEEK_API_KEY="your-api-key" in your .env file or add it to your environment variables
-
+# run_ollama.py by tj-scripts（https://github.com/tj-scripts）
 
 from dotenv import load_dotenv
-
-
 from camel.models import ModelFactory
 from camel.toolkits import (
-    ExcelToolkit,
-    SearchToolkit,
-    FileWriteToolkit,
     CodeExecutionToolkit,
+    ExcelToolkit,
+    ImageAnalysisToolkit,
+    SearchToolkit,
+    WebToolkit,
+    FileWriteToolkit,
 )
-from camel.types import ModelPlatformType, ModelType
+from camel.types import ModelPlatformType
 
-
-from utils import OwlRolePlaying, run_society, DocumentProcessingToolkit
+from utils import OwlRolePlaying, run_society
 
 from camel.logger import set_log_level
 
@@ -53,21 +47,48 @@ def construct_society(question: str) -> OwlRolePlaying:
     # Create models for different components
     models = {
         "user": ModelFactory.create(
-            model_platform=ModelPlatformType.DEEPSEEK,
-            model_type=ModelType.DEEPSEEK_CHAT,
-            model_config_dict={"temperature": 0},
+            model_platform=ModelPlatformType.OLLAMA,
+            model_type="qwen2.5:72b",
+            url="http://localhost:11434/v1",
+            model_config_dict={"temperature": 0.8, "max_tokens": 1000000},
         ),
         "assistant": ModelFactory.create(
-            model_platform=ModelPlatformType.DEEPSEEK,
-            model_type=ModelType.DEEPSEEK_CHAT,
-            model_config_dict={"temperature": 0},
+            model_platform=ModelPlatformType.OLLAMA,
+            model_type="qwen2.5:72b",
+            url="http://localhost:11434/v1",
+            model_config_dict={"temperature": 0.2, "max_tokens": 1000000},
+        ),
+        "web": ModelFactory.create(
+            model_platform=ModelPlatformType.OLLAMA,
+            model_type="llava:latest",
+            url="http://localhost:11434/v1",
+            model_config_dict={"temperature": 0.4, "max_tokens": 1000000},
+        ),
+        "planning": ModelFactory.create(
+            model_platform=ModelPlatformType.OLLAMA,
+            model_type="qwen2.5:72b",
+            url="http://localhost:11434/v1",
+            model_config_dict={"temperature": 0.4, "max_tokens": 1000000},
+        ),
+        "image": ModelFactory.create(
+            model_platform=ModelPlatformType.OLLAMA,
+            model_type="llava:latest",
+            url="http://localhost:11434/v1",
+            model_config_dict={"temperature": 0.4, "max_tokens": 1000000},
         ),
     }
 
     # Configure toolkits
     tools = [
+        *WebToolkit(
+            headless=False,  # Set to True for headless mode (e.g., on remote servers)
+            web_agent_model=models["web"],
+            planning_agent_model=models["planning"],
+        ).get_tools(),
         *CodeExecutionToolkit(sandbox="subprocess", verbose=True).get_tools(),
+        *ImageAnalysisToolkit(model=models["image"]).get_tools(),
         SearchToolkit().search_duckduckgo,
+        # SearchToolkit().search_google,  # Comment this out if you don't have google search
         SearchToolkit().search_wiki,
         *ExcelToolkit().get_tools(),
         *FileWriteToolkit(output_dir="./").get_tools(),
@@ -90,7 +111,6 @@ def construct_society(question: str) -> OwlRolePlaying:
         user_agent_kwargs=user_agent_kwargs,
         assistant_role_name="assistant",
         assistant_agent_kwargs=assistant_agent_kwargs,
-        output_language="Chinese",
     )
 
     return society
@@ -99,9 +119,7 @@ def construct_society(question: str) -> OwlRolePlaying:
 def main():
     r"""Main function to run the OWL system with an example question."""
     # Example research question
-    question = (
-        "搜索OWL项目最近的新闻并生成一篇报告，最后保存到本地。"
-    )
+    question = "Navigate to Amazon.com and identify one product that is attractive to coders. Please provide me with the product name and price. No need to verify your answer."
 
     # Construct and run the society
     society = construct_society(question)
