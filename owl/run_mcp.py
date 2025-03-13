@@ -79,10 +79,10 @@ from camel.models import ModelFactory
 from camel.toolkits import FunctionTool
 from camel.types import ModelPlatformType, ModelType
 from camel.logger import set_log_level
+from camel.toolkits import MCPToolkit
 
 from utils.enhanced_role_playing import OwlRolePlaying, run_society
 
-from utils.mcp.mcp_toolkit_manager import MCPToolkitManager
 
 
 load_dotenv()
@@ -138,7 +138,7 @@ async def main():
         Path(__file__).parent / "utils/mcp/mcp_servers_config.json"
     )
 
-    manager = MCPToolkitManager.from_config(config_path)
+    mcp_toolkit = MCPToolkit(config_path=config_path)
 
     question = (
         "I'd like a academic report about Guohao Li, including his research "
@@ -146,16 +146,18 @@ async def main():
         "Then organize the report in Markdown format and save it to my desktop"
     )
 
-    # Connect to all MCP toolkits
-    async with manager.connection():
-        tools = manager.get_all_tools()
+    await mcp_toolkit.connect()
 
-        society = await construct_society(question, tools)
+    # # Connect to all MCP toolkits
+    tools = [*mcp_toolkit.get_tools()]
 
-        answer, chat_history, token_count = await run_society(society)
+    society = await construct_society(question, tools)
+
+    answer, chat_history, token_count = await run_society(society)
 
     print(f"\033[94mAnswer: {answer}\033[0m")
 
+    await mcp_toolkit.disconnect()
 
 if __name__ == "__main__":
     asyncio.run(main())
