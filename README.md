@@ -422,10 +422,10 @@ OWL includes an intuitive web-based user interface that makes it easier to inter
 
 ```bash
 # Start the Chinese version
-python run_app_zh.py
+python owl/webapp_zh.py
 
 # Start the English version
-python run_app.py
+python owl/webapp.py
 ```
 
 ## Features
