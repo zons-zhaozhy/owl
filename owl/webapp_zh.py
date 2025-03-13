@@ -115,9 +115,21 @@ custom_css = """
 
 .features-section {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     margin: 20px 0;
+}
+
+@media (max-width: 1200px) {
+    .features-section {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .features-section {
+        grid-template-columns: 1fr;
+    }
 }
 
 .feature-card {
@@ -126,6 +138,9 @@ custom_css = """
     padding: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     transition: transform 0.3s, box-shadow 0.3s;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .feature-card:hover {
@@ -137,6 +152,17 @@ custom_css = """
     font-size: 2em;
     color: var(--primary-color);
     margin-bottom: 10px;
+}
+
+.feature-card h3 {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.feature-card p {
+    flex-grow: 1;
+    font-size: 0.95em;
+    line-height: 1.5;
 }
 
 /* Improved button and input styles */
@@ -247,7 +273,7 @@ def create_ui():
             gr.HTML("""
                 <div class="navbar">
                     <div class="navbar-logo">
-                        🦉 OWL 智能助手
+                        🦉 OWL 多智能体协作系统
                     </div>
                     <div class="navbar-menu">
                         <a href="#home">首页</a>
@@ -258,31 +284,46 @@ def create_ui():
                     </div>
                 </div>
                 <div class="header" id="home">
-                    <h1>多智能体协作系统</h1>
-                    <p>基于CAMEL框架的先进多智能体协作平台，解决复杂问题的智能解决方案</p>
+                    
+                    <p>我们的愿景是彻底改变AI代理协作解决现实世界任务的方式。通过利用动态代理交互，OWL能够在多个领域实现更自然、高效和稳健的任务自动化。</p>
                 </div>
             """)
             
             with gr.Row(elem_id="features"):
                 gr.HTML("""
-                    <div class="features-section">
-                        <div class="feature-card">
-                            <div class="feature-icon">🔍</div>
-                            <h3>智能信息获取</h3>
-                            <p>自动化网络搜索和数据收集，提供精准信息</p>
-                        </div>
-                        <div class="feature-card">
-                            <div class="feature-icon">🤖</div>
-                            <h3>多智能体协作</h3>
-                            <p>多个专家智能体协同工作，解决复杂问题</p>
-                        </div>
-                        <div class="feature-card">
-                            <div class="feature-icon">📊</div>
-                            <h3>数据分析与可视化</h3>
-                            <p>强大的数据分析能力，生成直观的可视化结果</p>
-                        </div>
+                <div class="features-section">
+                    <div class="feature-card">
+                        <div class="feature-icon">🔍</div>
+                        <h3>实时信息检索</h3>
+                        <p>利用维基百科、谷歌搜索和其他在线资源获取最新信息。</p>
                     </div>
-                """)
+                    <div class="feature-card">
+                        <div class="feature-icon">📹</div>
+                        <h3>多模态处理</h3>
+                        <p>支持处理互联网或本地的视频、图像和音频数据。</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🌐</div>
+                        <h3>浏览器自动化</h3>
+                        <p>使用Playwright框架模拟浏览器交互，实现网页操作自动化。</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📄</div>
+                        <h3>文档解析</h3>
+                        <p>从各种文档格式中提取内容，并转换为易于处理的格式。</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💻</div>
+                        <h3>代码执行</h3>
+                        <p>使用解释器编写和运行Python代码，实现自动化数据处理。</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🧰</div>
+                        <h3>内置工具包</h3>
+                        <p>提供丰富的工具包，支持搜索、数据分析、代码执行等多种功能。</p>
+                    </div>
+                </div>
+            """)
             
             with gr.Row():
                 with gr.Column(scale=2):
@@ -366,12 +407,11 @@ def create_ui():
             
             gr.HTML("""
                 <div class="footer" id="about">
-                    <h3>关于 OWL 智能助手</h3>
+                    <h3>关于 OWL 多智能体协作系统</h3>
                     <p>OWL 是一个基于CAMEL框架开发的先进多智能体协作系统，旨在通过智能体协作解决复杂问题。</p>
                     <p>© 2024 CAMEL-AI.org. 基于Apache License 2.0开源协议</p>
-                    <p><a href="https://github.com/camel-ai/camel" target="_blank">GitHub</a> | 
-                       <a href="#docs">文档</a> | 
-                       <a href="#contact" id="contact">联系我们</a></p>
+                    <p><a href="https://github.com/camel-ai/owl" target="_blank">GitHub</a> 
+                      
                 </div>
             """)
             
