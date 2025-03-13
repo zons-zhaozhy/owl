@@ -144,12 +144,11 @@ class DocumentProcessingToolkit(BaseToolkit):
                 return True, extracted_text
             try:
                 result = asyncio.run(self._extract_content_with_chunkr(document_path))
-                raise ValueError("Chunkr is not available.")
                 return True, result
 
             except Exception as e:
                 logger.warning(
-                    f"Error occurred while using chunkr to process document: {e}"
+                    f"Error occurred while using Chunkr to process document: {e}"
                 )
                 if document_path.endswith(".pdf"):
                     # try using pypdf to extract text from pdf
@@ -226,7 +225,7 @@ class DocumentProcessingToolkit(BaseToolkit):
 
         if result.status == "Failed":
             logger.error(
-                f"Error while processing document {document_path}: {result.message}"
+                f"Error while processing document {document_path}: {result.message} using Chunkr."
             )
             return f"Error while processing document: {result.message}"
 
