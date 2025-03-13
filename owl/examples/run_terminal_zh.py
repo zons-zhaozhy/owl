@@ -23,7 +23,7 @@ from camel.toolkits import (
 from camel.types import ModelPlatformType, ModelType
 from camel.logger import set_log_level
 
-from utils import OwlRolePlaying, run_society
+from owl.utils import OwlRolePlaying, run_society
 
 load_dotenv()
 set_log_level(level="DEBUG")

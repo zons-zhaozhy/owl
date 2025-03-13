@@ -31,7 +31,7 @@ from camel.toolkits import (
 from camel.types import ModelPlatformType, ModelType
 
 
-from utils import OwlRolePlaying, run_society, DocumentProcessingToolkit
+from owl.utils import OwlRolePlaying, run_society, DocumentProcessingToolkit
 
 from camel.logger import set_log_level
 

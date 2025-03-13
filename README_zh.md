@@ -303,16 +303,16 @@ OWL 支持多种 LLM 后端，但功能可能因模型的工具调用和多模�
 
 ```bash
 # 使用 Qwen 模型运行
-python owl/run_qwen_zh.py
+python owl/examples/run_qwen_zh.py
 
 # 使用 Deepseek 模型运行
-python owl/run_deepseek_zh.py
+python owl/examples/run_deepseek_zh.py
 
 # 使用其他 OpenAI 兼容模型运行
-python owl/run_openai_compatiable_model.py
+python owl/examples/run_openai_compatiable_model.py
 
 # 使用 Ollama 运行
-python owl/run_ollama.py
+python owl/examples/run_ollama.py
 ```
 
 你可以通过修改 `run.py` 脚本来运行自己的任务：

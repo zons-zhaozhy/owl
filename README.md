@@ -299,22 +299,22 @@ OWL supports various LLM backends, though capabilities may vary depending on the
 
 ```bash
 # Run with Qwen model
-python owl/run_qwen_zh.py
+python owl/examples/run_qwen_zh.py
 
 # Run with Deepseek model
-python owl/run_deepseek_zh.py
+python owl/examples/run_deepseek_zh.py
 
 # Run with other OpenAI-compatible models
-python owl/run_openai_compatiable_model.py
+python owl/examples/run_openai_compatiable_model.py
 
 # Run with Ollama
-python owl/run_ollama.py
+python owl/examples/run_ollama.py
 ```
 
 For a simpler version that only requires an LLM API key, you can try our minimal example:
 
 ```bash
-python owl/run_mini.py
+python owl/examples/run_mini.py
 ```
 
 You can run OWL agent with your own task by modifying the `run.py` script:
