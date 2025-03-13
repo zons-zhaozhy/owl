@@ -16,7 +16,7 @@ import os
 from camel.models import ModelFactory
 from camel.toolkits import (
     SearchToolkit,
-    WebToolkit,
+    BrowserToolkit,
     FileWriteToolkit,
     TerminalToolkit
 )
@@ -67,7 +67,7 @@ def construct_society(question: str) -> OwlRolePlaying:
 
     # Configure toolkits
     tools = [
-        *WebToolkit(
+        *BrowserToolkit(
             headless=False,  # Set to True for headless mode (e.g., on remote servers)
             web_agent_model=models["web"],
             planning_agent_model=models["planning"],
