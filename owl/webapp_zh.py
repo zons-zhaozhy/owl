@@ -2,191 +2,15 @@
 from owl.utils import run_society
 import os
 import gradio as gr
+import time
+import json
 from typing import Tuple, List, Dict, Any
 import importlib
+from dotenv import load_dotenv, set_key, find_dotenv, unset_key
 
 os.environ['PYTHONIOENCODING'] = 'utf-8'
 
-# Enhanced CSS with navigation bar and additional styling
-custom_css = """
-:root {
-    --primary-color: #4a89dc;
-    --secondary-color: #5d9cec;
-    --accent-color: #7baaf7;
-    --light-bg: #f8f9fa;
-    --border-color: #e4e9f0;
-    --text-muted: #8a9aae;
-}
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 30px;
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-    color: white;
-    border-radius: 10px 10px 0 0;
-    margin-bottom: 0;
-    box-shadow: 0 2px 10px rgba(74, 137, 220, 0.15);
-}
-
-.navbar-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.5em;
-    font-weight: bold;
-}
-
-.navbar-menu {
-    display: flex;
-    gap: 20px;
-}
-
-/* Navbar styles moved to a more specific section below */
-
-.header {
-    text-align: center;
-    margin-bottom: 20px;
-    background: linear-gradient(180deg, var(--secondary-color), var(--accent-color));
-    color: white;
-    padding: 40px 20px;
-    border-radius: 0 0 10px 10px;
-    box-shadow: 0 4px 6px rgba(93, 156, 236, 0.12);
-}
-
-.module-info {
-    background-color: var(--light-bg);
-    border-left: 5px solid var(--primary-color);
-    padding: 10px 15px;
-    margin-top: 10px;
-    border-radius: 5px;
-    font-size: 0.9em;
-}
-
-.answer-box {
-    background-color: var(--light-bg);
-    border-left: 5px solid var(--secondary-color);
-    padding: 15px;
-    margin-bottom: 20px;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.token-count {
-    background-color: #e9ecef;
-    padding: 10px;
-    border-radius: 5px;
-    text-align: center;
-    font-weight: bold;
-    margin-bottom: 20px;
-}
-
-.chat-container {
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-    max-height: 500px;
-    overflow-y: auto;
-    margin-bottom: 20px;
-}
-
-.footer {
-    text-align: center;
-    margin-top: 20px;
-    color: var(--text-muted);
-    font-size: 0.9em;
-    padding: 20px;
-    border-top: 1px solid var(--border-color);
-}
-
-.features-section {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    margin: 20px 0;
-}
-
-@media (max-width: 1200px) {
-    .features-section {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 768px) {
-    .features-section {
-        grid-template-columns: 1fr;
-    }
-}
-
-.feature-card {
-    background-color: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(74, 137, 220, 0.08);
-    transition: transform 0.3s, box-shadow 0.3s;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    border: 1px solid rgba(228, 233, 240, 0.6);
-}
-
-.feature-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(74, 137, 220, 0.15);
-    border-color: rgba(93, 156, 236, 0.3);
-}
-
-.feature-icon {
-    font-size: 2em;
-    color: var(--primary-color);
-    margin-bottom: 10px;
-    text-shadow: 0 1px 2px rgba(74, 137, 220, 0.1);
-}
-
-.feature-card h3 {
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
-
-.feature-card p {
-    flex-grow: 1;
-    font-size: 0.95em;
-    line-height: 1.5;
-}
-
-/* Navbar link styles - ensuring consistent colors */
-.navbar-menu a {
-    color: #ffffff !important;
-    text-decoration: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    transition: background-color 0.3s, color 0.3s;
-    font-weight: 500;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-menu a:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-    color: #ffffff !important;
-}
-
-/* Improved button and input styles */
-button.primary {
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-    transition: all 0.3s;
-}
-
-button.primary:hover {
-    background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(74, 137, 220, 0.2);
-}
-"""
 
 # Dictionary containing module descriptions
 MODULE_DESCRIPTIONS = {
@@ -199,10 +23,83 @@ MODULE_DESCRIPTIONS = {
     "run_ollama":"使用本地ollama模型处理任务",
     "run_qwen_mini_zh":"使用qwen模型最小化配置处理任务",
     "run_qwen_zh":"使用qwen模型处理任务",
- 
-    
-   
 }
+
+# API帮助信息
+API_HELP_INFO = {
+    "OPENAI_API_KEY": {
+        "name": "OpenAI API",
+        "desc": "OpenAI API密钥，用于访问GPT系列模型",
+        "url": "https://platform.openai.com/api-keys"
+    },
+    "QWEN_API_KEY": {
+        "name": "通义千问 API",
+        "desc": "阿里云通义千问API密钥",
+        "url": "https://help.aliyun.com/zh/model-studio/developer-reference/get-api-key"
+    },
+    "DEEPSEEK_API_KEY": {
+        "name": "DeepSeek API",
+        "desc": "DeepSeek API密钥",
+        "url": "https://platform.deepseek.com/api_keys"
+    },
+    "GOOGLE_API_KEY": {
+        "name": "Google Search API",
+        "desc": "Google自定义搜索API密钥",
+        "url": "https://developers.google.com/custom-search/v1/overview"
+    },
+    "SEARCH_ENGINE_ID": {
+        "name": "Google Search Engine ID",
+        "desc": "Google自定义搜索引擎ID",
+        "url": "https://developers.google.com/custom-search/v1/overview"
+    },
+    "HF_TOKEN": {
+        "name": "Hugging Face API",
+        "desc": "Hugging Face API令牌",
+        "url": "https://huggingface.co/join"
+    },
+    "CHUNKR_API_KEY": {
+        "name": "Chunkr API",
+        "desc": "Chunkr API密钥",
+        "url": "https://chunkr.ai/"
+    },
+    "FIRECRAWL_API_KEY": {
+        "name": "Firecrawl API",
+        "desc": "Firecrawl API密钥",
+        "url": "https://www.firecrawl.dev/"
+    }
+}
+
+# 默认环境变量模板
+DEFAULT_ENV_TEMPLATE = """# MODEL & API (See https://docs.camel-ai.org/key_modules/models.html#)
+
+# OPENAI API
+# OPENAI_API_KEY= ""
+# OPENAI_API_BASE_URL=""
+
+# Qwen API (https://help.aliyun.com/zh/model-studio/developer-reference/get-api-key)
+# QWEN_API_KEY=""
+
+# DeepSeek API (https://platform.deepseek.com/api_keys)
+# DEEPSEEK_API_KEY=""
+
+#===========================================
+# Tools & Services API
+#===========================================
+
+# Google Search API (https://developers.google.com/custom-search/v1/overview)
+GOOGLE_API_KEY=""
+SEARCH_ENGINE_ID=""
+
+# Hugging Face API (https://huggingface.co/join)
+HF_TOKEN=""
+
+# Chunkr API (https://chunkr.ai/)
+CHUNKR_API_KEY=""
+
+# Firecrawl API (https://www.firecrawl.dev/)
+FIRECRAWL_API_KEY=""
+#FIRECRAWL_API_URL="https://api.firecrawl.dev"
+"""
 
 def format_chat_history(chat_history: List[Dict[str, str]]) -> List[List[str]]:
     """将聊天历史格式化为Gradio聊天组件可接受的格式
@@ -261,6 +158,8 @@ def run_owl(question: str, example_module: str) -> Tuple[str, List[List[str]], s
         )
     
     try:
+        # 确保环境变量已加载
+        load_dotenv(find_dotenv(), override=True)
         # 检查模块是否在MODULE_DESCRIPTIONS中
         if example_module not in MODULE_DESCRIPTIONS:
             return (
@@ -354,67 +253,115 @@ def update_module_description(module_name: str) -> str:
     """返回所选模块的描述"""
     return MODULE_DESCRIPTIONS.get(module_name, "无可用描述")
 
+# 环境变量管理功能
+def init_env_file():
+    """初始化.env文件如果不存在"""
+    dotenv_path = find_dotenv()
+    if not dotenv_path:
+        with open(".env", "w") as f:
+            f.write(DEFAULT_ENV_TEMPLATE)
+        dotenv_path = find_dotenv()
+    return dotenv_path
+
+def load_env_vars():
+    """加载环境变量并返回字典格式"""
+    dotenv_path = init_env_file()
+    load_dotenv(dotenv_path, override=True)
+    
+    env_vars = {}
+    with open(dotenv_path, "r") as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#"):
+                if "=" in line:
+                    key, value = line.split("=", 1)
+                    env_vars[key.strip()] = value.strip().strip('"\'')
+    
+    return env_vars
+
+def save_env_vars(env_vars):
+    """保存环境变量到.env文件"""
+    try:
+        dotenv_path = init_env_file()
+        
+        # 保存每个环境变量
+        for key, value in env_vars.items():
+            if key and key.strip():  # 确保键不为空
+                set_key(dotenv_path, key.strip(), value.strip())
+        
+        # 重新加载环境变量以确保生效
+        load_dotenv(dotenv_path, override=True)
+        
+        return True, "环境变量已成功保存！"
+    except Exception as e:
+        return False, f"保存环境变量时出错: {str(e)}"
+
+def add_env_var(key, value):
+    """添加或更新单个环境变量"""
+    try:
+        if not key or not key.strip():
+            return False, "变量名不能为空"
+        
+        dotenv_path = init_env_file()
+        set_key(dotenv_path, key.strip(), value.strip())
+        load_dotenv(dotenv_path, override=True)
+        
+        return True, f"环境变量 {key} 已成功添加/更新！"
+    except Exception as e:
+        return False, f"添加环境变量时出错: {str(e)}"
+
+def delete_env_var(key):
+    """删除环境变量"""
+    try:
+        if not key or not key.strip():
+            return False, "变量名不能为空"
+        
+        dotenv_path = init_env_file()
+        unset_key(dotenv_path, key.strip())
+        
+        # 从当前进程环境中也删除
+        if key in os.environ:
+            del os.environ[key]
+        
+        return True, f"环境变量 {key} 已成功删除！"
+    except Exception as e:
+        return False, f"删除环境变量时出错: {str(e)}"
+
+def mask_sensitive_value(key: str, value: str) -> str:
+    """对敏感信息进行掩码处理
+    
+    Args:
+        key: 环境变量名
+        value: 环境变量值
+        
+    Returns:
+        str: 处理后的值
+    """
+    # 定义需要掩码的敏感关键词
+    sensitive_keywords = ['key', 'token', 'secret', 'password', 'api']
+    
+    # 检查是否包含敏感关键词（不区分大小写）
+    is_sensitive = any(keyword in key.lower() for keyword in sensitive_keywords)
+    
+    if is_sensitive and value:
+        # 如果是敏感信息且有值，则显示掩码
+        return '*' * 8
+    return value
+
+def update_env_table():
+    """更新环境变量表格显示，对敏感信息进行掩码处理"""
+    env_vars = load_env_vars()
+    # 对敏感值进行掩码处理
+    masked_env_vars = [[k, mask_sensitive_value(k, v)] for k, v in env_vars.items()]
+    return masked_env_vars
+
 def create_ui():
     """创建增强版Gradio界面"""
-    with gr.Blocks(css=custom_css, theme=gr.themes.Soft(primary_hue="blue")) as app:
-        with gr.Column(elem_classes="container"):
-            gr.HTML("""
-                <div class="navbar">
-                    <div class="navbar-logo">
-                        🦉 OWL 多智能体协作系统
-                    </div>
-                    <div class="navbar-menu">
-                        <a href="#home">首页</a>
-                        <a href="https://github.com/camel-ai/owl/blob/main/README.md#-community">加入交流群</a>
-                        <a href="https://github.com/camel-ai/owl/blob/main/README.md">OWL文档</a>
-                        <a href="https://github.com/camel-ai/camel">CAMEL框架</a>
-                        <a href="https://camel-ai.org">CAMEL-AI官网</a>
-                    </div>
-                </div>
-                <div class="header" id="home">
-                    
-                    <p>我们的愿景是彻底改变AI代理协作解决现实世界任务的方式。通过利用动态代理交互，OWL能够在多个领域实现更自然、高效和稳健的任务自动化。</p>
-                </div>
-            """)
-            
-            with gr.Row(elem_id="features"):
-                gr.HTML("""
-                <div class="features-section">
-                    <div class="feature-card">
-                        <div class="feature-icon">🔍</div>
-                        <h3>实时信息检索</h3>
-                        <p>利用维基百科、谷歌搜索和其他在线资源获取最新信息。</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">📹</div>
-                        <h3>多模态处理</h3>
-                        <p>支持处理互联网或本地的视频、图像和音频数据。</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">🌐</div>
-                        <h3>浏览器自动化</h3>
-                        <p>使用Playwright框架模拟浏览器交互，实现网页操作自动化。</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">📄</div>
-                        <h3>文档解析</h3>
-                        <p>从各种文档格式中提取内容，并转换为易于处理的格式。</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">💻</div>
-                        <h3>代码执行</h3>
-                        <p>使用解释器编写和运行Python代码，实现自动化数据处理。</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">🧰</div>
-                        <h3>内置工具包</h3>
-                        <p>提供丰富的工具包，支持搜索、数据分析、代码执行等多种功能。</p>
-                    </div>
-                </div>
-            """)
+    with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as app:
+       
             
             with gr.Row():
-                with gr.Column(scale=2):
+                with gr.Column(scale=1):
                     question_input = gr.Textbox(
                         lines=5,
                         placeholder="请输入您的问题...",
@@ -441,43 +388,125 @@ def create_ui():
                     )
                     
                     run_button = gr.Button("运行", variant="primary", elem_classes="primary")
+                        
+                    status_output = gr.Textbox(label="状态", interactive=False)
+                    token_count_output = gr.Textbox(
+                        label="令牌计数", 
+                        interactive=False,
+                        elem_classes="token-count"
+                    ) 
                 
-                with gr.Column(scale=1):
-                    gr.Markdown("""
-                    ### 使用指南
-                    
-                    1. **选择适合的模块**：根据您的任务需求选择合适的功能模块
-                    2. **详细描述您的需求**：在输入框中清晰描述您的问题或任务
-                    3. **启动智能处理**：点击"运行"按钮开始多智能体协作处理
-                    4. **查看结果**：在下方标签页查看回答和完整对话历史
-                    
-                    > **高级提示**: 对于复杂任务，可以尝试指定具体步骤和预期结果
-                    """)
-            
-            status_output = gr.Textbox(label="状态", interactive=False)
-            
-            with gr.Tabs():
-                with gr.TabItem("回答"):
-                    answer_output = gr.Textbox(
-                        label="回答", 
-                        lines=10,
-                        elem_classes="answer-box"
-                    )
+           
                 
-                with gr.TabItem("对话历史"):
-                    chat_output = gr.Chatbot(
-                        label="完整对话记录",
-                        elem_classes="chat-container",
-                        height=500
-                    )
+                with gr.Tabs(scale=2):
+                    with gr.TabItem("回答"):
+                        answer_output = gr.Textbox(
+                            label="回答", 
+                            lines=10,
+                            elem_classes="answer-box"
+                        )
                     
+                    with gr.TabItem("对话历史"):
+                        chat_output = gr.Chatbot(
+                            label="完整对话记录",
+                            elem_classes="chat-container",
+                            height=500
+                        )
+                    
+                    with gr.TabItem("环境变量管理", id="env-settings"):
+                        gr.Markdown("""
+                        ## 环境变量管理
+                        
+                        在此处设置模型API密钥和其他服务凭证。这些信息将保存在本地的`.env`文件中，确保您的API密钥安全存储且不会上传到网络。
+                        """)
+                        
+                        # 添加API密钥获取指南
+                        gr.Markdown("### API密钥获取指南")
+                        
+                        for key, info in API_HELP_INFO.items():
+                            with gr.Accordion(f"{info['name']} ({key})", open=False):
+                                gr.Markdown(f"""
+                                - **说明**: {info['desc']}
+                                - **获取地址**: [{info['url']}]({info['url']})
+                                """)
+                        
+                        gr.Markdown("---")
+                        
+                        # 环境变量表格
+                        env_table = gr.Dataframe(
+                            headers=["变量名", "值"],
+                            datatype=["str", "str"],
+                            row_count=10,
+                            col_count=(2, "fixed"),
+                            value=update_env_table,
+                            label="当前环境变量",
+                            interactive=False
+                        )
+                        
+                        with gr.Row():
+                            with gr.Column(scale=1):
+                                new_env_key = gr.Textbox(label="变量名", placeholder="例如: OPENAI_API_KEY")
+                            with gr.Column(scale=2):
+                                new_env_value = gr.Textbox(label="值", placeholder="输入API密钥或其他配置值")
+                        
+                        with gr.Row():
+                            add_env_button = gr.Button("添加/更新变量", variant="primary")
+                            refresh_button = gr.Button("刷新变量列表")
+                            delete_env_button = gr.Button("删除选定变量", variant="stop")
+                        
+                        env_status = gr.Textbox(label="状态", interactive=False)
+                        
+                        # 变量选择器（用于删除）
+                        env_var_to_delete = gr.Dropdown(
+                            choices=[], 
+                            label="选择要删除的变量",
+                            interactive=True
+                        )
+                        
+                        # 更新变量选择器的选项
+                        def update_delete_dropdown():
+                            env_vars = load_env_vars()
+                            return gr.Dropdown.update(choices=list(env_vars.keys()))
+                        
+                        # 连接事件处理函数
+                        add_env_button.click(
+                            fn=lambda k, v: add_env_var(k, v),
+                            inputs=[new_env_key, new_env_value],
+                            outputs=[env_status]
+                        ).then(
+                            fn=update_env_table,
+                            outputs=[env_table]
+                        ).then(
+                            fn=update_delete_dropdown,
+                            outputs=[env_var_to_delete]
+                        ).then(
+                            fn=lambda: ("", ""),  # 修改为返回两个空字符串的元组
+                            outputs=[new_env_key, new_env_value]
+                        )
+                        
+                        refresh_button.click(
+                            fn=update_env_table,
+                            outputs=[env_table]
+                        ).then(
+                            fn=update_delete_dropdown,
+                            outputs=[env_var_to_delete]
+                        )
+                        
+                        delete_env_button.click(
+                            fn=lambda k: delete_env_var(k),
+                            inputs=[env_var_to_delete],
+                            outputs=[env_status]
+                        ).then(
+                            fn=update_env_table,
+                            outputs=[env_table]
+                        ).then(
+                            fn=update_delete_dropdown,
+                            outputs=[env_var_to_delete]
+                        )
+                            
+                        
                 
-            
-            token_count_output = gr.Textbox(
-                label="令牌计数", 
-                interactive=False,
-                elem_classes="token-count"
-            )
+           
             
             # 示例问题
             examples = [
@@ -492,6 +521,10 @@ def create_ui():
                 examples=examples, 
                 inputs=question_input
             )
+    
+
+
+
             
             gr.HTML("""
                 <div class="footer" id="about">
@@ -521,6 +554,8 @@ def create_ui():
 # 主函数
 def main():
     try:
+        # 初始化.env文件（如果不存在）
+        init_env_file()
         app = create_ui()
         app.launch(share=False)
     except Exception as e:
