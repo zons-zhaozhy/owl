@@ -2,21 +2,20 @@
 from owl.utils import run_society
 import os
 import gradio as gr
-import time
-import json
 from typing import Tuple, List, Dict, Any
 import importlib
 
 os.environ['PYTHONIOENCODING'] = 'utf-8'
+
 # Enhanced CSS with navigation bar and additional styling
 custom_css = """
 :root {
-    --primary-color: #1e3c72;
-    --secondary-color: #2a5298;
-    --accent-color: #4776E6;
+    --primary-color: #4a89dc;
+    --secondary-color: #5d9cec;
+    --accent-color: #7baaf7;
     --light-bg: #f8f9fa;
-    --border-color: #dee2e6;
-    --text-muted: #6c757d;
+    --border-color: #e4e9f0;
+    --text-muted: #8a9aae;
 }
 
 .container {
@@ -33,6 +32,7 @@ custom_css = """
     color: white;
     border-radius: 10px 10px 0 0;
     margin-bottom: 0;
+    box-shadow: 0 2px 10px rgba(74, 137, 220, 0.15);
 }
 
 .navbar-logo {
@@ -48,17 +48,7 @@ custom_css = """
     gap: 20px;
 }
 
-.navbar-menu a {
-    color: white;
-    text-decoration: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-}
-
-.navbar-menu a:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
+/* Navbar styles moved to a more specific section below */
 
 .header {
     text-align: center;
@@ -67,7 +57,7 @@ custom_css = """
     color: white;
     padding: 40px 20px;
     border-radius: 0 0 10px 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba(93, 156, 236, 0.12);
 }
 
 .module-info {
@@ -137,22 +127,25 @@ custom_css = """
     background-color: white;
     border-radius: 8px;
     padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 8px rgba(74, 137, 220, 0.08);
     transition: transform 0.3s, box-shadow 0.3s;
     height: 100%;
     display: flex;
     flex-direction: column;
+    border: 1px solid rgba(228, 233, 240, 0.6);
 }
 
 .feature-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 15px rgba(74, 137, 220, 0.15);
+    border-color: rgba(93, 156, 236, 0.3);
 }
 
 .feature-icon {
     font-size: 2em;
     color: var(--primary-color);
     margin-bottom: 10px;
+    text-shadow: 0 1px 2px rgba(74, 137, 220, 0.1);
 }
 
 .feature-card h3 {
@@ -166,6 +159,22 @@ custom_css = """
     line-height: 1.5;
 }
 
+/* Navbar link styles - ensuring consistent colors */
+.navbar-menu a {
+    color: #ffffff !important;
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-menu a:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff !important;
+}
+
 /* Improved button and input styles */
 button.primary {
     background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
@@ -175,21 +184,20 @@ button.primary {
 button.primary:hover {
     background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 8px rgba(74, 137, 220, 0.2);
 }
 """
 
 # Dictionary containing module descriptions
 MODULE_DESCRIPTIONS = {
-    "run": "默认模式：使用默认的智能体协作模式，适合大多数任务。",
-    "run_mini":"使用最小化配置处理任务",
+    "run": "默认模式：使用OpenAI模型的默认的智能体协作模式，适合大多数任务。",
+    "run_mini":"使用使用OpenAI模型最小化配置处理任务",
     "run_deepseek_zh":"使用deepseek模型处理中文任务",
-    "run_terminal_zh": "终端模式：可执行命令行操作，支持网络搜索、文件处理等功能。适合需要系统交互的任务。",
-    "run_mini": "精简模式：轻量级智能体协作，适合快速回答和简单任务处理，响应速度更快。",
-    "run_gaia_roleplaying":"GAIA基准测试实现，用于评估模型能力",
+    "run_terminal_zh": "终端模式：可执行命令行操作，支持网络搜索、文件处理等功能。适合需要系统交互的任务，使用OpenAI模型",
+    "run_gaia_roleplaying":"GAIA基准测试实现，用于评估Agent能力",
     "run_openai_compatiable_model":"使用openai兼容模型处理任务",
     "run_ollama":"使用本地ollama模型处理任务",
-    "run_qwen_mini_zh":"使用qwen模型处理中文任务",
+    "run_qwen_mini_zh":"使用qwen模型最小化配置处理任务",
     "run_qwen_zh":"使用qwen模型处理任务",
  
     
@@ -219,6 +227,20 @@ def format_chat_history(chat_history: List[Dict[str, str]]) -> List[List[str]]:
     
     return formatted_history
 
+def validate_input(question: str) -> bool:
+    """验证用户输入是否有效
+    
+    Args:
+        question: 用户问题
+        
+    Returns:
+        bool: 输入是否有效
+    """
+    # 检查输入是否为空或只包含空格
+    if not question or question.strip() == "":
+        return False
+    return True
+
 def run_owl(question: str, example_module: str) -> Tuple[str, List[List[str]], str, str]:
     """运行OWL系统并返回结果
     
@@ -229,29 +251,94 @@ def run_owl(question: str, example_module: str) -> Tuple[str, List[List[str]], s
     Returns:
         Tuple[...]: 回答、聊天历史、令牌计数、状态
     """
+    # 验证输入
+    if not validate_input(question):
+        return (
+            "请输入有效的问题", 
+            [], 
+            "0", 
+            "❌ 错误: 输入无效"
+        )
+    
     try:
+        # 检查模块是否在MODULE_DESCRIPTIONS中
+        if example_module not in MODULE_DESCRIPTIONS:
+            return (
+                f"所选模块 '{example_module}' 不受支持", 
+                [], 
+                "0", 
+                f"❌ 错误: 不支持的模块"
+            )
+            
         # 动态导入目标模块
         module_path = f"owl.examples.{example_module}"
-        module = importlib.import_module(module_path)
+        try:
+            module = importlib.import_module(module_path)
+        except ImportError as ie:
+            return (
+                f"无法导入模块: {module_path}", 
+                [], 
+                "0", 
+                f"❌ 错误: 模块 {example_module} 不存在或无法加载 - {str(ie)}"
+            )
+        except Exception as e:
+            return (
+                f"导入模块时发生错误: {module_path}", 
+                [], 
+                "0", 
+                f"❌ 错误: {str(e)}"
+            )
         
         # 检查是否包含construct_society函数
         if not hasattr(module, "construct_society"):
-            raise AttributeError(f"模块 {module_path} 中未找到 construct_society 函数")
+            return (
+                f"模块 {module_path} 中未找到 construct_society 函数", 
+                [], 
+                "0", 
+                f"❌ 错误: 模块接口不兼容"
+            )
             
         # 构建社会模拟
-        society = module.construct_society(question)
+        try:
+            society = module.construct_society(question)
+        except Exception as e:
+            return (
+                f"构建社会模拟时发生错误: {str(e)}", 
+                [], 
+                "0", 
+                f"❌ 错误: 构建失败 - {str(e)}"
+            )
         
-        # 运行社会模拟（假设run_society兼容不同模块）
-        answer, chat_history, token_info = run_society(society)
+        # 运行社会模拟
+        try:
+            answer, chat_history, token_info = run_society(society)
+        except Exception as e:
+            return (
+                f"运行社会模拟时发生错误: {str(e)}", 
+                [], 
+                "0", 
+                f"❌ 错误: 运行失败 - {str(e)}"
+            )
         
-        # 格式化和令牌计数（与原逻辑一致）
-        formatted_chat_history = format_chat_history(chat_history)
-        total_tokens = token_info["completion_token_count"] + token_info["prompt_token_count"]
+        # 格式化聊天历史
+        try:
+            formatted_chat_history = format_chat_history(chat_history)
+        except Exception as e:
+            # 如果格式化失败，返回空历史记录但继续处理
+            formatted_chat_history = []
+        
+        # 安全地获取令牌计数
+        if not isinstance(token_info, dict):
+            token_info = {}
+            
+        completion_tokens = token_info.get("completion_token_count", 0)
+        prompt_tokens = token_info.get("prompt_token_count", 0)
+        total_tokens = completion_tokens + prompt_tokens
         
         return (
             answer, 
             formatted_chat_history, 
-            f"完成令牌: {token_info['completion_token_count']:,} | 提示令牌: {token_info['prompt_token_count']:,} | 总计: {total_tokens:,}", 
+            f"完成令牌: {completion_tokens:,} | 提示令牌: {prompt_tokens:,} | 总计: {total_tokens:,}", 
             "✅ 成功完成"
         )
         
@@ -337,9 +424,9 @@ def create_ui():
                     )
                     
                     # 增强版模块选择下拉菜单
+                    # 只包含MODULE_DESCRIPTIONS中定义的模块
                     module_dropdown = gr.Dropdown(
-                        choices=["run", "run_mini","run_terminal_zh","run_gaia_roleplaying",
-                                 "run_openai_compatiable_model","run_ollama","run_qwen_zh","run_qwen_mini_zh","run_deepseek_zh","run_terminal"],
+                        choices=list(MODULE_DESCRIPTIONS.keys()),
                         value="run_terminal_zh",
                         label="选择功能模块",
                         interactive=True
@@ -411,8 +498,7 @@ def create_ui():
                     <h3>关于 OWL 多智能体协作系统</h3>
                     <p>OWL 是一个基于CAMEL框架开发的先进多智能体协作系统，旨在通过智能体协作解决复杂问题。</p>
                     <p>© 2025 CAMEL-AI.org. 基于Apache License 2.0开源协议</p>
-                    <p><a href="https://github.com/camel-ai/owl" target="_blank">GitHub</a> 
-                      
+                    <p><a href="https://github.com/camel-ai/owl" target="_blank">GitHub</a></p>
                 </div>
             """)
             
@@ -434,8 +520,13 @@ def create_ui():
 
 # 主函数
 def main():
-    app = create_ui()
-    app.launch(share=False)
+    try:
+        app = create_ui()
+        app.launch(share=False)
+    except Exception as e:
+        print(f"启动应用程序时发生错误: {str(e)}")
+        import traceback
+        traceback.print_exc()
 
 if __name__ == "__main__":
     main()
