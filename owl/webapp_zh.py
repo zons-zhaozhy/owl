@@ -46,24 +46,7 @@ def setup_logging():
     # 添加处理器到根日志记录器
     root_logger.addHandler(file_handler)
     
-    # 配置CAMEL日志系统（如果可用）
-    try:
-        from camel.logger import set_log_file, set_log_level, enable_logging
-        # 启用CAMEL日志
-        enable_logging()
-        # 设置CAMEL日志文件为同一个文件
-        set_log_file(log_file)
-        # 设置日志级别
-        set_log_level("INFO")
-        logging.info("CAMEL日志系统已配置")
-    except ImportError:
-        logging.warning("无法导入CAMEL日志模块，将只使用Python标准日志")
-    except Exception as e:
-        logging.warning(f"配置CAMEL日志时出错: {str(e)}")
-    
-    # 配置第三方库的日志级别
-    for logger_name in ['urllib3', 'requests', 'gradio']:
-        logging.getLogger(logger_name).setLevel(logging.WARNING)
+
     
     logging.info("日志系统已初始化，日志文件: %s", log_file)
     return log_file
