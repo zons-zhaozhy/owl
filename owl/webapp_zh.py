@@ -1171,8 +1171,8 @@ def main():
             STOP_LOG_THREAD.set()
             STOP_REQUESTED.set()
             logging.info("应用程序关闭，停止日志线程")
-            
-        app.launch(share=False,enable_queue=True,server_name="127.0.0.1",server_port=7860)
+        app.queue()    
+        app.launch(share=False,server_name="127.0.0.1",server_port=7860)
     except Exception as e:
         logging.error(f"启动应用程序时发生错误: {str(e)}")
         print(f"启动应用程序时发生错误: {str(e)}")
