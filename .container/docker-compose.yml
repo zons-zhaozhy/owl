@@ -1,5 +1,6 @@
 services:
   owl:
+    image: mugglejinx/owl:latest
     build:
       context: ..
       dockerfile: .container/Dockerfile
