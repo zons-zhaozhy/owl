@@ -544,9 +544,25 @@ def create_ui():
         """获取最新日志并返回给前端显示"""
         return get_latest_logs(100)
         
-    def clear_log_display():
-        """清空日志显示"""
-        return ""
+    def clear_log_file():
+        """清空日志文件内容"""
+        try:
+            if LOG_FILE and os.path.exists(LOG_FILE):
+                # 清空日志文件内容而不是删除文件
+                open(LOG_FILE, 'w').close()
+                logging.info("日志文件已清空")
+                # 清空日志队列
+                while not LOG_QUEUE.empty():
+                    try:
+                        LOG_QUEUE.get_nowait()
+                    except queue.Empty:
+                        break
+                return "日志文件已清空"
+            else:
+                return "日志文件不存在或未设置"
+        except Exception as e:
+            logging.error(f"清空日志文件时出错: {str(e)}")
+            return f"清空日志文件时出错: {str(e)}"
     
     # 创建一个实时日志更新函数
     def process_with_live_logs(question, module_name):
@@ -958,7 +974,7 @@ def create_ui():
                                 value=True,
                                 interactive=True
                             )
-                            clear_logs_button = gr.Button("清空显示", variant="secondary")
+                            clear_logs_button = gr.Button("清空日志", variant="secondary")
                     
                     with gr.TabItem("环境变量管理", id="env-settings"):
                         gr.Markdown("""
@@ -1109,7 +1125,7 @@ def create_ui():
             )
             
             clear_logs_button.click(
-                fn=clear_log_display,
+                fn=clear_log_file,
                 outputs=[log_display]
             )
             
