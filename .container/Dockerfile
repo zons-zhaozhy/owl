@@ -18,8 +18,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc python3-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-
+# 复制项目文件
+COPY owl/ ./owl/
+COPY licenses/ ./licenses/
+COPY assets/ ./assets/
+COPY README.md .
+COPY README_zh.md .
 COPY pyproject.toml .
+
 # 创建README.md文件以避免构建错误
 RUN echo "# OWL Project\n\n这是OWL项目的Docker环境。" > README.md
 # 安装uv工具
@@ -31,12 +37,7 @@ RUN uv venv .venv --python=3.10 && \
     uv pip install -e .
 
 
-# 复制项目文件
-COPY owl/ ./owl/
-COPY licenses/ ./licenses/
-COPY assets/ ./assets/
-COPY README.md .
-COPY README_zh.md .
+
 
 # 创建启动脚本
 RUN echo '#!/bin/bash\nxvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" python "$@"' > /usr/local/bin/xvfb-python && \
