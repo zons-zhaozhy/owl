@@ -263,6 +263,7 @@ docker-compose up -d
 # 在容器中运行OWL
 docker-compose exec owl bash -c "cd .. && source .venv/bin/activate && cd owl"
 
+#运行例子演示脚本
 xvfb-python run.py
 
 # 选项2：使用提供的脚本构建和运行
