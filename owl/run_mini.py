@@ -1,77 +1,114 @@
+# ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
 from dotenv import load_dotenv
-load_dotenv()
 
 from camel.models import ModelFactory
 from camel.toolkits import (
-    WebToolkit, 
     SearchToolkit,
-    FunctionTool
-    )
+    BrowserToolkit,
+    FileWriteToolkit,
+)
 from camel.types import ModelPlatformType, ModelType
-
-
-from loguru import logger
+from camel.logger import set_log_level
 
 from utils import OwlRolePlaying, run_society
 
+load_dotenv()
+set_log_level(level="DEBUG")
 
 
 def construct_society(question: str) -> OwlRolePlaying:
-    r"""Construct the society based on the question."""
+    r"""Construct a society of agents based on the given question.
 
-    user_role_name = "user"
-    assistant_role_name = "assistant"
-    
-    user_model = ModelFactory.create(
-        model_platform=ModelPlatformType.OPENAI,
-        model_type=ModelType.GPT_4O,
-    )
+    Args:
+        question (str): The task or question to be addressed by the society.
 
-    assistant_model = ModelFactory.create(
-        model_platform=ModelPlatformType.OPENAI,
-        model_type=ModelType.GPT_4O,
-    )
+    Returns:
+        OwlRolePlaying: A configured society of agents ready to address the
+            question.
+    """
 
-    tools_list = [
-        *WebToolkit(
-            headless=False, 
-            web_agent_model=assistant_model, 
-            planning_agent_model=assistant_model
-        ).get_tools(),
-        FunctionTool(SearchToolkit(model=assistant_model).search_duckduckgo),
-    ]
-
-    user_role_name = 'user'
-    user_agent_kwargs = dict(model=user_model)
-    assistant_role_name = 'assistant'
-    assistant_agent_kwargs = dict(model=assistant_model,
-    tools=tools_list)
-    
-    task_kwargs = {
-        'task_prompt': question,
-        'with_task_specify': False,
+    # Create models for different components
+    models = {
+        "user": ModelFactory.create(
+            model_platform=ModelPlatformType.OPENAI,
+            model_type=ModelType.GPT_4O,
+            model_config_dict={"temperature": 0},
+        ),
+        "assistant": ModelFactory.create(
+            model_platform=ModelPlatformType.OPENAI,
+            model_type=ModelType.GPT_4O,
+            model_config_dict={"temperature": 0},
+        ),
+        "web": ModelFactory.create(
+            model_platform=ModelPlatformType.OPENAI,
+            model_type=ModelType.GPT_4O,
+            model_config_dict={"temperature": 0},
+        ),
+        "planning": ModelFactory.create(
+            model_platform=ModelPlatformType.OPENAI,
+            model_type=ModelType.GPT_4O,
+            model_config_dict={"temperature": 0},
+        ),
     }
 
+    # Configure toolkits
+    tools = [
+        *BrowserToolkit(
+            headless=False,  # Set to True for headless mode (e.g., on remote servers)
+            web_agent_model=models["web"],
+            planning_agent_model=models["planning"],
+        ).get_tools(),
+        SearchToolkit().search_duckduckgo,
+        SearchToolkit().search_wiki,
+        *FileWriteToolkit(output_dir="./").get_tools(),
+    ]
+
+    # Configure agent roles and parameters
+    user_agent_kwargs = {"model": models["user"]}
+    assistant_agent_kwargs = {"model": models["assistant"], "tools": tools}
+
+    # Configure task parameters
+    task_kwargs = {
+        "task_prompt": question,
+        "with_task_specify": False,
+    }
+
+    # Create and return the society
     society = OwlRolePlaying(
         **task_kwargs,
-        user_role_name=user_role_name,
+        user_role_name="user",
         user_agent_kwargs=user_agent_kwargs,
-        assistant_role_name=assistant_role_name,
+        assistant_role_name="assistant",
         assistant_agent_kwargs=assistant_agent_kwargs,
     )
-    
+
     return society
 
 
-# Example case
-question = "What was the volume in m^3 of the fish bag that was calculated in the University of Leicester paper `Can Hiccup Supply Enough Fish to Maintain a Dragon’s Diet?` "
+def main():
+    r"""Main function to run the OWL system with an example question."""
+    # Example research question
+    question = "Navigate to Amazon.com and identify one product that is attractive to coders. Please provide me with the product name and price. No need to verify your answer."
 
-society = construct_society(question)
-answer, chat_history, token_count = run_society(society)
+    # Construct and run the society
+    society = construct_society(question)
+    answer, chat_history, token_count = run_society(society)
 
-logger.success(f"Answer: {answer}")
+    # Output the result
+    print(f"\033[94mAnswer: {answer}\033[0m")
 
 
-
-
-
+if __name__ == "__main__":
+    main()

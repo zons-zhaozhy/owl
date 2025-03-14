@@ -1,0 +1,34 @@
+services:
+  owl:
+    build:
+      context: ..
+      dockerfile: .container/Dockerfile
+    volumes:
+      # 挂载.env文件，方便配置API密钥
+      - ../owl/.env:/app/owl/.env
+      # 挂载数据目录
+      - ./data:/app/data
+      # 挂载缓存目录，避免重复下载
+      - ~/.cache/pip:/root/.pip/cache
+      - ~/.cache/playwright:/root/.cache/ms-playwright
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DISPLAY=:99
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+      - TERM=xterm-256color
+    ports:
+      - "8000:8000"
+    stdin_open: true
+    tty: true
+    shm_size: 2gb
+    # 简化资源限制
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+
+# 定义持久化卷，用于缓存 | Define persistent volumes for caching
+volumes:
+  playwright-cache:
+  pip-cache:

@@ -1,17 +1,30 @@
+# ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
 import sys
+
 sys.path.append("../")
 
-import json
 import re
-from typing import Dict, Optional, List
-from loguru import logger
+from typing import Optional
+from camel.logger import get_logger
 
-from camel.toolkits import *
+logger = get_logger(__name__)
 
 
 def extract_pattern(content: str, pattern: str) -> Optional[str]:
     try:
-        _pattern = fr"<{pattern}>(.*?)</{pattern}>"
+        _pattern = rf"<{pattern}>(.*?)</{pattern}>"
         match = re.search(_pattern, content, re.DOTALL)
         if match:
             text = match.group(1)
@@ -21,44 +34,3 @@ def extract_pattern(content: str, pattern: str) -> Optional[str]:
     except Exception as e:
         logger.warning(f"Error extracting answer: {e}, current content: {content}")
         return None
-        
-        
-def extract_dict_from_str(text: str) -> Optional[Dict]:
-    r"""Extract dict from LLM's outputs including "```json ```" tag."""
-    text = text.replace("\\", "")
-    pattern = r'```json\s*(.*?)```'
-    match = re.search(pattern, text, re.DOTALL)
-    
-    if match:
-        json_str = match.group(1).strip()
-        try:
-            # Parse the JSON string into a dictionary
-            return json.loads(json_str)
-        except json.JSONDecodeError:
-            return None
-    return None 
-
-
-def process_tools(tools: List[str] | str) -> List[FunctionTool]:
-    r"""Process the tools from the configuration."""
-    tool_list = []
-    if isinstance(tools, str):
-        tools = [tools]
-    for tool_name in tools:
-        if tool_name in globals():
-            toolkit_class: BaseToolkit = globals()[tool_name]
-            if tool_name == "CodeExecutionToolkit":
-                tool_list.extend(toolkit_class(sandbox="subprocess", verbose=True).get_tools())
-            elif tool_name == 'ImageAnalysisToolkit':
-                tool_list.extend(toolkit_class(model="gpt-4o").get_tools())
-            elif tool_name == 'AudioAnalysisToolkit':
-                tool_list.extend(toolkit_class(reasoning=True).get_tools())
-            elif tool_name == "WebToolkit":
-                tool_list.extend(toolkit_class(headless=True).get_tools())
-            else:
-                tool_list.extend(toolkit_class().get_tools())
-
-        else:
-            raise ValueError(f"Toolkit {tool_name} not found.")
-
-    return tool_list
