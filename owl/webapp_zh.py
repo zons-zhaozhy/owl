@@ -285,7 +285,7 @@ def run_owl(question: str, example_module: str) -> Tuple[str, List[List[str]], s
     Returns:
         Tuple[...]: 回答、聊天历史、令牌计数、状态
     """
-    global CURRENT_PROCESS, STOP_REQUESTED, CONVERSATION_UPDATE_QUEUE
+    global CURRENT_PROCESS, CONVERSATION_UPDATE_QUEUE
     
     # 清空对话更新队列
     while not CONVERSATION_UPDATE_QUEUE.empty():
@@ -293,9 +293,6 @@ def run_owl(question: str, example_module: str) -> Tuple[str, List[List[str]], s
             CONVERSATION_UPDATE_QUEUE.get_nowait()
         except queue.Empty:
             break
-    
-    # 重置停止标志
-    STOP_REQUESTED.clear()
     
     # 验证输入
     if not validate_input(question):
@@ -567,10 +564,7 @@ def create_ui():
     # 创建一个实时日志更新函数
     def process_with_live_logs(question, module_name):
         """处理问题并实时更新日志和对话历史"""
-        global CURRENT_PROCESS, STOP_REQUESTED, CONVERSATION_UPDATE_QUEUE
-        
-        # 重置停止标志
-        STOP_REQUESTED.clear()
+        global CURRENT_PROCESS, CONVERSATION_UPDATE_QUEUE
         
         # 创建一个后台线程来处理问题
         result_queue = queue.Queue()
@@ -592,7 +586,7 @@ def create_ui():
                     # 移动到文件末尾
                     f.seek(0, 2)
                     
-                    while not STOP_REQUESTED.is_set():
+                    while True:
                         line = f.readline()
                         if line:
                             # 尝试多种模式来检测对话信息
@@ -661,18 +655,7 @@ def create_ui():
         
         def process_in_background():
             try:
-                # 检查是否已请求停止
-                if STOP_REQUESTED.is_set():
-                    result_queue.put((f"操作已取消", [], "0", f"❌ 操作已取消"))
-                    return
-                
                 result = run_owl(question, module_name)
-                
-                # 再次检查是否已请求停止
-                if STOP_REQUESTED.is_set():
-                    result_queue.put((f"操作已取消", [], "0", f"❌ 操作已取消"))
-                    return
-                    
                 result_queue.put(result)
             except Exception as e:
                 result_queue.put((f"发生错误: {str(e)}", [], "0", f"❌ 错误: {str(e)}"))
@@ -688,12 +671,6 @@ def create_ui():
         
         # 在等待处理完成的同时，每秒更新一次日志和对话历史
         while bg_thread.is_alive():
-            # 检查是否已请求停止
-            if STOP_REQUESTED.is_set():
-                logs = get_latest_logs(100)
-                yield "操作已取消", current_chat_history, "0", "<span class='status-indicator status-warning'></span> 正在停止...", logs
-                break
-            
             # 检查是否有新的对话更新（从日志解析）
             updated = False
             while not chat_history_queue.empty():
@@ -747,13 +724,6 @@ def create_ui():
             
             time.sleep(1)
         
-        # 如果已请求停止但线程仍在运行
-        if STOP_REQUESTED.is_set() and bg_thread.is_alive():
-            # 不再强制join线程，让它自然结束
-            logs = get_latest_logs(100)
-            yield "生成已停止", current_chat_history, "0", "<span class='status-indicator status-warning'></span> 已停止生成", logs
-            return
-        
         # 处理完成，获取结果
         if not result_queue.empty():
             result = result_queue.get()
@@ -778,7 +748,7 @@ def create_ui():
             yield answer, current_chat_history, token_count, status_with_indicator, logs
         else:
             logs = get_latest_logs(100)
-            yield "操作已取消或未完成", current_chat_history, "0", "<span class='status-indicator status-error'></span> 已终止", logs
+            yield "操作未完成", current_chat_history, "0", "<span class='status-indicator status-error'></span> 已终止", logs
     
     with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as app:
             gr.Markdown(
@@ -931,7 +901,6 @@ def create_ui():
                     
                     with gr.Row():
                         run_button = gr.Button("运行", variant="primary", elem_classes="primary")
-                        stop_button = gr.Button("停止", variant="stop", elem_classes="stop")
                         
                     status_output = gr.HTML(
                         value="<span class='status-indicator status-success'></span> 已就绪",
@@ -1136,12 +1105,6 @@ def create_ui():
                 fn=process_with_live_logs,
                 inputs=[question_input, module_dropdown], 
                 outputs=[answer_output, chat_output, token_count_output, status_output, log_display]
-            )
-            
-            # 添加停止按钮事件处理
-            stop_button.click(
-                fn=terminate_process,
-                outputs=[answer_output, status_output]
             )
             
             # 模块选择更新描述
