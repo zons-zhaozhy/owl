@@ -261,7 +261,12 @@ cd .container
 docker-compose up -d
 
 # 在容器中运行OWL
-docker-compose exec owl bash -c "cd .. && source .venv/bin/activate && cd owl"
+docker-compose exec owl bash
+
+# 激活虚拟环境
+cd .. && source .venv/bin/activate && cd owl
+
+playwright install-deps 
 
 #运行例子演示脚本
 xvfb-python run.py
