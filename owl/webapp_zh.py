@@ -246,35 +246,6 @@ def validate_input(question: str) -> bool:
         return False
     return True
 
-
-
-    """停止当前运行的线程，而不是终止整个进程"""
-    global CURRENT_PROCESS, STOP_REQUESTED
-    
-    if CURRENT_PROCESS is None:
-        logging.info("没有正在运行的线程")
-        return "没有正在运行的线程", "<span class='status-indicator status-success'></span> 已就绪"
-    
-    try:
-        STOP_REQUESTED.set()  # 设置停止标志
-        logging.info("已设置停止标志，正在等待线程响应...")
-        
-        # 如果是线程，只需要设置标志让它自行停止
-        if isinstance(CURRENT_PROCESS, threading.Thread) and CURRENT_PROCESS.is_alive():
-            logging.info("等待线程处理停止请求...")
-            # 不强制终止线程，只设置标志位让线程自行退出
-            # 线程应该会定期检查STOP_REQUESTED标志
-            return "已请求停止生成", "<span class='status-indicator status-warning'></span> 正在停止..."
-        else:
-            # 如果不是线程或线程已经不活跃，则重置状态
-            CURRENT_PROCESS = None
-            logging.info("线程已不活跃")
-            return "线程已停止", "<span class='status-indicator status-success'></span> 已就绪"
-    
-    except Exception as e:
-        logging.error(f"停止线程时出错: {str(e)}")
-        return f"停止线程时出错: {str(e)}", f"<span class='status-indicator status-error'></span> 错误: {str(e)}"
-
 def run_owl(question: str, example_module: str) -> Tuple[str, List[List[str]], str, str]:
     """运行OWL系统并返回结果
     
