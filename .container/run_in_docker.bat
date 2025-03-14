@@ -165,7 +165,10 @@ REM 在容器中运行指定的脚本，传递查询参数
 REM Run the specified script in container, passing query parameter
 echo 在Docker容器中使用!PYTHON_CMD!运行脚本...
 echo Running script in Docker container using !PYTHON_CMD!...
-%COMPOSE_CMD% exec -T !SERVICE_NAME! !PYTHON_CMD! !SCRIPT_NAME! "!QUERY!"
+
+REM 修改执行命令，按照README中的方式执行
+REM Modify execution command according to README
+%COMPOSE_CMD% exec -T !SERVICE_NAME! bash -c "cd .. && source .venv/bin/activate && cd owl && !PYTHON_CMD! !SCRIPT_NAME! \"!QUERY!\""
 
 if errorlevel 0 (
     echo 查询完成！

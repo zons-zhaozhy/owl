@@ -257,9 +257,13 @@ cp owl/.env_template owl/.env
 
 # 选项1：直接使用docker-compose
 cd .container
+
 docker-compose up -d
+
 # 在容器中运行OWL
-docker-compose exec owl bash -c "xvfb-python run.py"
+docker-compose exec owl bash -c "cd .. && source .venv/bin/activate && cd owl"
+
+xvfb-python run.py
 
 # 选项2：使用提供的脚本构建和运行
 cd .container
