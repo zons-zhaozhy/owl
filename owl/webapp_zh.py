@@ -863,6 +863,17 @@ def create_ui():
                 background-color: #dc3545;
             }
             
+            /* 日志显示区域样式 */
+            .log-display textarea {
+                height: 400px !important;
+                max-height: 400px !important;
+                overflow-y: auto !important;
+                font-family: monospace;
+                font-size: 0.9em;
+                white-space: pre-wrap;
+                line-height: 1.4;
+            }
+            
             @keyframes pulse {
                 0% { opacity: 1; }
                 50% { opacity: 0.5; }
@@ -919,12 +930,13 @@ def create_ui():
                         # 添加日志显示区域
                         log_display = gr.Textbox(
                             label="系统日志",
-                            lines=20,
-                            max_lines=50,
+                            lines=25,
+                            max_lines=100,
                             interactive=False,
                             autoscroll=True,
                             show_copy_button=True,
-                            elem_classes="log-display"
+                            elem_classes="log-display",
+                            container=True
                         )
                         
                         with gr.Row():
