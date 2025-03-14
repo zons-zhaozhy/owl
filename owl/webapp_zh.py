@@ -697,7 +697,7 @@ def create_ui():
                 
            
                 
-                with gr.Tabs(selected=1):  # 设置对话记录为默认选中的标签页
+                with gr.Tabs():  # 设置对话记录为默认选中的标签页
                     with gr.TabItem("对话记录"):
                         # 添加对话记录显示区域
                         log_display2 = gr.Textbox(
