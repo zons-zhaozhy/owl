@@ -765,7 +765,7 @@ def create_ui():
                 app.load(
                     fn=update_logs,
                     outputs=[log_display],
-                    every=3
+                    every=2
                 )
     
     return app
