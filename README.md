@@ -87,6 +87,7 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
 
 # 🔥 News
 
+
 <div align="center" style="background-color: #fffacd; padding: 15px; border-radius: 10px; border: 2px solid #ffd700; margin: 20px 0;">
   <h3 style="color: #d81b60; margin: 0; font-size: 1.3em;">
     🌟🌟🌟 <b>COMMUNITY CALL FOR USE CASES!</b> 🌟🌟🌟
@@ -108,6 +109,7 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
 - **[2025.03.09]**: We added a web-based user interface that makes it easier to interact with the system.
 - **[2025.03.07]**: We open-sourced the codebase of the 🦉 OWL project.
 - **[2025.03.03]**: OWL achieved the #1 position among open-source frameworks on the GAIA benchmark with a score of 58.18.
+
 
 # 🎬 Demo Video
 
@@ -537,8 +539,8 @@ To take on an issue, simply leave a comment stating your interest.
 Join us ([*Discord*](https://discord.camel-ai.org/) or [*WeChat*](https://ghli.org/camel/wechat.png)) in pushing the boundaries of finding the scaling laws of agents. 
 
 Join us for further discussions!
-![](./assets/community.jpg)
-<!-- ![](./assets/meetup.jpg) -->
+<!-- ![](./assets/community.png) -->
+![](./assets/community_8.jpg)
 
 # ❓ FAQ
 
