@@ -261,9 +261,14 @@ cp owl/.env_template owl/.env
 
 # Option 1: Using docker-compose directly
 cd .container
+
 docker-compose up -d
+
 # Run OWL inside the container
-docker-compose exec owl bash -c "xvfb-python run.py"
+docker-compose exec owl bash -c "cd .. && source .venv/bin/activate && cd owl"
+
+#run example demo script
+xvfb-python run.py
 
 # Option 2: Build and run using the provided scripts
 cd .container
