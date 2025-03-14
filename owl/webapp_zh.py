@@ -915,6 +915,26 @@ def create_ui():
            
                 
                 with gr.Tabs():
+                    with gr.TabItem("系统日志"):
+                        # 添加日志显示区域
+                        log_display = gr.Textbox(
+                            label="系统日志",
+                            lines=20,
+                            max_lines=50,
+                            interactive=False,
+                            autoscroll=True,
+                            show_copy_button=True,
+                            elem_classes="log-display"
+                        )
+                        
+                        with gr.Row():
+                            refresh_logs_button = gr.Button("刷新日志")
+                            auto_refresh_checkbox = gr.Checkbox(
+                                label="自动刷新", 
+                                value=True,
+                                interactive=True
+                            )
+                            clear_logs_button = gr.Button("清空日志", variant="secondary")
                     with gr.TabItem("回答"):
                         answer_output = gr.Textbox(
                             label="回答", 
@@ -955,26 +975,7 @@ def create_ui():
                         </script>
                         """)
                     
-                    with gr.TabItem("系统日志"):
-                        # 添加日志显示区域
-                        log_display = gr.Textbox(
-                            label="系统日志",
-                            lines=20,
-                            max_lines=50,
-                            interactive=False,
-                            autoscroll=True,
-                            show_copy_button=True,
-                            elem_classes="log-display"
-                        )
-                        
-                        with gr.Row():
-                            refresh_logs_button = gr.Button("刷新日志")
-                            auto_refresh_checkbox = gr.Checkbox(
-                                label="自动刷新", 
-                                value=True,
-                                interactive=True
-                            )
-                            clear_logs_button = gr.Button("清空日志", variant="secondary")
+                    
                     
                     with gr.TabItem("环境变量管理", id="env-settings"):
                         gr.Markdown("""
