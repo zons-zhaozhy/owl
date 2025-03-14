@@ -246,8 +246,8 @@ def validate_input(question: str) -> bool:
         return False
     return True
 
-# 终止运行进程的函数
-def terminate_process():
+
+
     """停止当前运行的线程，而不是终止整个进程"""
     global CURRENT_PROCESS, STOP_REQUESTED
     
