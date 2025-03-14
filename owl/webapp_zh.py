@@ -874,6 +874,26 @@ def create_ui():
                 line-height: 1.4;
             }
             
+            /* 聊天头像样式 */
+            .chat-container .avatar {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                width: 40px !important;
+                height: 40px !important;
+                border-radius: 50%;
+                font-size: 20px;
+                margin-right: 10px;
+            }
+            
+            .chat-container .avatar.user {
+                background-color: #e6f7ff;
+            }
+            
+            .chat-container .avatar.assistant {
+                background-color: #f0f0f0;
+            }
+            
             @keyframes pulse {
                 0% { opacity: 1; }
                 50% { opacity: 0.5; }
@@ -896,14 +916,14 @@ def create_ui():
                     # 只包含MODULE_DESCRIPTIONS中定义的模块
                     module_dropdown = gr.Dropdown(
                         choices=list(MODULE_DESCRIPTIONS.keys()),
-                        value="run_terminal_zh",
+                        value="run",
                         label="选择功能模块",
                         interactive=True
                     )
                     
                     # 模块描述文本框
                     module_description = gr.Textbox(
-                        value=MODULE_DESCRIPTIONS["run_terminal_zh"],
+                        value=MODULE_DESCRIPTIONS["run"],
                         label="模块描述",
                         interactive=False,
                         elem_classes="module-info"
@@ -959,7 +979,7 @@ def create_ui():
                             label="完整对话记录",
                             elem_classes="chat-container",
                             height=500,
-                            avatar_images=("👤", "🦉"),  # 添加用户和助手的头像
+                          
                             bubble_full_width=False,     # 气泡不占满宽度
                             show_copy_button=True        # 显示复制按钮
                         )
