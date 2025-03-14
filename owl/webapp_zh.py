@@ -248,56 +248,32 @@ def validate_input(question: str) -> bool:
 
 # 终止运行进程的函数
 def terminate_process():
-    """终止当前运行的进程，适配不同操作系统平台"""
+    """停止当前运行的线程，而不是终止整个进程"""
     global CURRENT_PROCESS, STOP_REQUESTED
     
     if CURRENT_PROCESS is None:
-        logging.info("没有正在运行的进程")
-        return "没有正在运行的进程", "<span class='status-indicator status-success'></span> 已就绪"
+        logging.info("没有正在运行的线程")
+        return "没有正在运行的线程", "<span class='status-indicator status-success'></span> 已就绪"
     
     try:
         STOP_REQUESTED.set()  # 设置停止标志
-        logging.info("正在尝试终止进程...")
+        logging.info("已设置停止标志，正在等待线程响应...")
         
-        # 获取当前操作系统
-        current_os = platform.system()
-        
-        if current_os == "Windows":
-            # Windows平台使用taskkill强制终止进程树
-            if hasattr(CURRENT_PROCESS, 'pid'):
-                subprocess.run(f"taskkill /F /T /PID {CURRENT_PROCESS.pid}", shell=True)
-                logging.info(f"已发送Windows终止命令到进程 {CURRENT_PROCESS.pid}")
-        else:
-            # Unix-like系统 (Linux, macOS)
-            if hasattr(CURRENT_PROCESS, 'pid'):
-                # 发送SIGTERM信号
-                os.killpg(os.getpgid(CURRENT_PROCESS.pid), signal.SIGTERM)
-                logging.info(f"已发送SIGTERM信号到进程组 {CURRENT_PROCESS.pid}")
-                
-                # 给进程一些时间来清理
-                time.sleep(0.5)
-                
-                # 如果进程仍在运行，发送SIGKILL
-                try:
-                    if CURRENT_PROCESS.poll() is None:
-                        os.killpg(os.getpgid(CURRENT_PROCESS.pid), signal.SIGKILL)
-                        logging.info(f"已发送SIGKILL信号到进程组 {CURRENT_PROCESS.pid}")
-                except (ProcessLookupError, OSError):
-                    pass  # 进程可能已经终止
-        
-        # 如果是线程，尝试终止线程
+        # 如果是线程，只需要设置标志让它自行停止
         if isinstance(CURRENT_PROCESS, threading.Thread) and CURRENT_PROCESS.is_alive():
-            # 线程无法强制终止，但可以设置标志让线程自行退出
-            logging.info("等待线程终止...")
-            CURRENT_PROCESS.join(timeout=2)
-            
-        CURRENT_PROCESS = None
-        logging.info("进程已终止")
-        return "进程已终止", "<span class='status-indicator status-success'></span> 已就绪"
+            logging.info("等待线程处理停止请求...")
+            # 不强制终止线程，只设置标志位让线程自行退出
+            # 线程应该会定期检查STOP_REQUESTED标志
+            return "已请求停止生成", "<span class='status-indicator status-warning'></span> 正在停止..."
+        else:
+            # 如果不是线程或线程已经不活跃，则重置状态
+            CURRENT_PROCESS = None
+            logging.info("线程已不活跃")
+            return "线程已停止", "<span class='status-indicator status-success'></span> 已就绪"
     
     except Exception as e:
-        logging.error(f"终止进程时出错: {str(e)}")
-        return f"终止进程时出错: {str(e)}", f"<span class='status-indicator status-error'></span> 错误: {str(e)}"
+        logging.error(f"停止线程时出错: {str(e)}")
+        return f"停止线程时出错: {str(e)}", f"<span class='status-indicator status-error'></span> 错误: {str(e)}"
 
 def run_owl(question: str, example_module: str) -> Tuple[str, List[List[str]], str, str]:
     """运行OWL系统并返回结果
@@ -577,6 +553,9 @@ def create_ui():
         """处理问题并实时更新日志和对话历史"""
         global CURRENT_PROCESS, STOP_REQUESTED, CONVERSATION_UPDATE_QUEUE
         
+        # 重置停止标志
+        STOP_REQUESTED.clear()
+        
         # 创建一个后台线程来处理问题
         result_queue = queue.Queue()
         # 创建一个队列用于实时更新对话历史
@@ -696,7 +675,7 @@ def create_ui():
             # 检查是否已请求停止
             if STOP_REQUESTED.is_set():
                 logs = get_latest_logs(100)
-                yield None, current_chat_history, None, "<span class='status-indicator status-error'></span> 正在终止...", logs
+                yield "操作已取消", current_chat_history, "0", "<span class='status-indicator status-warning'></span> 正在停止...", logs
                 break
             
             # 检查是否有新的对话更新（从日志解析）
@@ -754,9 +733,9 @@ def create_ui():
         
         # 如果已请求停止但线程仍在运行
         if STOP_REQUESTED.is_set() and bg_thread.is_alive():
-            bg_thread.join(timeout=2)  # 等待线程最多2秒
+            # 不再强制join线程，让它自然结束
             logs = get_latest_logs(100)
-            yield "操作已取消", current_chat_history, "0", "<span class='status-indicator status-error'></span> 已终止", logs
+            yield "生成已停止", current_chat_history, "0", "<span class='status-indicator status-warning'></span> 已停止生成", logs
             return
         
         # 处理完成，获取结果
@@ -1179,8 +1158,6 @@ def main():
             global STOP_LOG_THREAD, STOP_REQUESTED
             STOP_LOG_THREAD.set()
             STOP_REQUESTED.set()
-            # 尝试终止当前进程
-            terminate_process()
             logging.info("应用程序关闭，停止日志线程")
             
         app.launch(share=False,enable_queue=True,server_name="127.0.0.1",server_port=7860)
@@ -1194,8 +1171,6 @@ def main():
         # 确保日志线程停止
         STOP_LOG_THREAD.set()
         STOP_REQUESTED.set()
-        # 尝试终止当前进程
-        terminate_process()
         logging.info("应用程序关闭")
 
 if __name__ == "__main__":
