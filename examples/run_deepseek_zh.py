@@ -71,6 +71,7 @@ def construct_society(question: str) -> RolePlaying:
         *CodeExecutionToolkit(sandbox="subprocess", verbose=True).get_tools(),
         SearchToolkit().search_duckduckgo,
         SearchToolkit().search_wiki,
+        SearchToolkit().search_baidu,
         *ExcelToolkit().get_tools(),
         *FileWriteToolkit(output_dir="./").get_tools(),
     ]

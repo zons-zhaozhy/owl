@@ -103,6 +103,7 @@ def construct_society(question: str) -> RolePlaying:
         SearchToolkit().search_duckduckgo,
         SearchToolkit().search_google,  # Comment this out if you don't have google search
         SearchToolkit().search_wiki,
+        SearchToolkit().search_baidu,
         *ExcelToolkit().get_tools(),
         *DocumentProcessingToolkit(model=models["document"]).get_tools(),
         *FileWriteToolkit(output_dir="./").get_tools(),
