@@ -385,6 +385,8 @@ tools = [
     SearchToolkit().search_duckduckgo,
     SearchToolkit().search_google,  # Comment out if unavailable
     SearchToolkit().search_wiki,
+    SearchToolkit().search_bocha,
+    SearchToolkit().search_baidu,
     *ExcelToolkit().get_tools(),
     *DocumentProcessingToolkit(model=models["document"]).get_tools(),
     *FileWriteToolkit(output_dir="./").get_tools(),
