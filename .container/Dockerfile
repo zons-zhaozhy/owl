@@ -20,23 +20,28 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# 安装uv工具
+RUN pip install uv
+
+# 复制构建项目文件
+COPY pyproject.toml .
+COPY README.md .
+# 如果README.md不存在则创建
+RUN if [ ! -f "README.md" ]; then echo -e "# OWL Project\n\n这是OWL项目的Docker环境。" > README.md; fi
+
 # 创建虚拟环境并安装依赖
 RUN uv venv .venv --python=3.10 && \
     . .venv/bin/activate && \
     uv pip install -e .
 
-# 复制项目文件
+# 复制运行项目文件
 COPY owl/ ./owl/
 COPY licenses/ ./licenses/
 COPY assets/ ./assets/
-COPY README.md .
 COPY README_zh.md .
-COPY pyproject.toml .
 
-# 如果README.md不存在则创建
-RUN if [ ! -f "README.md" ]; then echo -e "# OWL Project\n\n这是OWL项目的Docker环境。" > README.md; fi
-# 安装uv工具
-RUN pip install uv
+
+
 
 
 
