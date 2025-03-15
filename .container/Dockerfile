@@ -33,8 +33,8 @@ COPY README.md .
 COPY README_zh.md .
 COPY pyproject.toml .
 
-# 创建README.md文件以避免构建错误
-RUN echo "# OWL Project\n\n这是OWL项目的Docker环境。" > README.md
+# 如果README.md不存在则创建
+RUN if [ ! -f "README.md" ]; then echo -e "# OWL Project\n\n这是OWL项目的Docker环境。" > README.md; fi
 # 安装uv工具
 RUN pip install uv
 
