@@ -104,7 +104,7 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
   </p>
 </div>
 
-- **[2025.03.15]**: Restructured the web application architecture for significantly improved system stability; optimized OWL Agent execution mechanisms for enhanced efficiency and performance; integrated Baidu search engine into SearchToolkit.
+- **[2025.03.15]**: Restructured the web-based user interface architecture for improved system stability; optimized OWL Agent execution mechanisms for enhanced efficiency and performance; integrated Baidu search engine into SearchToolkit.
 - **[2025.03.12]**: Added Bocha search in SearchToolkit, integrated Volcano Engine model platform, and enhanced Azure and OpenAI Compatible models with structured output and tool calling.
 - **[2025.03.11]**: We added MCPToolkit, FileWriteToolkit, and TerminalToolkit to enhance OWL agents with MCP tool calling, file writing capabilities, and terminal command execution.
 - **[2025.03.09]**: We added a web-based user interface that makes it easier to interact with the system.
