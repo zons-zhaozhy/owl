@@ -58,6 +58,27 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
 
 </div>
 
+<!-- # Key Features -->
+# 📋 Table of Contents
+
+- [📋 Table of Contents](#-table-of-contents)
+- [🔥 News](#-news)
+- [🎬 Demo Video](#-demo-video)
+- [✨️ Core Features](#️-core-features)
+- [🛠️ Installation](#️-installation)
+- [🚀 Quick Start](#-quick-start)
+- [🧰 Toolkits and Capabilities](#-toolkits-and-capabilities)
+  - [Model Context Protocol (MCP)](#model-context-protocol-mcp)
+- [🌐 Web Interface](#-web-interface)
+- [🧪 Experiments](#-experiments)
+- [⏱️ Future Plans](#️-future-plans)
+- [📄 License](#-license)
+- [🖊️ Cite](#️-cite)
+- [🤝 Contributing](#-contributing)
+- [🔥 Community](#-community)
+- [❓ FAQ](#-faq)
+- [📚 Exploring CAMEL Dependency](#-exploring-camel-dependency)
+- [⭐ Star History](#-star-history)
 
 # 🔥 News
 
