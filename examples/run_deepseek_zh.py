@@ -20,7 +20,6 @@
 
 from dotenv import load_dotenv
 
-
 from camel.models import ModelFactory
 from camel.toolkits import (
     ExcelToolkit,
@@ -29,17 +28,18 @@ from camel.toolkits import (
     CodeExecutionToolkit,
 )
 from camel.types import ModelPlatformType, ModelType
-
+from camel.societies import RolePlaying
+from camel.logger import set_log_level
 
 from owl.utils import run_society
 
-from camel.societies import RolePlaying
-
-from camel.logger import set_log_level
+import pathlib
 
 set_log_level(level="DEBUG")
 
-load_dotenv()
+base_dir = pathlib.Path(__file__).parent.parent
+env_path = base_dir / "owl" / ".env"
+load_dotenv(dotenv_path=str(env_path))
 
 
 def construct_society(question: str) -> RolePlaying:
@@ -71,6 +71,7 @@ def construct_society(question: str) -> RolePlaying:
         *CodeExecutionToolkit(sandbox="subprocess", verbose=True).get_tools(),
         SearchToolkit().search_duckduckgo,
         SearchToolkit().search_wiki,
+        SearchToolkit().search_baidu,
         *ExcelToolkit().get_tools(),
         *FileWriteToolkit(output_dir="./").get_tools(),
     ]

@@ -67,13 +67,9 @@
 - [🎬 演示视频](#-演示视频)
 - [✨️ 核心功能](#-核心功能)
 - [🛠️ 安装](#️-安装)
-  - [**选项1：使用 uv（推荐）**](#选项1使用-uv推荐)
-  - [**选项2：使用 venv 和 pip**](#选项2使用-venv-和-pip)
-  - [**选项3：使用 conda**](#选项3使用-conda)
-  - [**设置环境变量**](#设置环境变量)
-  - [**使用Docker运行**](#使用docker运行)
 - [🚀 快速开始](#-快速开始)
 - [🧰 工具包与功能](#-工具包与功能)
+  - [模型上下文协议 (MCP)](#模型上下文协议-mcp)
 - [🌐 网页界面](#-网页界面)
 - [🧪 实验](#-实验)
 - [⏱️ 未来计划](#️-未来计划)
@@ -84,7 +80,6 @@
 - [❓ 常见问题](#-常见问题)
 - [📚 探索 CAMEL 依赖](#-探索-camel-依赖)
 - [⭐ Star History](#-star-history)
-
 
 # 🔥 新闻
 
@@ -104,7 +99,20 @@
   </p>
 </div>
 
-- **[2025.03.15]**: 重构网页用户界面，提升系统稳定性；优化OWL Agent的运行机制，提高执行效率与性能；在SearchToolkit中整合百度搜索引擎
+<div style="background-color: #e3f2fd; padding: 12px; border-radius: 8px; border-left: 4px solid #1e88e5; margin: 10px 0;">
+  <h4 style="color: #1e88e5; margin: 0 0 8px 0;">
+    🎉 最新重大更新 - 2025年3月15日
+  </h4>
+  <p style="margin: 0;">
+    <b>重要改进：</b>
+    <ul style="margin: 5px 0 0 0; padding-left: 20px;">
+      <li>重构网页用户界面架构，显著提升系统稳定性 🏗️</li>
+      <li>优化OWL Agent执行机制，大幅提升性能与效率 🚀</li>
+    </ul>
+    <i>立即体验全新升级的自动化任务处理能力！</i>
+  </p>
+</div>
+
 - **[2025.03.12]**: 在SearchToolkit中添加了Bocha搜索功能，集成了火山引擎模型平台，并更新了Azure和OpenAI Compatible模型的结构化输出和工具调用能力。
 - **[2025.03.11]**: 我们添加了 MCPToolkit、FileWriteToolkit 和 TerminalToolkit，增强了 OWL Agent 的 MCP（模型上下文协议）集成、文件写入能力和终端命令执行功能。MCP 作为一个通用协议层，标准化了 AI 模型与各种数据源和工具的交互方式。
 - **[2025.03.09]**: 我们添加了基于网页的用户界面，使系统交互变得更加简便。
@@ -284,21 +292,6 @@ chmod +x build_docker.sh
 
 # 🚀 快速开始
 
-## 尝试 MCP（模型上下文协议）集成
-
-体验 MCP 的强大功能，运行我们的示例来展示多智能体信息检索和处理：
-
-```bash
-# 设置 MCP 服务器（仅需一次性设置）
-npx -y @smithery/cli install @wonderwhy-er/desktop-commander --client claude
-npx @wonderwhy-er/desktop-commander setup
-
-# 运行 MCP 示例
-python examples/run_mcp.py
-```
-
-这个示例展示了 OWL 智能体如何通过 MCP 协议无缝地与文件系统、网页自动化和信息检索进行交互。查看 `examples/run_mcp.py` 了解完整实现。
-
 ## 基本用法
    
 运行以下示例：
@@ -403,6 +396,8 @@ tools = [
     SearchToolkit().search_duckduckgo,
     SearchToolkit().search_google,  # 如果不可用请注释
     SearchToolkit().search_wiki,
+    SearchToolkit().search_bocha,
+    SearchToolkit().search_baidu,
     *ExcelToolkit().get_tools(),
     *DocumentProcessingToolkit(model=models["document"]).get_tools(),
     *FileWriteToolkit(output_dir="./").get_tools(),
@@ -448,6 +443,16 @@ assistant_agent_kwargs = {"model": models["assistant"], "tools": tools}
 选择必要的工具包可优化性能并减少资源使用。
 
 # 🌐 网页界面
+
+<div align="center" style="background-color: #f0f7ff; padding: 15px; border-radius: 10px; border: 2px solid #1e88e5; margin: 20px 0;">
+  <h3 style="color: #1e88e5; margin: 0;">
+    🚀 全新升级的网页界面现已发布！
+  </h3>
+  <p style="margin: 10px 0;">
+    体验更稳定的系统性能和优化后的执行效率。
+    通过我们直观的界面，开启OWL强大功能的探索之旅！
+  </p>
+</div>
 
 OWL 现在包含一个基于网页的用户界面，使与系统交互变得更加容易。要启动网页界面，请运行：
 
@@ -520,7 +525,8 @@ python examples/run_gaia_roleplaying.py
 3. 提交包含您改进的拉取请求
 
 **当前开放贡献的问题：**
-- [#1857](https://github.com/camel-ai/camel/issues/1857)
+- [#1868](https://github.com/camel-ai/camel/issues/1868)
+- [#1866](https://github.com/camel-ai/camel/issues/1866)
 - [#1770](https://github.com/camel-ai/camel/issues/1770)
 - [#1712](https://github.com/camel-ai/camel/issues/1712)
 - [#1537](https://github.com/camel-ai/camel/issues/1537)
@@ -531,9 +537,8 @@ python examples/run_gaia_roleplaying.py
 加入我们的 ([*Discord*](https://discord.camel-ai.org/) 或 [*微信*](https://ghli.org/camel/wechat.png)) 社区，一起探索智能体扩展规律的边界。
 
 加入我们，参与更多讨论！
-<!-- ![](./assets/community.png) -->
-![](./assets/community.jpg)
-<!-- ![](./assets/meetup.jpg) -->
+
+![](./assets/community.jpeg)
 
 # ❓ 常见问题
 

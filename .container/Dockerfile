@@ -16,7 +16,7 @@ WORKDIR /app
 # 安装系统依赖（合并为一个RUN命令减少层数）
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl git ffmpeg libsm6 libxext6 xvfb xauth x11-utils \
-    gcc python3-dev \
+    build-essential python3-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

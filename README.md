@@ -64,15 +64,11 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
 - [📋 Table of Contents](#-table-of-contents)
 - [🔥 News](#-news)
 - [🎬 Demo Video](#-demo-video)
-- [✨️ Core Features](#-core-features)
+- [✨️ Core Features](#️-core-features)
 - [🛠️ Installation](#️-installation)
-  - [**Clone the Github repository**](#clone-the-github-repository)
-  - [**Set up Environment**](#set-up-environment)
-  - [**Install Dependencies**](#install-dependencies)
-  - [**Setup Environment Variables**](#setup-environment-variables)
-  - [**Running with Docker**](#running-with-docker)
 - [🚀 Quick Start](#-quick-start)
 - [🧰 Toolkits and Capabilities](#-toolkits-and-capabilities)
+  - [Model Context Protocol (MCP)](#model-context-protocol-mcp)
 - [🌐 Web Interface](#-web-interface)
 - [🧪 Experiments](#-experiments)
 - [⏱️ Future Plans](#️-future-plans)
@@ -83,7 +79,6 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
 - [❓ FAQ](#-faq)
 - [📚 Exploring CAMEL Dependency](#-exploring-camel-dependency)
 - [⭐ Star History](#-star-history)
-
 
 # 🔥 News
 
@@ -104,7 +99,20 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
   </p>
 </div>
 
-- **[2025.03.15]**: Restructured the web-based user interface architecture for improved system stability; optimized OWL Agent execution mechanisms for enhanced efficiency and performance; integrated Baidu search engine into SearchToolkit.
+<div style="background-color: #e3f2fd; padding: 12px; border-radius: 8px; border-left: 4px solid #1e88e5; margin: 10px 0;">
+  <h4 style="color: #1e88e5; margin: 0 0 8px 0;">
+    🎉 Latest Major Update - March 15, 2025
+  </h4>
+  <p style="margin: 0;">
+    <b>Significant Improvements:</b>
+    <ul style="margin: 5px 0 0 0; padding-left: 20px;">
+      <li>Restructured web-based UI architecture for enhanced stability 🏗️</li>
+      <li>Optimized OWL Agent execution mechanisms for better performance 🚀</li>
+    </ul>
+    <i>Try it now and experience the improved performance in your automation tasks!</i>
+  </p>
+</div>
+
 - **[2025.03.12]**: Added Bocha search in SearchToolkit, integrated Volcano Engine model platform, and enhanced Azure and OpenAI Compatible models with structured output and tool calling.
 - **[2025.03.11]**: We added MCPToolkit, FileWriteToolkit, and TerminalToolkit to enhance OWL agents with MCP tool calling, file writing capabilities, and terminal command execution.
 - **[2025.03.09]**: We added a web-based user interface that makes it easier to interact with the system.
@@ -261,8 +269,8 @@ cd owl
 cp owl/.env_template owl/.env
 # Edit the .env file and fill in your API keys
 
-
 # Option 1: Using docker-compose directly
+# (By default it's using pre-built online image, you can also check the docker-compose.yml for building locally)
 cd .container
 
 docker-compose up -d
@@ -289,21 +297,6 @@ chmod +x build_docker.sh
 For more detailed Docker usage instructions, including cross-platform support, optimized configurations, and troubleshooting, please refer to [DOCKER_README.md](.container/DOCKER_README_en.md).
 
 # 🚀 Quick Start
-
-## Try MCP (Model Context Protocol) Integration
-
-Experience the power of MCP by running our example that demonstrates multi-agent information retrieval and processing:
-
-```bash
-# Set up MCP servers (one-time setup)
-npx -y @smithery/cli install @wonderwhy-er/desktop-commander --client claude
-npx @wonderwhy-er/desktop-commander setup
-
-# Run the MCP example
-python examples/run_mcp.py
-```
-
-This example showcases how OWL agents can seamlessly interact with file systems, web automation, and information retrieval through the MCP protocol. Check out `examples/run_mcp.py` for the full implementation.
 
 ## Basic Usage
 
@@ -413,6 +406,8 @@ tools = [
     SearchToolkit().search_duckduckgo,
     SearchToolkit().search_google,  # Comment out if unavailable
     SearchToolkit().search_wiki,
+    SearchToolkit().search_bocha,
+    SearchToolkit().search_baidu,
     *ExcelToolkit().get_tools(),
     *DocumentProcessingToolkit(model=models["document"]).get_tools(),
     *FileWriteToolkit(output_dir="./").get_tools(),
@@ -459,7 +454,15 @@ Selecting only necessary toolkits optimizes performance and reduces resource usa
 
 # 🌐 Web Interface
 
-OWL includes an intuitive web-based user interface that makes it easier to interact with the system. 
+<div align="center" style="background-color: #f0f7ff; padding: 15px; border-radius: 10px; border: 2px solid #1e88e5; margin: 20px 0;">
+  <h3 style="color: #1e88e5; margin: 0;">
+    🚀 Enhanced Web Interface Now Available!
+  </h3>
+  <p style="margin: 10px 0;">
+    Experience improved system stability and optimized performance with our latest update.
+    Start exploring the power of OWL through our user-friendly interface!
+  </p>
+</div>
 
 ## Starting the Web UI
 
@@ -533,7 +536,8 @@ We welcome contributions from the community! Here's how you can help:
 3. Submit pull requests with your improvements
 
 **Current Issues Open for Contribution:**
-- [#1857](https://github.com/camel-ai/camel/issues/1857)
+- [#1868](https://github.com/camel-ai/camel/issues/1868)
+- [#1866](https://github.com/camel-ai/camel/issues/1866)
 - [#1770](https://github.com/camel-ai/camel/issues/1770)
 - [#1712](https://github.com/camel-ai/camel/issues/1712)
 - [#1537](https://github.com/camel-ai/camel/issues/1537)
@@ -546,7 +550,7 @@ Join us ([*Discord*](https://discord.camel-ai.org/) or [*WeChat*](https://ghli.o
 
 Join us for further discussions!
 <!-- ![](./assets/community.png) -->
-![](./assets/community.jpg)
+![](./assets/community.jpeg)
 
 # ❓ FAQ
 
