@@ -104,8 +104,12 @@ from camel.toolkits import MCPToolkit
 
 from owl.utils.enhanced_role_playing import OwlRolePlaying, arun_society
 
+import pathlib
 
-load_dotenv()
+base_dir = pathlib.Path(__file__).parent.parent
+env_path = base_dir / "owl" / ".env"
+load_dotenv(dotenv_path=str(env_path))
+
 set_log_level(level="DEBUG")
 
 

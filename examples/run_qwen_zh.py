@@ -34,9 +34,14 @@ from owl.utils import run_society, DocumentProcessingToolkit
 
 from camel.logger import set_log_level
 
-set_log_level(level="DEBUG")
 
-load_dotenv()
+import pathlib
+
+base_dir = pathlib.Path(__file__).parent.parent
+env_path = base_dir / "owl" / ".env"
+load_dotenv(dotenv_path=str(env_path))
+
+set_log_level(level="DEBUG")
 
 
 def construct_society(question: str) -> RolePlaying:
