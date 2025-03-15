@@ -278,10 +278,8 @@ cd owl
 cp owl/.env_template owl/.env
 # Edit the .env file and fill in your API keys
 
-# Option 1: Using pre-built docker image
-docker run -it --rm --env-file owl/.env mugglejinx/owl
-
-# Option 2: Using docker-compose directly
+# Option 1: Using docker-compose directly
+# (By default it's using pre-built online image, you can also check the docker-compose.yml for building locally)
 cd .container
 
 docker-compose up -d
@@ -297,7 +295,7 @@ playwright install-deps
 #run example demo script
 xvfb-python examples/run.py
 
-# Option 3: Build and run using the provided scripts
+# Option 2: Build and run using the provided scripts
 cd .container
 chmod +x build_docker.sh
 ./build_docker.sh
