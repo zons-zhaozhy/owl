@@ -41,13 +41,6 @@ COPY assets/ ./assets/
 COPY README_zh.md .
 
 
-
-
-
-
-
-
-
 # 创建启动脚本
 RUN echo '#!/bin/bash\nxvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" python "$@"' > /usr/local/bin/xvfb-python && \
     chmod +x /usr/local/bin/xvfb-python
