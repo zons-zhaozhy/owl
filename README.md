@@ -58,49 +58,6 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
 
 </div>
 
-<!-- # Key Features -->
-# 📋 Table of Contents
-
-- [📋 Table of Contents](#-table-of-contents)
-- [🔥 News](#-news)
-- [🎬 Demo Video](#-demo-video)
-- [✨️ Core Features](#️-core-features)
-- [🛠️ Installation](#️-installation)
-  - [Option 1: Using uv (Recommended)](#option-1-using-uv-recommended)
-  - [Option 2: Using venv and pip](#option-2-using-venv-and-pip)
-  - [Option 3: Using conda](#option-3-using-conda)
-  - [**Setup Environment Variables**](#setup-environment-variables)
-    - [Option 1: Using a `.env` File (Recommended)](#option-1-using-a-env-file-recommended)
-    - [Option 2: Setting Environment Variables Directly](#option-2-setting-environment-variables-directly)
-  - [**Running with Docker**](#running-with-docker)
-- [🚀 Quick Start](#-quick-start)
-  - [Try MCP (Model Context Protocol) Integration](#try-mcp-model-context-protocol-integration)
-  - [Basic Usage](#basic-usage)
-  - [Running with Different Models](#running-with-different-models)
-    - [Model Requirements](#model-requirements)
-      - [Supported Models](#supported-models)
-    - [Example Tasks](#example-tasks)
-- [🧰 Toolkits and Capabilities](#-toolkits-and-capabilities)
-  - [Model Context Protocol (MCP)](#model-context-protocol-mcp)
-  - [Available Toolkits](#available-toolkits)
-  - [Available Toolkits](#available-toolkits-1)
-    - [Multimodal Toolkits (Require multimodal model capabilities)](#multimodal-toolkits-require-multimodal-model-capabilities)
-    - [Text-Based Toolkits](#text-based-toolkits)
-  - [Customizing Your Configuration](#customizing-your-configuration)
-- [🌐 Web Interface](#-web-interface)
-  - [Starting the Web UI](#starting-the-web-ui)
-  - [Features](#features)
-- [🧪 Experiments](#-experiments)
-- [⏱️ Future Plans](#️-future-plans)
-- [📄 License](#-license)
-- [🖊️ Cite](#️-cite)
-- [🤝 Contributing](#-contributing)
-- [🔥 Community](#-community)
-- [❓ FAQ](#-faq)
-- [📚 Exploring CAMEL Dependency](#-exploring-camel-dependency)
-  - [Accessing CAMEL Source Code](#accessing-camel-source-code)
-- [⭐ Star History](#-star-history)
-
 
 # 🔥 News
 
@@ -134,6 +91,7 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
     <i>Try it now and experience the improved performance in your automation tasks!</i>
   </p>
 </div>
+
 - **[2025.03.12]**: Added Bocha search in SearchToolkit, integrated Volcano Engine model platform, and enhanced Azure and OpenAI Compatible models with structured output and tool calling.
 - **[2025.03.11]**: We added MCPToolkit, FileWriteToolkit, and TerminalToolkit to enhance OWL agents with MCP tool calling, file writing capabilities, and terminal command execution.
 - **[2025.03.09]**: We added a web-based user interface that makes it easier to interact with the system.
