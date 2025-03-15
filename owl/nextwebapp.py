@@ -1,14 +1,25 @@
+# ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
 # Import from the correct module path
 from owl.utils import run_society
 import os
 import gradio as gr
-import time
-import json
-from typing import Tuple, List, Dict, Any
+from typing import Tuple, List, Dict
 import importlib
 from dotenv import load_dotenv, set_key, find_dotenv, unset_key
 
-os.environ['PYTHONIOENCODING'] = 'utf-8'
+os.environ["PYTHONIOENCODING"] = "utf-8"
 
 # Enhanced CSS with navigation bar and additional styling
 custom_css = """
@@ -250,14 +261,14 @@ button.primary:hover {
 # Dictionary containing module descriptions
 MODULE_DESCRIPTIONS = {
     "run": "默认模式：使用OpenAI模型的默认的智能体协作模式，适合大多数任务。",
-    "run_mini":"使用使用OpenAI模型最小化配置处理任务",
-    "run_deepseek_zh":"使用deepseek模型处理中文任务",
+    "run_mini": "使用使用OpenAI模型最小化配置处理任务",
+    "run_deepseek_zh": "使用deepseek模型处理中文任务",
     "run_terminal_zh": "终端模式：可执行命令行操作，支持网络搜索、文件处理等功能。适合需要系统交互的任务，使用OpenAI模型",
-    "run_gaia_roleplaying":"GAIA基准测试实现，用于评估Agent能力",
-    "run_openai_compatiable_model":"使用openai兼容模型处理任务",
-    "run_ollama":"使用本地ollama模型处理任务",
-    "run_qwen_mini_zh":"使用qwen模型最小化配置处理任务",
-    "run_qwen_zh":"使用qwen模型处理任务",
+    "run_gaia_roleplaying": "GAIA基准测试实现，用于评估Agent能力",
+    "run_openai_compatiable_model": "使用openai兼容模型处理任务",
+    "run_ollama": "使用本地ollama模型处理任务",
+    "run_qwen_mini_zh": "使用qwen模型最小化配置处理任务",
+    "run_qwen_zh": "使用qwen模型处理任务",
 }
 
 # 默认环境变量模板
@@ -292,12 +303,13 @@ FIRECRAWL_API_KEY=""
 #FIRECRAWL_API_URL="https://api.firecrawl.dev"
 """
 
+
 def format_chat_history(chat_history: List[Dict[str, str]]) -> List[List[str]]:
     """将聊天历史格式化为Gradio聊天组件可接受的格式
-    
+
     Args:
         chat_history: 原始聊天历史
-        
+
     Returns:
         List[List[str]]: 格式化后的聊天历史
     """
@@ -305,22 +317,23 @@ def format_chat_history(chat_history: List[Dict[str, str]]) -> List[List[str]]:
     for message in chat_history:
         user_msg = message.get("user", "")
         assistant_msg = message.get("assistant", "")
-        
+
         if user_msg:
             formatted_history.append([user_msg, None])
         if assistant_msg and formatted_history:
             formatted_history[-1][1] = assistant_msg
         elif assistant_msg:
             formatted_history.append([None, assistant_msg])
-    
+
     return formatted_history
+
 
 def validate_input(question: str) -> bool:
     """验证用户输入是否有效
-    
+
     Args:
         question: 用户问题
-        
+
     Returns:
         bool: 输入是否有效
     """
@@ -329,120 +342,110 @@ def validate_input(question: str) -> bool:
         return False
     return True
 
-def run_owl(question: str, example_module: str) -> Tuple[str, List[List[str]], str, str]:
+
+def run_owl(
+    question: str, example_module: str
+) -> Tuple[str, List[List[str]], str, str]:
     """运行OWL系统并返回结果
-    
+
     Args:
         question: 用户问题
         example_module: 要导入的示例模块名（如 "run_terminal_zh" 或 "run_deep"）
-        
+
     Returns:
         Tuple[...]: 回答、聊天历史、令牌计数、状态
     """
     # 验证输入
     if not validate_input(question):
-        return (
-            "请输入有效的问题", 
-            [], 
-            "0", 
-            "❌ 错误: 输入无效"
-        )
-    
+        return ("请输入有效的问题", [], "0", "❌ 错误: 输入无效")
+
     try:
         # 确保环境变量已加载
         load_dotenv(find_dotenv(), override=True)
         # 检查模块是否在MODULE_DESCRIPTIONS中
         if example_module not in MODULE_DESCRIPTIONS:
             return (
-                f"所选模块 '{example_module}' 不受支持", 
-                [], 
-                "0", 
-                f"❌ 错误: 不支持的模块"
+                f"所选模块 '{example_module}' 不受支持",
+                [],
+                "0",
+                "❌ 错误: 不支持的模块",
             )
-            
+
         # 动态导入目标模块
         module_path = f"owl.examples.{example_module}"
         try:
             module = importlib.import_module(module_path)
         except ImportError as ie:
             return (
-                f"无法导入模块: {module_path}", 
-                [], 
-                "0", 
-                f"❌ 错误: 模块 {example_module} 不存在或无法加载 - {str(ie)}"
+                f"无法导入模块: {module_path}",
+                [],
+                "0",
+                f"❌ 错误: 模块 {example_module} 不存在或无法加载 - {str(ie)}",
             )
         except Exception as e:
-            return (
-                f"导入模块时发生错误: {module_path}", 
-                [], 
-                "0", 
-                f"❌ 错误: {str(e)}"
-            )
-        
+            return (f"导入模块时发生错误: {module_path}", [], "0", f"❌ 错误: {str(e)}")
+
         # 检查是否包含construct_society函数
         if not hasattr(module, "construct_society"):
             return (
-                f"模块 {module_path} 中未找到 construct_society 函数", 
-                [], 
-                "0", 
-                f"❌ 错误: 模块接口不兼容"
+                f"模块 {module_path} 中未找到 construct_society 函数",
+                [],
+                "0",
+                "❌ 错误: 模块接口不兼容",
             )
-            
+
         # 构建社会模拟
         try:
             society = module.construct_society(question)
         except Exception as e:
             return (
-                f"构建社会模拟时发生错误: {str(e)}", 
-                [], 
-                "0", 
-                f"❌ 错误: 构建失败 - {str(e)}"
+                f"构建社会模拟时发生错误: {str(e)}",
+                [],
+                "0",
+                f"❌ 错误: 构建失败 - {str(e)}",
             )
-        
+
         # 运行社会模拟
         try:
             answer, chat_history, token_info = run_society(society)
         except Exception as e:
             return (
-                f"运行社会模拟时发生错误: {str(e)}", 
-                [], 
-                "0", 
-                f"❌ 错误: 运行失败 - {str(e)}"
+                f"运行社会模拟时发生错误: {str(e)}",
+                [],
+                "0",
+                f"❌ 错误: 运行失败 - {str(e)}",
             )
-        
+
         # 格式化聊天历史
         try:
             formatted_chat_history = format_chat_history(chat_history)
-        except Exception as e:
+        except Exception:
             # 如果格式化失败，返回空历史记录但继续处理
             formatted_chat_history = []
-        
+
         # 安全地获取令牌计数
         if not isinstance(token_info, dict):
             token_info = {}
-            
+
         completion_tokens = token_info.get("completion_token_count", 0)
         prompt_tokens = token_info.get("prompt_token_count", 0)
         total_tokens = completion_tokens + prompt_tokens
-        
+
         return (
-            answer, 
-            formatted_chat_history, 
-            f"完成令牌: {completion_tokens:,} | 提示令牌: {prompt_tokens:,} | 总计: {total_tokens:,}", 
-            "✅ 成功完成"
+            answer,
+            formatted_chat_history,
+            f"完成令牌: {completion_tokens:,} | 提示令牌: {prompt_tokens:,} | 总计: {total_tokens:,}",
+            "✅ 成功完成",
         )
-        
+
     except Exception as e:
-        return (
-            f"发生错误: {str(e)}", 
-            [], 
-            "0", 
-            f"❌ 错误: {str(e)}"
-        )
+        return (f"发生错误: {str(e)}", [], "0", f"❌ 错误: {str(e)}")
+
 
 def update_module_description(module_name: str) -> str:
     """返回所选模块的描述"""
     return MODULE_DESCRIPTIONS.get(module_name, "无可用描述")
+
 
 # 环境变量管理功能
 def init_env_file():
@@ -454,11 +457,12 @@ def init_env_file():
         dotenv_path = find_dotenv()
     return dotenv_path
 
+
 def load_env_vars():
     """加载环境变量并返回字典格式"""
     dotenv_path = init_env_file()
     load_dotenv(dotenv_path, override=True)
-    
+
     env_vars = {}
     with open(dotenv_path, "r") as f:
         for line in f:
@@ -466,78 +470,83 @@ def load_env_vars():
             if line and not line.startswith("#"):
                 if "=" in line:
                     key, value = line.split("=", 1)
-                    env_vars[key.strip()] = value.strip().strip('"\'')
-    
+                    env_vars[key.strip()] = value.strip().strip("\"'")
+
     return env_vars
+
 
 def save_env_vars(env_vars):
     """保存环境变量到.env文件"""
     try:
         dotenv_path = init_env_file()
-        
+
         # 保存每个环境变量
         for key, value in env_vars.items():
             if key and key.strip():  # 确保键不为空
                 set_key(dotenv_path, key.strip(), value.strip())
-        
+
         # 重新加载环境变量以确保生效
         load_dotenv(dotenv_path, override=True)
-        
+
         return True, "环境变量已成功保存！"
     except Exception as e:
         return False, f"保存环境变量时出错: {str(e)}"
+
 
 def add_env_var(key, value):
     """添加或更新单个环境变量"""
     try:
         if not key or not key.strip():
             return False, "变量名不能为空"
-        
+
         dotenv_path = init_env_file()
         set_key(dotenv_path, key.strip(), value.strip())
         load_dotenv(dotenv_path, override=True)
-        
+
         return True, f"环境变量 {key} 已成功添加/更新！"
     except Exception as e:
         return False, f"添加环境变量时出错: {str(e)}"
+
 
 def delete_env_var(key):
     """删除环境变量"""
     try:
         if not key or not key.strip():
             return False, "变量名不能为空"
-        
+
         dotenv_path = init_env_file()
         unset_key(dotenv_path, key.strip())
-        
+
         # 从当前进程环境中也删除
         if key in os.environ:
             del os.environ[key]
-        
+
         return True, f"环境变量 {key} 已成功删除！"
     except Exception as e:
         return False, f"删除环境变量时出错: {str(e)}"
 
+
 def mask_sensitive_value(key: str, value: str) -> str:
     """对敏感信息进行掩码处理
-    
+
     Args:
         key: 环境变量名
         value: 环境变量值
-        
+
     Returns:
         str: 处理后的值
     """
     # 定义需要掩码的敏感关键词
-    sensitive_keywords = ['key', 'token', 'secret', 'password', 'api']
-    
+    sensitive_keywords = ["key", "token", "secret", "password", "api"]
+
     # 检查是否包含敏感关键词（不区分大小写）
     is_sensitive = any(keyword in key.lower() for keyword in sensitive_keywords)
-    
+
     if is_sensitive and value:
         # 如果是敏感信息且有值，则显示掩码
-        return '*' * 8
+        return "*" * 8
     return value
+
 
 def update_env_table():
     """更新环境变量表格显示，对敏感信息进行掩码处理"""
@@ -545,6 +554,7 @@ def update_env_table():
     # 对敏感值进行掩码处理
     masked_env_vars = [[k, mask_sensitive_value(k, v)] for k, v in env_vars.items()]
     return masked_env_vars
+
 
 def create_ui():
     """创建增强版Gradio界面"""
@@ -569,7 +579,7 @@ def create_ui():
                     <p>我们的愿景是彻底改变AI代理协作解决现实世界任务的方式。通过利用动态代理交互，OWL能够在多个领域实现更自然、高效和稳健的任务自动化。</p>
                 </div>
             """)
-            
+
             with gr.Row(elem_id="features"):
                 gr.HTML("""
                 <div class="features-section">
@@ -610,7 +620,7 @@ def create_ui():
                     </div>
                 </div>
             """)
-            
+
             with gr.Row():
                 with gr.Column(scale=2):
                     question_input = gr.Textbox(
@@ -620,26 +630,28 @@ def create_ui():
                         elem_id="question_input",
                         show_copy_button=True,
                     )
-                    
+
                     # 增强版模块选择下拉菜单
                     # 只包含MODULE_DESCRIPTIONS中定义的模块
                     module_dropdown = gr.Dropdown(
                         choices=list(MODULE_DESCRIPTIONS.keys()),
                         value="run_terminal_zh",
                         label="选择功能模块",
-                        interactive=True
+                        interactive=True,
                     )
-                    
+
                     # 模块描述文本框
                     module_description = gr.Textbox(
                         value=MODULE_DESCRIPTIONS["run_terminal_zh"],
                         label="模块描述",
                         interactive=False,
-                        elem_classes="module-info"
+                        elem_classes="module-info",
                     )
-                    
-                    run_button = gr.Button("运行", variant="primary", elem_classes="primary")
-                
+
+                    run_button = gr.Button(
+                        "运行", variant="primary", elem_classes="primary"
+                    )
+
                 with gr.Column(scale=1):
                     gr.Markdown("""
                     ### 使用指南
@@ -651,127 +663,103 @@ def create_ui():
                     
                     > **高级提示**: 对于复杂任务，可以尝试指定具体步骤和预期结果
                     """)
-            
+
             status_output = gr.Textbox(label="状态", interactive=False)
-            
+
             with gr.Tabs():
                 with gr.TabItem("回答"):
                     answer_output = gr.Textbox(
-                        label="回答", 
-                        lines=10,
-                        elem_classes="answer-box"
+                        label="回答", lines=10, elem_classes="answer-box"
                     )
-                
+
                 with gr.TabItem("对话历史"):
                     chat_output = gr.Chatbot(
-                        label="完整对话记录",
-                        elem_classes="chat-container",
-                        height=500
+                        label="完整对话记录", elem_classes="chat-container", height=500
                     )
-                    
-                
-            
+
             token_count_output = gr.Textbox(
-                label="令牌计数", 
-                interactive=False,
-                elem_classes="token-count"
+                label="令牌计数", interactive=False, elem_classes="token-count"
             )
-            
+
             # 示例问题
             examples = [
                 "打开百度搜索，总结一下camel-ai的camel框架的github star、fork数目等，并把数字用plot包写成python文件保存到本地，用本地终端执行python文件显示图出来给我",
                 "请分析GitHub上CAMEL-AI项目的最新统计数据。找出该项目的星标数量、贡献者数量和最近的活跃度。",
                 "浏览亚马逊并找出一款对程序员有吸引力的产品。请提供产品名称和价格",
                 "写一个hello world的python文件，保存到本地",
-             
             ]
-            
-            gr.Examples(
-                examples=examples, 
-                inputs=question_input
-            )
+
+            gr.Examples(examples=examples, inputs=question_input)
             # 新增: 环境变量管理选项卡
             with gr.TabItem("环境变量管理", id="env-settings"):
-                    gr.Markdown("""
+                gr.Markdown("""
                     ## 环境变量管理
                     
                     在此处设置模型API密钥和其他服务凭证。这些信息将保存在本地的`.env`文件中，确保您的API密钥安全存储且不会上传到网络。
                     """)
-                    
-                    # 环境变量表格
-                    env_table = gr.Dataframe(
-                        headers=["变量名", "值"],
-                        datatype=["str", "str"],
-                        row_count=10,
-                        col_count=(2, "fixed"),
-                        value=update_env_table,
-                        label="当前环境变量",
-                        interactive=False
-                    )
-                    
-                    with gr.Row():
-                        with gr.Column(scale=1):
-                            new_env_key = gr.Textbox(label="变量名", placeholder="例如: OPENAI_API_KEY")
-                        with gr.Column(scale=2):
-                            new_env_value = gr.Textbox(label="值", placeholder="输入API密钥或其他配置值")
-                    
-                    with gr.Row():
-                        add_env_button = gr.Button("添加/更新变量", variant="primary")
-                        refresh_button = gr.Button("刷新变量列表")
-                        delete_env_button = gr.Button("删除选定变量", variant="stop")
-                    
-                    env_status = gr.Textbox(label="状态", interactive=False)
-                    
-                    # 变量选择器（用于删除）
-                    env_var_to_delete = gr.Dropdown(
-                        choices=[], 
-                        label="选择要删除的变量",
-                        interactive=True
-                    )
-                    
-                    # 更新变量选择器的选项
-                    def update_delete_dropdown():
-                        env_vars = load_env_vars()
-                        return gr.Dropdown.update(choices=list(env_vars.keys()))
-                    
-                    # 连接事件处理函数
-                    add_env_button.click(
-                        fn=lambda k, v: add_env_var(k, v),
-                        inputs=[new_env_key, new_env_value],
-                        outputs=[env_status]
-                    ).then(
-                        fn=update_env_table,
-                        outputs=[env_table]
-                    ).then(
-                        fn=update_delete_dropdown,
-                        outputs=[env_var_to_delete]
-                    ).then(
-                        fn=lambda: ("", ""),  # 修改为返回两个空字符串的元组
-                        outputs=[new_env_key, new_env_value]
-                    )
-                    
-                    refresh_button.click(
-                        fn=update_env_table,
-                        outputs=[env_table]
-                    ).then(
-                        fn=update_delete_dropdown,
-                        outputs=[env_var_to_delete]
-                    )
-                    
-                    delete_env_button.click(
-                        fn=lambda k: delete_env_var(k),
-                        inputs=[env_var_to_delete],
-                        outputs=[env_status]
-                    ).then(
-                        fn=update_env_table,
-                        outputs=[env_table]
-                    ).then(
-                        fn=update_delete_dropdown,
-                        outputs=[env_var_to_delete]
-                    )
 
+                # 环境变量表格
+                env_table = gr.Dataframe(
+                    headers=["变量名", "值"],
+                    datatype=["str", "str"],
+                    row_count=10,
+                    col_count=(2, "fixed"),
+                    value=update_env_table,
+                    label="当前环境变量",
+                    interactive=False,
+                )
 
-            
+                with gr.Row():
+                    with gr.Column(scale=1):
+                        new_env_key = gr.Textbox(
+                            label="变量名", placeholder="例如: OPENAI_API_KEY"
+                        )
+                    with gr.Column(scale=2):
+                        new_env_value = gr.Textbox(
+                            label="值", placeholder="输入API密钥或其他配置值"
+                        )
+
+                with gr.Row():
+                    add_env_button = gr.Button("添加/更新变量", variant="primary")
+                    refresh_button = gr.Button("刷新变量列表")
+                    delete_env_button = gr.Button("删除选定变量", variant="stop")
+
+                env_status = gr.Textbox(label="状态", interactive=False)
+
+                # 变量选择器（用于删除）
+                env_var_to_delete = gr.Dropdown(
+                    choices=[], label="选择要删除的变量", interactive=True
+                )
+
+                # 更新变量选择器的选项
+                def update_delete_dropdown():
+                    env_vars = load_env_vars()
+                    return gr.Dropdown.update(choices=list(env_vars.keys()))
+
+                # 连接事件处理函数
+                add_env_button.click(
+                    fn=lambda k, v: add_env_var(k, v),
+                    inputs=[new_env_key, new_env_value],
+                    outputs=[env_status],
+                ).then(fn=update_env_table, outputs=[env_table]).then(
+                    fn=update_delete_dropdown, outputs=[env_var_to_delete]
+                ).then(
+                    fn=lambda: ("", ""),  # 修改为返回两个空字符串的元组
+                    outputs=[new_env_key, new_env_value],
+                )
+
+                refresh_button.click(fn=update_env_table, outputs=[env_table]).then(
+                    fn=update_delete_dropdown, outputs=[env_var_to_delete]
+                )
+
+                delete_env_button.click(
+                    fn=lambda k: delete_env_var(k),
+                    inputs=[env_var_to_delete],
+                    outputs=[env_status],
+                ).then(fn=update_env_table, outputs=[env_table]).then(
+                    fn=update_delete_dropdown, outputs=[env_var_to_delete]
+                )
+
             gr.HTML("""
                 <div class="footer" id="about">
                     <h3>关于 OWL 多智能体协作系统</h3>
@@ -780,22 +768,23 @@ def create_ui():
                     <p><a href="https://github.com/camel-ai/owl" target="_blank">GitHub</a></p>
                 </div>
             """)
-            
+
             # 设置事件处理
             run_button.click(
                 fn=run_owl,
-                inputs=[question_input, module_dropdown], 
-                outputs=[answer_output, chat_output, token_count_output, status_output]
+                inputs=[question_input, module_dropdown],
+                outputs=[answer_output, chat_output, token_count_output, status_output],
             )
-            
+
             # 模块选择更新描述
             module_dropdown.change(
                 fn=update_module_description,
                 inputs=module_dropdown,
-                outputs=module_description
+                outputs=module_description,
             )
-    
+
     return app
+
 
 # 主函数
 def main():
@@ -807,7 +796,9 @@ def main():
     except Exception as e:
         print(f"启动应用程序时发生错误: {str(e)}")
         import traceback
+
         traceback.print_exc()
+
 
 if __name__ == "__main__":
     main()

@@ -25,7 +25,9 @@ from camel.toolkits import (
 )
 from camel.types import ModelPlatformType
 
-from owl.utils import OwlRolePlaying, run_society
+from owl.utils import run_society
+
+from camel.societies import RolePlaying
 
 from camel.logger import set_log_level
 
@@ -34,14 +36,14 @@ set_log_level(level="DEBUG")
 load_dotenv()
 
 
-def construct_society(question: str) -> OwlRolePlaying:
+def construct_society(question: str) -> RolePlaying:
     r"""Construct a society of agents based on the given question.
 
     Args:
         question (str): The task or question to be addressed by the society.
 
     Returns:
-        OwlRolePlaying: A configured society of agents ready to address the question.
+        RolePlaying: A configured society of agents ready to address the question.
     """
 
     # Create models for different components
@@ -105,7 +107,7 @@ def construct_society(question: str) -> OwlRolePlaying:
     }
 
     # Create and return the society
-    society = OwlRolePlaying(
+    society = RolePlaying(
         **task_kwargs,
         user_role_name="user",
         user_agent_kwargs=user_agent_kwargs,

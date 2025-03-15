@@ -482,7 +482,7 @@ wheels = [
 
 [[package]]
 name = "camel-ai"
-version = "0.2.27"
+version = "0.2.30"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "colorama" },
@@ -499,9 +499,9 @@ dependencies = [
     { name = "pyyaml" },
     { name = "tiktoken" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ff/27/2bce666ae7f7d0db276d037b3afe84a460e782438e5cacc08de20417233b/camel_ai-0.2.27.tar.gz", hash = "sha256:4689245ad48f51e5e602d2651cf463afe212bcf046633a19c2189574c1f3481a", size = 441363 }
+sdist = { url = "https://files.pythonhosted.org/packages/ef/86/57cbcae86d2d60dab0aad31b5302525c75f45ff5edc3c3819a378fa9e12c/camel_ai-0.2.30.tar.gz", hash = "sha256:e1639376e70e9cf1477eca88d1bdc1813855cbd1db683528e1f93027b6aa0b0a", size = 442842 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b0/fa/94f5b41cb6babc81aac00494b170ec2bea058b6c00f477ceb3e886c49177/camel_ai-0.2.27-py3-none-any.whl", hash = "sha256:c4a6597791faf2f2161c56c2579e60850557b126135b29af77ebd08fa0774e0b", size = 746387 },
+    { url = "https://files.pythonhosted.org/packages/85/fe/8f1d17896aedbc9e0dfa1bff40d560e5a6808d9b727e04c293be6be5954f/camel_ai-0.2.30-py3-none-any.whl", hash = "sha256:e09eec860331cdb4da4e49f46f5d45345a81820c5847556fdf9e7827dd9bbfa9", size = 752672 },
 ]
 
 [package.optional-dependencies]
@@ -3575,7 +3575,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "camel-ai", extras = ["all"], specifier = "==0.2.27" },
+    { name = "camel-ai", extras = ["all"], specifier = "==0.2.30" },
     { name = "chunkr-ai", specifier = ">=0.0.41" },
     { name = "docx2markdown", specifier = ">=0.1.1" },
     { name = "gradio", specifier = ">=3.50.2" },

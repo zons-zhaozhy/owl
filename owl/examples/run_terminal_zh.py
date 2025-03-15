@@ -18,27 +18,31 @@ from camel.toolkits import (
     SearchToolkit,
     BrowserToolkit,
     FileWriteToolkit,
-    TerminalToolkit
+    TerminalToolkit,
 )
 from camel.types import ModelPlatformType, ModelType
 from camel.logger import set_log_level
 
-from owl.utils import OwlRolePlaying, run_society
+from owl.utils import run_society
+from camel.societies import RolePlaying
+import os
 
 load_dotenv()
 set_log_level(level="DEBUG")
-import os
+
+
 # Get current script directory
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
-def construct_society(question: str) -> OwlRolePlaying:
+
+def construct_society(question: str) -> RolePlaying:
     r"""Construct a society of agents based on the given question.
 
     Args:
         question (str): The task or question to be addressed by the society.
 
     Returns:
-        OwlRolePlaying: A configured society of agents ready to address the
+        RolePlaying: A configured society of agents ready to address the
             question.
     """
 
@@ -90,7 +94,7 @@ def construct_society(question: str) -> OwlRolePlaying:
     }
 
     # Create and return the society
-    society = OwlRolePlaying(
+    society = RolePlaying(
         **task_kwargs,
         user_role_name="user",
         user_agent_kwargs=user_agent_kwargs,
@@ -112,7 +116,9 @@ def main():
     answer, chat_history, token_count = run_society(society)
 
     # Output the result
-    print(f"\033[94mAnswer: {answer}\nChat History: {chat_history}\ntoken_count:{token_count}\033[0m")
+    print(
+        f"\033[94mAnswer: {answer}\nChat History: {chat_history}\ntoken_count:{token_count}\033[0m"
+    )
 
 
 if __name__ == "__main__":

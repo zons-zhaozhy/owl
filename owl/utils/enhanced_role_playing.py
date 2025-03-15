@@ -381,6 +381,12 @@ Now please give me instructions to solve over overall task step by step. If the 
     """
     input_msg = society.init_chat(init_prompt)
     for _round in range(round_limit):
+        # Check if previous user response had TASK_DONE before getting next assistant response
+        if _round > 0 and (
+            "TASK_DONE" in input_msg.content or "任务已完成" in input_msg.content
+        ):
+            break
+
         assistant_response, user_response = society.step(input_msg)
         overall_completion_token_count += (
             assistant_response.info["usage"]["completion_tokens"]
@@ -408,10 +414,12 @@ Now please give me instructions to solve over overall task step by step. If the 
             f"Round #{_round} assistant_response:\n {assistant_response.msgs[0].content}"
         )
 
+        # Check other termination conditions
         if (
             assistant_response.terminated
             or user_response.terminated
             or "TASK_DONE" in user_response.msg.content
+            or "任务已完成" in user_response.msg.content
         ):
             break
 
