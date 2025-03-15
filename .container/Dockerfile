@@ -18,6 +18,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc python3-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# 创建虚拟环境并安装依赖
+RUN uv venv .venv --python=3.10 && \
+    . .venv/bin/activate && \
+    uv pip install -e .
+    
 # 复制项目文件
 COPY owl/ ./owl/
 COPY licenses/ ./licenses/
@@ -31,10 +37,7 @@ RUN echo "# OWL Project\n\n这是OWL项目的Docker环境。" > README.md
 # 安装uv工具
 RUN pip install uv
 
-# 创建虚拟环境并安装依赖
-RUN uv venv .venv --python=3.10 && \
-    . .venv/bin/activate && \
-    uv pip install -e .
+
 
 
 
