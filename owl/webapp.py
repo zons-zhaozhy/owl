@@ -1075,14 +1075,14 @@ def create_ui():
                 # Only includes modules defined in MODULE_DESCRIPTIONS
                 module_dropdown = gr.Dropdown(
                     choices=list(MODULE_DESCRIPTIONS.keys()),
-                    value="run_qwen_zh",
+                    value="run",
                     label="Select Function Module",
                     interactive=True,
                 )
 
                 # Module description text box
                 module_description = gr.Textbox(
-                    value=MODULE_DESCRIPTIONS["run_qwen_zh"],
+                    value=MODULE_DESCRIPTIONS["run"],
                     label="Module Description",
                     interactive=False,
                     elem_classes="module-info",
