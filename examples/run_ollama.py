@@ -11,9 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
-import os
+# run_ollama.py by tj-scripts（https://github.com/tj-scripts）
+
 from dotenv import load_dotenv
-from camel.configs import ChatGPTConfig
 from camel.models import ModelFactory
 from camel.toolkits import (
     CodeExecutionToolkit,
@@ -25,7 +25,9 @@ from camel.toolkits import (
 )
 from camel.types import ModelPlatformType
 
-from utils import OwlRolePlaying, run_society
+from owl.utils import run_society
+
+from camel.societies import RolePlaying
 
 from camel.logger import set_log_level
 
@@ -34,29 +36,48 @@ set_log_level(level="DEBUG")
 load_dotenv()
 
 
-def construct_society(question: str) -> OwlRolePlaying:
+def construct_society(question: str) -> RolePlaying:
     r"""Construct a society of agents based on the given question.
 
     Args:
         question (str): The task or question to be addressed by the society.
 
     Returns:
-        OwlRolePlaying: A configured society of agents ready to address the question.
+        RolePlaying: A configured society of agents ready to address the question.
     """
 
-    # Create models for different components using Azure OpenAI
-    base_model_config = {
-        "model_platform": ModelPlatformType.AZURE,
-        "model_type": os.getenv("AZURE_OPENAI_MODEL_TYPE"),
-        "model_config_dict": ChatGPTConfig(temperature=0.4, max_tokens=4096).as_dict(),
-    }
-
+    # Create models for different components
     models = {
-        "user": ModelFactory.create(**base_model_config),
-        "assistant": ModelFactory.create(**base_model_config),
-        "web": ModelFactory.create(**base_model_config),
-        "planning": ModelFactory.create(**base_model_config),
-        "image": ModelFactory.create(**base_model_config),
+        "user": ModelFactory.create(
+            model_platform=ModelPlatformType.OLLAMA,
+            model_type="qwen2.5:72b",
+            url="http://localhost:11434/v1",
+            model_config_dict={"temperature": 0.8, "max_tokens": 1000000},
+        ),
+        "assistant": ModelFactory.create(
+            model_platform=ModelPlatformType.OLLAMA,
+            model_type="qwen2.5:72b",
+            url="http://localhost:11434/v1",
+            model_config_dict={"temperature": 0.2, "max_tokens": 1000000},
+        ),
+        "web": ModelFactory.create(
+            model_platform=ModelPlatformType.OLLAMA,
+            model_type="llava:latest",
+            url="http://localhost:11434/v1",
+            model_config_dict={"temperature": 0.4, "max_tokens": 1000000},
+        ),
+        "planning": ModelFactory.create(
+            model_platform=ModelPlatformType.OLLAMA,
+            model_type="qwen2.5:72b",
+            url="http://localhost:11434/v1",
+            model_config_dict={"temperature": 0.4, "max_tokens": 1000000},
+        ),
+        "image": ModelFactory.create(
+            model_platform=ModelPlatformType.OLLAMA,
+            model_type="llava:latest",
+            url="http://localhost:11434/v1",
+            model_config_dict={"temperature": 0.4, "max_tokens": 1000000},
+        ),
     }
 
     # Configure toolkits
@@ -69,7 +90,7 @@ def construct_society(question: str) -> OwlRolePlaying:
         *CodeExecutionToolkit(sandbox="subprocess", verbose=True).get_tools(),
         *ImageAnalysisToolkit(model=models["image"]).get_tools(),
         SearchToolkit().search_duckduckgo,
-        SearchToolkit().search_google,  # Comment this out if you don't have google search
+        # SearchToolkit().search_google,  # Comment this out if you don't have google search
         SearchToolkit().search_wiki,
         *ExcelToolkit().get_tools(),
         *FileWriteToolkit(output_dir="./").get_tools(),
@@ -86,7 +107,7 @@ def construct_society(question: str) -> OwlRolePlaying:
     }
 
     # Create and return the society
-    society = OwlRolePlaying(
+    society = RolePlaying(
         **task_kwargs,
         user_role_name="user",
         user_agent_kwargs=user_agent_kwargs,
@@ -98,8 +119,8 @@ def construct_society(question: str) -> OwlRolePlaying:
 
 
 def main():
-    r"""Main function to run the OWL system with Azure OpenAI."""
-    # Example question
+    r"""Main function to run the OWL system with an example question."""
+    # Example research question
     question = "Navigate to Amazon.com and identify one product that is attractive to coders. Please provide me with the product name and price. No need to verify your answer."
 
     # Construct and run the society

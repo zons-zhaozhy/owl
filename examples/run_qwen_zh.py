@@ -12,26 +12,25 @@
 # limitations under the License.
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
 
-
-# To run this file, you need to configure the DeepSeek API key
-# You can obtain your API key from DeepSeek platform: https://platform.deepseek.com/api_keys
-# Set it as DEEPSEEK_API_KEY="your-api-key" in your .env file or add it to your environment variables
-
+# To run this file, you need to configure the Qwen API key
+# You can obtain your API key from Bailian platform: bailian.console.aliyun.com
+# Set it as QWEN_API_KEY="your-api-key" in your .env file or add it to your environment variables
 
 from dotenv import load_dotenv
-
-
 from camel.models import ModelFactory
 from camel.toolkits import (
-    ExcelToolkit,
-    SearchToolkit,
-    FileWriteToolkit,
     CodeExecutionToolkit,
+    ExcelToolkit,
+    ImageAnalysisToolkit,
+    SearchToolkit,
+    VideoAnalysisToolkit,
+    BrowserToolkit,
+    FileWriteToolkit,
 )
 from camel.types import ModelPlatformType, ModelType
+from camel.societies import RolePlaying
 
-
-from utils import OwlRolePlaying, run_society
+from owl.utils import run_society, DocumentProcessingToolkit
 
 from camel.logger import set_log_level
 
@@ -40,36 +39,72 @@ set_log_level(level="DEBUG")
 load_dotenv()
 
 
-def construct_society(question: str) -> OwlRolePlaying:
-    r"""Construct a society of agents based on the given question.
+def construct_society(question: str) -> RolePlaying:
+    """
+    Construct a society of agents based on the given question.
 
     Args:
         question (str): The task or question to be addressed by the society.
 
     Returns:
-        OwlRolePlaying: A configured society of agents ready to address the question.
+        RolePlaying: A configured society of agents ready to address the question.
     """
 
     # Create models for different components
     models = {
         "user": ModelFactory.create(
-            model_platform=ModelPlatformType.DEEPSEEK,
-            model_type=ModelType.DEEPSEEK_CHAT,
+            model_platform=ModelPlatformType.QWEN,
+            model_type=ModelType.QWEN_MAX,
             model_config_dict={"temperature": 0},
         ),
         "assistant": ModelFactory.create(
-            model_platform=ModelPlatformType.DEEPSEEK,
-            model_type=ModelType.DEEPSEEK_CHAT,
+            model_platform=ModelPlatformType.QWEN,
+            model_type=ModelType.QWEN_MAX,
+            model_config_dict={"temperature": 0},
+        ),
+        "web": ModelFactory.create(
+            model_platform=ModelPlatformType.QWEN,
+            model_type=ModelType.QWEN_VL_MAX,
+            model_config_dict={"temperature": 0},
+        ),
+        "planning": ModelFactory.create(
+            model_platform=ModelPlatformType.QWEN,
+            model_type=ModelType.QWEN_MAX,
+            model_config_dict={"temperature": 0},
+        ),
+        "video": ModelFactory.create(
+            model_platform=ModelPlatformType.QWEN,
+            model_type=ModelType.QWEN_VL_MAX,
+            model_config_dict={"temperature": 0},
+        ),
+        "image": ModelFactory.create(
+            model_platform=ModelPlatformType.QWEN,
+            model_type=ModelType.QWEN_VL_MAX,
+            model_config_dict={"temperature": 0},
+        ),
+        "document": ModelFactory.create(
+            model_platform=ModelPlatformType.QWEN,
+            model_type=ModelType.QWEN_VL_MAX,
             model_config_dict={"temperature": 0},
         ),
     }
 
     # Configure toolkits
     tools = [
+        *BrowserToolkit(
+            headless=False,  # Set to True for headless mode (e.g., on remote servers)
+            web_agent_model=models["web"],
+            planning_agent_model=models["planning"],
+            output_language="Chinese",
+        ).get_tools(),
+        *VideoAnalysisToolkit(model=models["video"]).get_tools(),
         *CodeExecutionToolkit(sandbox="subprocess", verbose=True).get_tools(),
+        *ImageAnalysisToolkit(model=models["image"]).get_tools(),
         SearchToolkit().search_duckduckgo,
+        SearchToolkit().search_google,  # Comment this out if you don't have google search
         SearchToolkit().search_wiki,
         *ExcelToolkit().get_tools(),
+        *DocumentProcessingToolkit(model=models["document"]).get_tools(),
         *FileWriteToolkit(output_dir="./").get_tools(),
     ]
 
@@ -84,7 +119,7 @@ def construct_society(question: str) -> OwlRolePlaying:
     }
 
     # Create and return the society
-    society = OwlRolePlaying(
+    society = RolePlaying(
         **task_kwargs,
         user_role_name="user",
         user_agent_kwargs=user_agent_kwargs,
@@ -99,7 +134,7 @@ def construct_society(question: str) -> OwlRolePlaying:
 def main():
     r"""Main function to run the OWL system with an example question."""
     # Example research question
-    question = "搜索OWL项目最近的新闻并生成一篇报告，最后保存到本地。"
+    question = "浏览亚马逊并找出一款对程序员有吸引力的产品。请提供产品名称和价格"
 
     # Construct and run the society
     society = construct_society(question)

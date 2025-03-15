@@ -32,7 +32,7 @@ from camel.toolkits import (
 from camel.types import ModelPlatformType, ModelType
 from camel.configs import ChatGPTConfig
 
-from utils import GAIABenchmark
+from owl.utils import GAIABenchmark
 from camel.logger import set_log_level
 
 set_log_level(level="DEBUG")
