@@ -66,30 +66,10 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
 - [🎬 Demo Video](#-demo-video)
 - [✨️ Core Features](#️-core-features)
 - [🛠️ Installation](#️-installation)
-  - [Option 1: Using uv (Recommended)](#option-1-using-uv-recommended)
-  - [Option 2: Using venv and pip](#option-2-using-venv-and-pip)
-  - [Option 3: Using conda](#option-3-using-conda)
-  - [**Setup Environment Variables**](#setup-environment-variables)
-    - [Option 1: Using a `.env` File (Recommended)](#option-1-using-a-env-file-recommended)
-    - [Option 2: Setting Environment Variables Directly](#option-2-setting-environment-variables-directly)
-  - [**Running with Docker**](#running-with-docker)
 - [🚀 Quick Start](#-quick-start)
-  - [Try MCP (Model Context Protocol) Integration](#try-mcp-model-context-protocol-integration)
-  - [Basic Usage](#basic-usage)
-  - [Running with Different Models](#running-with-different-models)
-    - [Model Requirements](#model-requirements)
-      - [Supported Models](#supported-models)
-    - [Example Tasks](#example-tasks)
 - [🧰 Toolkits and Capabilities](#-toolkits-and-capabilities)
   - [Model Context Protocol (MCP)](#model-context-protocol-mcp)
-  - [Available Toolkits](#available-toolkits)
-  - [Available Toolkits](#available-toolkits-1)
-    - [Multimodal Toolkits (Require multimodal model capabilities)](#multimodal-toolkits-require-multimodal-model-capabilities)
-    - [Text-Based Toolkits](#text-based-toolkits)
-  - [Customizing Your Configuration](#customizing-your-configuration)
 - [🌐 Web Interface](#-web-interface)
-  - [Starting the Web UI](#starting-the-web-ui)
-  - [Features](#features)
 - [🧪 Experiments](#-experiments)
 - [⏱️ Future Plans](#️-future-plans)
 - [📄 License](#-license)
@@ -98,9 +78,7 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
 - [🔥 Community](#-community)
 - [❓ FAQ](#-faq)
 - [📚 Exploring CAMEL Dependency](#-exploring-camel-dependency)
-  - [Accessing CAMEL Source Code](#accessing-camel-source-code)
 - [⭐ Star History](#-star-history)
-
 
 # 🔥 News
 
@@ -121,7 +99,20 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
   </p>
 </div>
 
-- **[2025.03.15]**: Restructured the web-based user interface architecture for improved system stability; optimized OWL Agent execution mechanisms for enhanced efficiency and performance; integrated Baidu search engine into SearchToolkit.
+<div style="background-color: #e3f2fd; padding: 12px; border-radius: 8px; border-left: 4px solid #1e88e5; margin: 10px 0;">
+  <h4 style="color: #1e88e5; margin: 0 0 8px 0;">
+    🎉 Latest Major Update - March 15, 2025
+  </h4>
+  <p style="margin: 0;">
+    <b>Significant Improvements:</b>
+    <ul style="margin: 5px 0 0 0; padding-left: 20px;">
+      <li>Restructured web-based UI architecture for enhanced stability 🏗️</li>
+      <li>Optimized OWL Agent execution mechanisms for better performance 🚀</li>
+    </ul>
+    <i>Try it now and experience the improved performance in your automation tasks!</i>
+  </p>
+</div>
+
 - **[2025.03.12]**: Added Bocha search in SearchToolkit, integrated Volcano Engine model platform, and enhanced Azure and OpenAI Compatible models with structured output and tool calling.
 - **[2025.03.11]**: We added MCPToolkit, FileWriteToolkit, and TerminalToolkit to enhance OWL agents with MCP tool calling, file writing capabilities, and terminal command execution.
 - **[2025.03.09]**: We added a web-based user interface that makes it easier to interact with the system.
@@ -307,21 +298,6 @@ For more detailed Docker usage instructions, including cross-platform support, o
 
 # 🚀 Quick Start
 
-## Try MCP (Model Context Protocol) Integration
-
-Experience the power of MCP by running our example that demonstrates multi-agent information retrieval and processing:
-
-```bash
-# Set up MCP servers (one-time setup)
-npx -y @smithery/cli install @wonderwhy-er/desktop-commander --client claude
-npx @wonderwhy-er/desktop-commander setup
-
-# Run the MCP example
-python examples/run_mcp.py
-```
-
-This example showcases how OWL agents can seamlessly interact with file systems, web automation, and information retrieval through the MCP protocol. Check out `examples/run_mcp.py` for the full implementation.
-
 ## Basic Usage
 
 After installation and setting up your environment variables, you can start using OWL right away:
@@ -430,6 +406,8 @@ tools = [
     SearchToolkit().search_duckduckgo,
     SearchToolkit().search_google,  # Comment out if unavailable
     SearchToolkit().search_wiki,
+    SearchToolkit().search_bocha,
+    SearchToolkit().search_baidu,
     *ExcelToolkit().get_tools(),
     *DocumentProcessingToolkit(model=models["document"]).get_tools(),
     *FileWriteToolkit(output_dir="./").get_tools(),
@@ -476,7 +454,15 @@ Selecting only necessary toolkits optimizes performance and reduces resource usa
 
 # 🌐 Web Interface
 
-OWL includes an intuitive web-based user interface that makes it easier to interact with the system. 
+<div align="center" style="background-color: #f0f7ff; padding: 15px; border-radius: 10px; border: 2px solid #1e88e5; margin: 20px 0;">
+  <h3 style="color: #1e88e5; margin: 0;">
+    🚀 Enhanced Web Interface Now Available!
+  </h3>
+  <p style="margin: 10px 0;">
+    Experience improved system stability and optimized performance with our latest update.
+    Start exploring the power of OWL through our user-friendly interface!
+  </p>
+</div>
 
 ## Starting the Web UI
 
@@ -564,7 +550,7 @@ Join us ([*Discord*](https://discord.camel-ai.org/) or [*WeChat*](https://ghli.o
 
 Join us for further discussions!
 <!-- ![](./assets/community.png) -->
-![](./assets/community.jpg)
+![](./assets/community.jpeg)
 
 # ❓ FAQ
 

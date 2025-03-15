@@ -70,7 +70,7 @@ def construct_society(question: str) -> RolePlaying:
             planning_agent_model=planning_model,
             output_language="Chinese",
         ).get_tools(),
-        SearchToolkit().search_duckduckgo,
+        SearchToolkit().search_baidu,
         *FileWriteToolkit(output_dir="./").get_tools(),
     ]
 
