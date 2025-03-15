@@ -27,7 +27,7 @@ Environment Setup:
    ```bash
    # Install MCP service
    npx -y @smithery/cli install @wonderwhy-er/desktop-commander --client claude
-   npx @wonderwhy-er/desktop-commander setup
+   npx -y @wonderwhy-er/desktop-commander setup --force-file-protocol
 
    # Configure in owl/examples/mcp_servers_config.json:
    {
@@ -35,7 +35,8 @@ Environment Setup:
        "command": "npx",
        "args": [
          "-y",
-         "@wonderwhy-er/desktop-commander"
+         "@wonderwhy-er/desktop-commander",
+         "--force-file-protocol"
        ]
      }
    }
