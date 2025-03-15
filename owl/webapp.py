@@ -1070,7 +1070,7 @@ def create_ui():
                     label="Question",
                     elem_id="question_input",
                     show_copy_button=True,
-                    value="Open Baidu search, summarize the github stars, fork counts, etc. of camel-ai's camel framework, and write the numbers into a python file using the plot package, save it locally, and run the generated python file.",
+                    value="Open Google search, summarize the github stars, fork counts, etc. of camel-ai's camel framework, and write the numbers into a python file using the plot package, save it locally, and run the generated python file.",
                 )
 
                 # Enhanced module selection dropdown
@@ -1212,7 +1212,7 @@ def create_ui():
 
         # Example questions
         examples = [
-            "Open Baidu search, summarize the github stars, fork counts, etc. of camel-ai's camel framework, and write the numbers into a python file using the plot package, save it locally, and run the generated python file.",
+            "Open Google search, summarize the github stars, fork counts, etc. of camel-ai's camel framework, and write the numbers into a python file using the plot package, save it locally, and run the generated python file.",
             "Browse Amazon and find a product that is attractive to programmers. Please provide the product name and price",
             "Write a hello world python file and save it locally",
         ]
