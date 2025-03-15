@@ -25,7 +25,6 @@ from camel.logger import set_log_level
 
 from owl.utils import run_society
 from camel.societies import RolePlaying
-import os
 
 load_dotenv()
 set_log_level(level="DEBUG")

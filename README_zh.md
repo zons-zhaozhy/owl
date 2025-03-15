@@ -219,7 +219,7 @@ OWL 需要各种 API 密钥来与不同的服务进行交互。`owl/.env_templat
 2. **配置你的 API 密钥**：
    在你喜欢的文本编辑器中打开 `.env` 文件，并在相应字段中插入你的 API 密钥。
    
-   > **注意**：对于最小示例（`run_mini.py`），你只需要配置 LLM API 密钥（例如，`OPENAI_API_KEY`）。
+   > **注意**：对于最小示例（`examples/run_mini.py`），你只需要配置 LLM API 密钥（例如，`OPENAI_API_KEY`）。
 
 ### 选项 2：直接设置环境变量
 
@@ -269,7 +269,7 @@ cd .. && source .venv/bin/activate && cd owl
 playwright install-deps 
 
 #运行例子演示脚本
-xvfb-python run.py
+xvfb-python examples/run.py
 
 # 选项2：使用提供的脚本构建和运行
 cd .container
@@ -293,23 +293,23 @@ npx -y @smithery/cli install @wonderwhy-er/desktop-commander --client claude
 npx @wonderwhy-er/desktop-commander setup
 
 # 运行 MCP 示例
-python owl/run_mcp.py
+python examples/run_mcp.py
 ```
 
-这个示例展示了 OWL 智能体如何通过 MCP 协议无缝地与文件系统、网页自动化和信息检索进行交互。查看 `owl/run_mcp.py` 了解完整实现。
+这个示例展示了 OWL 智能体如何通过 MCP 协议无缝地与文件系统、网页自动化和信息检索进行交互。查看 `examples/run_mcp.py` 了解完整实现。
 
 ## 基本用法
    
 运行以下示例：
 
 ```bash
-python owl/run.py
+python examples/run.py
 ```
 
 我们还提供了一个最小化示例，只需配置LLM的API密钥即可运行：
 
 ```bash
-python owl/run_mini.py
+python examples/run_mini.py
 ```
 
 ## 使用不同的模型
@@ -330,22 +330,22 @@ OWL 支持多种 LLM 后端，但功能可能因模型的工具调用和多模�
 
 ```bash
 # 使用 Qwen 模型运行
-python owl/examples/run_qwen_zh.py
+python examples/run_qwen_zh.py
 
 # 使用 Deepseek 模型运行
-python owl/examples/run_deepseek_zh.py
+python examples/run_deepseek_zh.py
 
 # 使用其他 OpenAI 兼容模型运行
-python owl/examples/run_openai_compatiable_model.py
+python examples/run_openai_compatiable_model.py
 
 # 使用 Azure OpenAI模型运行
-python owl/run_azure_openai.py
+python examples/run_azure_openai.py
 
 # 使用 Ollama 运行
-python owl/examples/run_ollama.py
+python examples/run_ollama.py
 ```
 
-你可以通过修改 `run.py` 脚本来运行自己的任务：
+你可以通过修改 `examples/run.py` 脚本来运行自己的任务：
 
 ```python
 # Define your own task
@@ -383,7 +383,7 @@ OWL 将自动调用与文档相关的工具来处理文件并提取答案。
 
 OWL 的 MCP 集成为 AI 模型与各种工具和数据源的交互提供了标准化的方式。
 
-查看我们的综合示例 `owl/run_mcp.py` 来体验这些功能！
+查看我们的综合示例 `examples/run_mcp.py` 来体验这些功能！
 
 ## 可用工具包
 
@@ -479,7 +479,7 @@ git checkout gaia58.18
 
 2. 运行评估脚本：
 ```bash
-python run_gaia_roleplaying.py
+python examples/run_gaia_roleplaying.py
 ```
 
 # ⏱️ 未来计划
@@ -531,7 +531,7 @@ python run_gaia_roleplaying.py
 
 加入我们，参与更多讨论！
 <!-- ![](./assets/community.png) -->
-![](./assets/community_8.jpg)
+![](./assets/community.jpg)
 <!-- ![](./assets/meetup.jpg) -->
 
 # ❓ 常见问题

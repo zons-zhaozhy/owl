@@ -29,111 +29,111 @@ import re  # For regular expression operations
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
 
-# 配置日志系统
+# Configure logging system
 def setup_logging():
-    """配置日志系统，将日志输出到文件和内存队列以及控制台"""
-    # 创建logs目录（如果不存在）
+    """Configure logging system to output logs to file, memory queue, and console"""
+    # Create logs directory (if it doesn't exist)
     logs_dir = os.path.join(os.path.dirname(__file__), "logs")
     os.makedirs(logs_dir, exist_ok=True)
 
-    # 生成日志文件名（使用当前日期）
+    # Generate log filename (using current date)
     current_date = datetime.datetime.now().strftime("%Y-%m-%d")
     log_file = os.path.join(logs_dir, f"gradio_log_{current_date}.txt")
 
-    # 配置根日志记录器（捕获所有日志）
+    # Configure root logger (captures all logs)
     root_logger = logging.getLogger()
 
-    # 清除现有的处理器，避免重复日志
+    # Clear existing handlers to avoid duplicate logs
     for handler in root_logger.handlers[:]:
         root_logger.removeHandler(handler)
 
     root_logger.setLevel(logging.INFO)
 
-    # 创建文件处理器
+    # Create file handler
     file_handler = logging.FileHandler(log_file, encoding="utf-8", mode="a")
     file_handler.setLevel(logging.INFO)
 
-    # 创建控制台处理器
+    # Create console handler
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.INFO)
 
-    # 创建格式化器
+    # Create formatter
     formatter = logging.Formatter(
         "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     )
     file_handler.setFormatter(formatter)
     console_handler.setFormatter(formatter)
 
-    # 添加处理器到根日志记录器
+    # Add handlers to root logger
     root_logger.addHandler(file_handler)
     root_logger.addHandler(console_handler)
 
-    logging.info("日志系统已初始化，日志文件: %s", log_file)
+    logging.info("Logging system initialized, log file: %s", log_file)
     return log_file
 
 
-# 全局变量
+# Global variables
 LOG_FILE = None
-LOG_QUEUE: queue.Queue = queue.Queue()  # 日志队列
+LOG_QUEUE: queue.Queue = queue.Queue()  # Log queue
 STOP_LOG_THREAD = threading.Event()
-CURRENT_PROCESS = None  # 用于跟踪当前运行的进程
-STOP_REQUESTED = threading.Event()  # 用于标记是否请求停止
+CURRENT_PROCESS = None  # Used to track the currently running process
+STOP_REQUESTED = threading.Event()  # Used to mark if stop was requested
 
 
-# 日志读取和更新函数
+# Log reading and updating functions
 def log_reader_thread(log_file):
-    """后台线程，持续读取日志文件并将新行添加到队列中"""
+    """Background thread that continuously reads the log file and adds new lines to the queue"""
     try:
         with open(log_file, "r", encoding="utf-8") as f:
-            # 移动到文件末尾
+            # Move to the end of file
             f.seek(0, 2)
 
             while not STOP_LOG_THREAD.is_set():
                 line = f.readline()
                 if line:
-                    LOG_QUEUE.put(line)  # 添加到对话记录队列
+                    LOG_QUEUE.put(line)  # Add to conversation record queue
                 else:
-                    # 没有新行，等待一小段时间
+                    # No new lines, wait for a short time
                     time.sleep(0.1)
     except Exception as e:
-        logging.error(f"日志读取线程出错: {str(e)}")
+        logging.error(f"Log reader thread error: {str(e)}")
 
 
 def get_latest_logs(max_lines=100, queue_source=None):
-    """从队列中获取最新的日志行，如果队列为空则直接从文件读取
+    """Get the latest log lines from the queue, or read directly from the file if the queue is empty
 
     Args:
-        max_lines: 最大返回行数
-        queue_source: 指定使用哪个队列，默认为LOG_QUEUE
+        max_lines: Maximum number of lines to return
+        queue_source: Specify which queue to use, default is LOG_QUEUE
 
     Returns:
-        str: 日志内容
+        str: Log content
     """
     logs = []
     log_queue = queue_source if queue_source else LOG_QUEUE
 
-    # 创建一个临时队列来存储日志，以便我们可以处理它们而不会从原始队列中删除它们
+    # Create a temporary queue to store logs so we can process them without removing them from the original queue
     temp_queue = queue.Queue()
     temp_logs = []
 
     try:
-        # 尝试从队列中获取所有可用的日志行
+        # Try to get all available log lines from the queue
         while not log_queue.empty() and len(temp_logs) < max_lines:
             log = log_queue.get_nowait()
             temp_logs.append(log)
-            temp_queue.put(log)  # 将日志放回临时队列
+            temp_queue.put(log)  # Put the log back into the temporary queue
     except queue.Empty:
         pass
 
-    # 处理对话记录
+    # Process conversation records
     logs = temp_logs
 
-    # 如果没有新日志或日志不足，尝试直接从文件读取最后几行
+    # If there are no new logs or not enough logs, try to read the last few lines directly from the file
     if len(logs) < max_lines and LOG_FILE and os.path.exists(LOG_FILE):
         try:
             with open(LOG_FILE, "r", encoding="utf-8") as f:
                 all_lines = f.readlines()
-                # 如果队列中已有一些日志，只读取剩余需要的行数
+                # If there are already some logs in the queue, only read the remaining needed lines
                 remaining_lines = max_lines - len(logs)
                 file_logs = (
                     all_lines[-remaining_lines:]
@@ -141,32 +141,32 @@ def get_latest_logs(max_lines=100, queue_source=None):
                     else all_lines
                 )
 
-                # 将文件日志添加到队列日志之前
+                # Add file logs before queue logs
                 logs = file_logs + logs
         except Exception as e:
-            error_msg = f"读取日志文件出错: {str(e)}"
+            error_msg = f"Error reading log file: {str(e)}"
             logging.error(error_msg)
-            if not logs:  # 只有在没有任何日志的情况下才添加错误消息
+            if not logs:  # Only add error message if there are no logs
                 logs = [error_msg]
 
-    # 如果仍然没有日志，返回提示信息
+    # If there are still no logs, return a prompt message
     if not logs:
-        return "初始化运行中..."
+        return "Initialization in progress..."
 
-    # 过滤日志，只保留 camel.agents.chat_agent - INFO 的日志
+    # Filter logs, only keep logs with 'camel.agents.chat_agent - INFO'
     filtered_logs = []
     for log in logs:
         if "camel.agents.chat_agent - INFO" in log:
             filtered_logs.append(log)
 
-    # 如果过滤后没有日志，返回提示信息
+    # If there are no logs after filtering, return a prompt message
     if not filtered_logs:
-        return "暂无对话记录。"
+        return "No conversation records yet."
 
-    # 处理日志内容，提取最新的用户和助手消息
+    # Process log content, extract the latest user and assistant messages
     simplified_logs = []
 
-    # 使用集合来跟踪已经处理过的消息，避免重复
+    # Use a set to track messages that have already been processed, to avoid duplicates
     processed_messages = set()
 
     def process_message(role, content):
@@ -202,7 +202,7 @@ def get_latest_logs(max_lines=100, queue_source=None):
             except json.JSONDecodeError:
                 pass
 
-        # 如果JSON解析失败或没有找到消息数组，尝试直接提取对话内容
+        # If JSON parsing fails or no message array is found, try to extract conversation content directly
         if not formatted_messages:
             user_pattern = re.compile(r"\{'role': 'user', 'content': '(.*?)'\}")
             assistant_pattern = re.compile(
@@ -222,15 +222,15 @@ def get_latest_logs(max_lines=100, queue_source=None):
         if formatted_messages:
             simplified_logs.append("\n\n".join(formatted_messages))
 
-    # 格式化日志输出，确保每个对话记录之间有适当的分隔
+    # Format log output, ensure appropriate separation between each conversation record
     formatted_logs = []
     for i, log in enumerate(simplified_logs):
-        # 移除开头和结尾的多余空白字符
+        # Remove excess whitespace characters from beginning and end
         log = log.strip()
 
         formatted_logs.append(log)
 
-        # 确保每个对话记录以换行符结束
+        # Ensure each conversation record ends with a newline
         if not log.endswith("\n"):
             formatted_logs.append("\n")
 
@@ -239,17 +239,17 @@ def get_latest_logs(max_lines=100, queue_source=None):
 
 # Dictionary containing module descriptions
 MODULE_DESCRIPTIONS = {
-    "run": "默认模式：使用OpenAI模型的默认的智能体协作模式，适合大多数任务。",
-    "run_mini": "使用使用OpenAI模型最小化配置处理任务",
-    "run_deepseek_zh": "使用deepseek模型处理中文任务",
-    "run_openai_compatiable_model": "使用openai兼容模型处理任务",
-    "run_ollama": "使用本地ollama模型处理任务",
-    "run_qwen_mini_zh": "使用qwen模型最小化配置处理任务",
-    "run_qwen_zh": "使用qwen模型处理任务",
+    "run": "Default mode: Using OpenAI model's default agent collaboration mode, suitable for most tasks.",
+    "run_mini": "Using OpenAI model with minimal configuration to process tasks",
+    "run_deepseek_zh": "Using deepseek model to process Chinese tasks",
+    "run_openai_compatiable_model": "Using openai compatible model to process tasks",
+    "run_ollama": "Using local ollama model to process tasks",
+    "run_qwen_mini_zh": "Using qwen model with minimal configuration to process tasks",
+    "run_qwen_zh": "Using qwen model to process tasks",
 }
 
 
-# 默认环境变量模板
+# Default environment variable template
 DEFAULT_ENV_TEMPLATE = """#===========================================
 # MODEL & API 
 # (See https://docs.camel-ai.org/key_modules/models.html#)
@@ -290,103 +290,117 @@ FIRECRAWL_API_KEY='Your_Key'
 
 
 def validate_input(question: str) -> bool:
-    """验证用户输入是否有效
+    """Validate if user input is valid
 
     Args:
-        question: 用户问题
+        question: User question
 
     Returns:
-        bool: 输入是否有效
+        bool: Whether the input is valid
     """
-    # 检查输入是否为空或只包含空格
+    # Check if input is empty or contains only spaces
     if not question or question.strip() == "":
         return False
     return True
 
 
 def run_owl(question: str, example_module: str) -> Tuple[str, str, str]:
-    """运行OWL系统并返回结果
+    """Run the OWL system and return results
 
     Args:
-        question: 用户问题
-        example_module: 要导入的示例模块名（如 "run_terminal_zh" 或 "run_deep"）
+        question: User question
+        example_module: Example module name to import (e.g., "run_terminal_zh" or "run_deep")
 
     Returns:
-        Tuple[...]: 回答、令牌计数、状态
+        Tuple[...]: Answer, token count, status
     """
     global CURRENT_PROCESS
 
-    # 验证输入
+    # Validate input
     if not validate_input(question):
-        logging.warning("用户提交了无效的输入")
-        return ("请输入有效的问题", "0", "❌ 错误: 输入问题无效")
+        logging.warning("User submitted invalid input")
+        return (
+            "Please enter a valid question",
+            "0",
+            "❌ Error: Invalid input question",
+        )
 
     try:
-        # 确保环境变量已加载
+        # Ensure environment variables are loaded
         load_dotenv(find_dotenv(), override=True)
-        logging.info(f"处理问题: '{question}', 使用模块: {example_module}")
+        logging.info(
+            f"Processing question: '{question}', using module: {example_module}"
+        )
 
-        # 检查模块是否在MODULE_DESCRIPTIONS中
+        # Check if the module is in MODULE_DESCRIPTIONS
         if example_module not in MODULE_DESCRIPTIONS:
-            logging.error(f"用户选择了不支持的模块: {example_module}")
+            logging.error(f"User selected an unsupported module: {example_module}")
             return (
-                f"所选模块 '{example_module}' 不受支持",
+                f"Selected module '{example_module}' is not supported",
                 "0",
-                "❌ 错误: 不支持的模块",
+                "❌ Error: Unsupported module",
             )
 
-        # 动态导入目标模块
+        # Dynamically import target module
         module_path = f"examples.{example_module}"
         try:
-            logging.info(f"正在导入模块: {module_path}")
+            logging.info(f"Importing module: {module_path}")
             module = importlib.import_module(module_path)
         except ImportError as ie:
-            logging.error(f"无法导入模块 {module_path}: {str(ie)}")
+            logging.error(f"Unable to import module {module_path}: {str(ie)}")
             return (
-                f"无法导入模块: {module_path}",
+                f"Unable to import module: {module_path}",
                 "0",
-                f"❌ 错误: 模块 {example_module} 不存在或无法加载 - {str(ie)}",
+                f"❌ Error: Module {example_module} does not exist or cannot be loaded - {str(ie)}",
             )
         except Exception as e:
-            logging.error(f"导入模块 {module_path} 时发生错误: {str(e)}")
-            return (f"导入模块时发生错误: {module_path}", "0", f"❌ 错误: {str(e)}")
-
-        # 检查是否包含construct_society函数
-        if not hasattr(module, "construct_society"):
-            logging.error(f"模块 {module_path} 中未找到 construct_society 函数")
+            logging.error(
+                f"Error occurred while importing module {module_path}: {str(e)}"
+            )
             return (
-                f"模块 {module_path} 中未找到 construct_society 函数",
+                f"Error occurred while importing module: {module_path}",
                 "0",
-                "❌ 错误: 模块接口不兼容",
+                f"❌ Error: {str(e)}",
             )
 
-        # 构建社会模拟
+        # Check if it contains the construct_society function
+        if not hasattr(module, "construct_society"):
+            logging.error(
+                f"construct_society function not found in module {module_path}"
+            )
+            return (
+                f"construct_society function not found in module {module_path}",
+                "0",
+                "❌ Error: Module interface incompatible",
+            )
+
+        # Build society simulation
         try:
-            logging.info("正在构建社会模拟...")
+            logging.info("Building society simulation...")
             society = module.construct_society(question)
 
         except Exception as e:
-            logging.error(f"构建社会模拟时发生错误: {str(e)}")
+            logging.error(f"Error occurred while building society simulation: {str(e)}")
             return (
-                f"构建社会模拟时发生错误: {str(e)}",
+                f"Error occurred while building society simulation: {str(e)}",
                 "0",
-                f"❌ 错误: 构建失败 - {str(e)}",
+                f"❌ Error: Build failed - {str(e)}",
             )
 
-        # 运行社会模拟
+        # Run society simulation
         try:
-            logging.info("正在运行社会模拟...")
+            logging.info("Running society simulation...")
             answer, chat_history, token_info = run_society(society)
-            logging.info("社会模拟运行完成")
+            logging.info("Society simulation completed")
         except Exception as e:
-            logging.error(f"运行社会模拟时发生错误: {str(e)}")
+            logging.error(f"Error occurred while running society simulation: {str(e)}")
             return (
-                f"运行社会模拟时发生错误: {str(e)}",
+                f"Error occurred while running society simulation: {str(e)}",
                 "0",
-                f"❌ 错误: 运行失败 - {str(e)}",
+                f"❌ Error: Run failed - {str(e)}",
             )
 
-        # 安全地获取令牌计数
+        # Safely get token count
         if not isinstance(token_info, dict):
             token_info = {}
 
@@ -395,31 +409,33 @@ def run_owl(question: str, example_module: str) -> Tuple[str, str, str]:
         total_tokens = completion_tokens + prompt_tokens
 
         logging.info(
-            f"处理完成，令牌使用: 完成={completion_tokens}, 提示={prompt_tokens}, 总计={total_tokens}"
+            f"Processing completed, token usage: completion={completion_tokens}, prompt={prompt_tokens}, total={total_tokens}"
         )
 
         return (
             answer,
-            f"完成令牌: {completion_tokens:,} | 提示令牌: {prompt_tokens:,} | 总计: {total_tokens:,}",
-            "✅ 成功完成",
+            f"Completion tokens: {completion_tokens:,} | Prompt tokens: {prompt_tokens:,} | Total: {total_tokens:,}",
+            "✅ Successfully completed",
         )
 
     except Exception as e:
-        logging.error(f"处理问题时发生未捕获的错误: {str(e)}")
-        return (f"发生错误: {str(e)}", "0", f"❌ 错误: {str(e)}")
+        logging.error(
+            f"Uncaught error occurred while processing the question: {str(e)}"
+        )
+        return (f"Error occurred: {str(e)}", "0", f"❌ Error: {str(e)}")
 
 
 def update_module_description(module_name: str) -> str:
-    """返回所选模块的描述"""
-    return MODULE_DESCRIPTIONS.get(module_name, "无可用描述")
+    """Return the description of the selected module"""
+    return MODULE_DESCRIPTIONS.get(module_name, "No description available")
 
 
-# 存储前端配置的环境变量
+# Store environment variables configured from the frontend
 WEB_FRONTEND_ENV_VARS: dict[str, str] = {}
 
 
 def init_env_file():
-    """初始化.env文件如果不存在"""
+    """Initialize .env file if it doesn't exist"""
     dotenv_path = find_dotenv()
     if not dotenv_path:
         with open(".env", "w") as f:
@@ -429,15 +445,15 @@ def init_env_file():
 
 
 def load_env_vars():
-    """加载环境变量并返回字典格式
+    """Load environment variables and return as dictionary format
 
     Returns:
-        dict: 环境变量字典，每个值为一个包含值和来源的元组 (value, source)
+        dict: Environment variable dictionary, each value is a tuple containing value and source (value, source)
     """
     dotenv_path = init_env_file()
     load_dotenv(dotenv_path, override=True)
 
-    # 从.env文件读取环境变量
+    # Read environment variables from .env file
     env_file_vars = {}
     with open(dotenv_path, "r") as f:
         for line in f:
@@ -447,46 +463,46 @@ def load_env_vars():
                     key, value = line.split("=", 1)
                     env_file_vars[key.strip()] = value.strip().strip("\"'")
 
-    # 从系统环境变量中获取
+    # Get from system environment variables
     system_env_vars = {
         k: v
         for k, v in os.environ.items()
         if k not in env_file_vars and k not in WEB_FRONTEND_ENV_VARS
     }
 
-    # 合并环境变量，并标记来源
+    # Merge environment variables and mark sources
     env_vars = {}
 
-    # 添加系统环境变量（最低优先级）
+    # Add system environment variables (lowest priority)
     for key, value in system_env_vars.items():
-        env_vars[key] = (value, "系统")
+        env_vars[key] = (value, "System")
 
-    # 添加.env文件环境变量（中等优先级）
+    # Add .env file environment variables (medium priority)
     for key, value in env_file_vars.items():
-        env_vars[key] = (value, ".env文件")
+        env_vars[key] = (value, ".env file")
 
-    # 添加前端配置的环境变量（最高优先级）
+    # Add frontend configured environment variables (highest priority)
     for key, value in WEB_FRONTEND_ENV_VARS.items():
-        env_vars[key] = (value, "前端配置")
-        # 确保操作系统环境变量也被更新
+        env_vars[key] = (value, "Frontend configuration")
+        # Ensure operating system environment variables are also updated
         os.environ[key] = value
 
     return env_vars
 
 
 def save_env_vars(env_vars):
-    """保存环境变量到.env文件
+    """Save environment variables to .env file
 
     Args:
-        env_vars: 字典，键为环境变量名，值可以是字符串或(值,来源)元组
+        env_vars: Dictionary, keys are environment variable names, values can be strings or (value, source) tuples
     """
     try:
         dotenv_path = init_env_file()
 
-        # 保存每个环境变量
+        # Save each environment variable
         for key, value_data in env_vars.items():
-            if key and key.strip():  # 确保键不为空
-                # 处理值可能是元组的情况
+            if key and key.strip():  # Ensure key is not empty
+                # Handle case where value might be a tuple
                 if isinstance(value_data, tuple):
                     value = value_data[0]
                 else:
@@ -494,80 +510,80 @@ def save_env_vars(env_vars):
 
                 set_key(dotenv_path, key.strip(), value.strip())
 
-        # 重新加载环境变量以确保生效
+        # Reload environment variables to ensure they take effect
         load_dotenv(dotenv_path, override=True)
 
-        return True, "环境变量已成功保存！"
+        return True, "Environment variables have been successfully saved!"
     except Exception as e:
-        return False, f"保存环境变量时出错: {str(e)}"
+        return False, f"Error saving environment variables: {str(e)}"
 
 
 def add_env_var(key, value, from_frontend=True):
-    """添加或更新单个环境变量
+    """Add or update a single environment variable
 
     Args:
-        key: 环境变量名
-        value: 环境变量值
-        from_frontend: 是否来自前端配置，默认为True
+        key: Environment variable name
+        value: Environment variable value
+        from_frontend: Whether it's from frontend configuration, default is True
     """
     try:
         if not key or not key.strip():
-            return False, "变量名不能为空"
+            return False, "Variable name cannot be empty"
 
         key = key.strip()
         value = value.strip()
 
-        # 如果来自前端，则添加到前端环境变量字典
+        # If from frontend, add to frontend environment variable dictionary
         if from_frontend:
             WEB_FRONTEND_ENV_VARS[key] = value
-            # 直接更新系统环境变量
+            # Directly update system environment variables
             os.environ[key] = value
 
-        # 同时更新.env文件
+        # Also update .env file
         dotenv_path = init_env_file()
         set_key(dotenv_path, key, value)
         load_dotenv(dotenv_path, override=True)
 
-        return True, f"环境变量 {key} 已成功添加/更新！"
+        return True, f"Environment variable {key} has been successfully added/updated!"
     except Exception as e:
-        return False, f"添加环境变量时出错: {str(e)}"
+        return False, f"Error adding environment variable: {str(e)}"
 
 
 def delete_env_var(key):
-    """删除环境变量"""
+    """Delete environment variable"""
     try:
         if not key or not key.strip():
-            return False, "变量名不能为空"
+            return False, "Variable name cannot be empty"
 
         key = key.strip()
 
-        # 从.env文件中删除
+        # Delete from .env file
         dotenv_path = init_env_file()
         unset_key(dotenv_path, key)
 
-        # 从前端环境变量字典中删除
+        # Delete from frontend environment variable dictionary
         if key in WEB_FRONTEND_ENV_VARS:
             del WEB_FRONTEND_ENV_VARS[key]
 
-        # 从当前进程环境中也删除
+        # Also delete from current process environment
         if key in os.environ:
             del os.environ[key]
 
-        return True, f"环境变量 {key} 已成功删除！"
+        return True, f"Environment variable {key} has been successfully deleted!"
     except Exception as e:
-        return False, f"删除环境变量时出错: {str(e)}"
+        return False, f"Error deleting environment variable: {str(e)}"
 
 
 def is_api_related(key: str) -> bool:
-    """判断环境变量是否与API相关
+    """Determine if an environment variable is API-related
 
     Args:
-        key: 环境变量名
+        key: Environment variable name
 
     Returns:
-        bool: 是否与API相关
+        bool: Whether it's API-related
     """
-    # API相关的关键词
+    # API-related keywords
     api_keywords = [
         "api",
         "key",
@@ -585,18 +601,18 @@ def is_api_related(key: str) -> bool:
         "firecrawl",
     ]
 
-    # 检查是否包含API相关关键词（不区分大小写）
+    # Check if it contains API-related keywords (case insensitive)
     return any(keyword in key.lower() for keyword in api_keywords)
 
 
 def get_api_guide(key: str) -> str:
-    """根据环境变量名返回对应的API获取指南
+    """Return the corresponding API guide based on the environment variable name
 
     Args:
-        key: 环境变量名
+        key: Environment variable name
 
     Returns:
-        str: API获取指南链接或说明
+        str: API guide link or description
     """
     key_lower = key.lower()
     if "openai" in key_lower:
@@ -618,18 +634,18 @@ def get_api_guide(key: str) -> str:
 
 
 def update_env_table():
-    """更新环境变量表格显示，只显示API相关的环境变量"""
+    """Update environment variable table display, only showing API-related environment variables"""
     env_vars = load_env_vars()
-    # 过滤出API相关的环境变量
+    # Filter out API-related environment variables
     api_env_vars = {k: v for k, v in env_vars.items() if is_api_related(k)}
-    # 转换为列表格式，以符合Gradio Dataframe的要求
-    # 格式: [变量名, 变量值, 获取指南链接]
+    # Convert to list format to meet Gradio Dataframe requirements
+    # Format: [Variable name, Variable value, Guide link]
     result = []
     for k, v in api_env_vars.items():
         guide = get_api_guide(k)
-        # 如果有指南链接，创建一个可点击的链接
+        # If there's a guide link, create a clickable link
         guide_link = (
-            f"<a href='{guide}' target='_blank' class='guide-link'>🔗 获取</a>"
+            f"<a href='{guide}' target='_blank' class='guide-link'>🔗 Get</a>"
             if guide
             else ""
         )
@@ -638,45 +654,51 @@ def update_env_table():
 
 
 def save_env_table_changes(data):
-    """保存环境变量表格的更改
+    """Save changes to the environment variable table
 
     Args:
-        data: Dataframe数据，可能是pandas DataFrame对象
+        data: Dataframe data, possibly a pandas DataFrame object
 
     Returns:
-        str: 操作状态信息，包含HTML格式的状态消息
+        str: Operation status information, containing HTML-formatted status message
     """
     try:
-        logging.info(f"开始处理环境变量表格数据，类型: {type(data)}")
+        logging.info(
+            f"Starting to process environment variable table data, type: {type(data)}"
+        )
 
-        # 获取当前所有环境变量
+        # Get all current environment variables
         current_env_vars = load_env_vars()
-        processed_keys = set()  # 记录已处理的键，用于检测删除的变量
+        processed_keys = set()  # Record processed keys to detect deleted variables
 
         # 处理pandas DataFrame对象
         import pandas as pd
 
         if isinstance(data, pd.DataFrame):
-            # 获取列名信息
+            # Get column name information
             columns = data.columns.tolist()
-            logging.info(f"DataFrame列名: {columns}")
+            logging.info(f"DataFrame column names: {columns}")
 
-            # 遍历DataFrame的每一行
+            # Iterate through each row of the DataFrame
             for index, row in data.iterrows():
                 # 使用列名访问数据
                 if len(columns) >= 3:
-                    # 获取变量名和值 (第0列是变量名，第1列是值)
+                    # Get variable name and value (column 0 is name, column 1 is value)
                     key = row[0] if isinstance(row, pd.Series) else row.iloc[0]
                     value = row[1] if isinstance(row, pd.Series) else row.iloc[1]
 
-                    # 检查是否为空行或已删除的变量
-                    if key and str(key).strip():  # 如果键名不为空，则添加或更新
-                        logging.info(f"处理环境变量: {key} = {value}")
+                    # Check if it's an empty row or deleted variable
+                    if (
+                        key and str(key).strip()
+                    ):  # If key name is not empty, add or update
+                        logging.info(
+                            f"Processing environment variable: {key} = {value}"
+                        )
                         add_env_var(key, str(value))
                         processed_keys.add(key)
         # 处理其他格式
         elif isinstance(data, dict):
-            logging.info(f"字典格式数据的键: {list(data.keys())}")
+            logging.info(f"Dictionary format data keys: {list(data.keys())}")
             # 如果是字典格式，尝试不同的键
             if "data" in data:
                 rows = data["data"]
@@ -707,56 +729,56 @@ def save_env_table_changes(data):
                         add_env_var(key, str(value))
                         processed_keys.add(key)
         else:
-            logging.error(f"未知的数据格式: {type(data)}")
-            return f"❌ 保存失败: 未知的数据格式 {type(data)}"
+            logging.error(f"Unknown data format: {type(data)}")
+            return f"❌ Save failed: Unknown data format {type(data)}"
 
-        # 处理删除的变量 - 检查当前环境变量中是否有未在表格中出现的变量
+        # Process deleted variables - check if there are variables in current environment not appearing in the table
         api_related_keys = {k for k in current_env_vars.keys() if is_api_related(k)}
         keys_to_delete = api_related_keys - processed_keys
 
-        # 删除不再表格中的变量
+        # Delete variables no longer in the table
         for key in keys_to_delete:
-            logging.info(f"删除环境变量: {key}")
+            logging.info(f"Deleting environment variable: {key}")
             delete_env_var(key)
 
-        return "✅ 环境变量已成功保存"
+        return "✅ Environment variables have been successfully saved"
     except Exception as e:
         import traceback
 
         error_details = traceback.format_exc()
-        logging.error(f"保存环境变量时出错: {str(e)}\n{error_details}")
-        return f"❌ 保存失败: {str(e)}"
+        logging.error(f"Error saving environment variables: {str(e)}\n{error_details}")
+        return f"❌ Save failed: {str(e)}"
 
 
 def get_env_var_value(key):
-    """获取环境变量的实际值
+    """Get the actual value of an environment variable
 
-    优先级：前端配置 > .env文件 > 系统环境变量
+    Priority: Frontend configuration > .env file > System environment variables
     """
-    # 检查前端配置的环境变量
+    # Check frontend configured environment variables
     if key in WEB_FRONTEND_ENV_VARS:
         return WEB_FRONTEND_ENV_VARS[key]
 
-    # 检查系统环境变量（包括从.env加载的）
+    # Check system environment variables (including those loaded from .env)
     return os.environ.get(key, "")
 
 
 def create_ui():
-    """创建增强版Gradio界面"""
+    """Create enhanced Gradio interface"""
 
-    # 定义对话记录更新函数
+    # Define conversation record update function
     def update_logs2():
-        """获取最新对话记录并返回给前端显示"""
+        """Get the latest conversation records and return them to the frontend for display"""
         return get_latest_logs(100, LOG_QUEUE)
 
     def clear_log_file():
-        """清空日志文件内容"""
+        """Clear log file content"""
         try:
             if LOG_FILE and os.path.exists(LOG_FILE):
-                # 清空日志文件内容而不是删除文件
+                # Clear log file content instead of deleting the file
                 open(LOG_FILE, "w").close()
-                logging.info("日志文件已清空")
-                # 清空日志队列
+                logging.info("Log file has been cleared")
+                # Clear log queue
                 while not LOG_QUEUE.empty():
                     try:
                         LOG_QUEUE.get_nowait()
@@ -766,18 +788,18 @@ def create_ui():
             else:
                 return ""
         except Exception as e:
-            logging.error(f"清空日志文件时出错: {str(e)}")
+            logging.error(f"Error clearing log file: {str(e)}")
             return ""
 
-    # 创建一个实时日志更新函数
+    # Create a real-time log update function
     def process_with_live_logs(question, module_name):
-        """处理问题并实时更新日志"""
+        """Process questions and update logs in real-time"""
         global CURRENT_PROCESS
 
-        # 清空日志文件
+        # Clear log file
         clear_log_file()
 
-        # 创建一个后台线程来处理问题
+        # Create a background thread to process the question
         result_queue = queue.Queue()
 
         def process_in_background():
@@ -785,37 +807,39 @@ def create_ui():
                 result = run_owl(question, module_name)
                 result_queue.put(result)
             except Exception as e:
-                result_queue.put((f"发生错误: {str(e)}", "0", f"❌ 错误: {str(e)}"))
+                result_queue.put(
+                    (f"Error occurred: {str(e)}", "0", f"❌ Error: {str(e)}")
+                )
 
-        # 启动后台处理线程
+        # Start background processing thread
         bg_thread = threading.Thread(target=process_in_background)
-        CURRENT_PROCESS = bg_thread  # 记录当前进程
+        CURRENT_PROCESS = bg_thread  # Record current process
         bg_thread.start()
 
-        # 在等待处理完成的同时，每秒更新一次日志
+        # While waiting for processing to complete, update logs once per second
         while bg_thread.is_alive():
-            # 更新对话记录显示
+            # Update conversation record display
             logs2 = get_latest_logs(100, LOG_QUEUE)
 
-            # 始终更新状态
+            # Always update status
             yield (
                 "0",
-                "<span class='status-indicator status-running'></span> 处理中...",
+                "<span class='status-indicator status-running'></span> Processing...",
                 logs2,
             )
 
             time.sleep(1)
 
-        # 处理完成，获取结果
+        # Processing complete, get results
         if not result_queue.empty():
             result = result_queue.get()
             answer, token_count, status = result
 
-            # 最后一次更新对话记录
+            # Final update of conversation record
             logs2 = get_latest_logs(100, LOG_QUEUE)
 
-            # 根据状态设置不同的指示器
-            if "错误" in status:
+            # Set different indicators based on status
+            if "Error" in status:
                 status_with_indicator = (
                     f"<span class='status-indicator status-error'></span> {status}"
                 )
@@ -829,25 +853,25 @@ def create_ui():
             logs2 = get_latest_logs(100, LOG_QUEUE)
             yield (
                 "0",
-                "<span class='status-indicator status-error'></span> 已终止",
+                "<span class='status-indicator status-error'></span> Terminated",
                 logs2,
             )
 
     with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as app:
         gr.Markdown(
             """
-                # 🦉 OWL 多智能体协作系统
+                # 🦉 OWL Multi-Agent Collaboration System
 
-                基于CAMEL框架开发的先进多智能体协作系统，旨在通过智能体协作解决复杂问题。
-                可以通过修改本地脚本自定义模型和工具。
-                本网页应用目前处于测试阶段，仅供演示和测试使用，尚未推荐用于生产环境。
+                Advanced multi-agent collaboration system developed based on the CAMEL framework, designed to solve complex problems through agent collaboration.
+                Models and tools can be customized by modifying local scripts.
+                This web app is currently in beta development. It is provided for demonstration and testing purposes only and is not yet recommended for production use.
                 """
         )
 
-        # 添加自定义CSS
+        # Add custom CSS
         gr.HTML("""
             <style>
-            /* 聊天容器样式 */
+            /* Chat container style */
             .chat-container .chatbot {
                 height: 500px;
                 overflow-y: auto;
@@ -856,7 +880,7 @@ def create_ui():
             }
             
 
-            /* 改进标签页样式 */
+            /* Improved tab style */
             .tabs .tab-nav {
                 background-color: #f5f5f5;
                 border-radius: 8px 8px 0 0;
@@ -875,7 +899,7 @@ def create_ui():
                 color: white;
             }
             
-            /* 状态指示器样式 */
+            /* Status indicator style */
             .status-indicator {
                 display: inline-block;
                 width: 10px;
@@ -897,7 +921,7 @@ def create_ui():
                 background-color: #dc3545;
             }
             
-            /* 日志显示区域样式 */
+            /* Log display area style */
             .log-display textarea {
                 height: 400px !important;
                 max-height: 400px !important;
@@ -908,7 +932,7 @@ def create_ui():
                 line-height: 1.4;
             }
             
-            /* 环境变量管理样式 */
+            /* Environment variable management style */
             .env-manager-container {
                 border-radius: 10px;
                 padding: 15px;
@@ -956,7 +980,7 @@ def create_ui():
                 margin-bottom: 15px;
             }
             
-            /* 改进环境变量表格样式 */
+            /* Improved environment variable table style */
             .env-table table {
                 border-collapse: separate;
                 border-spacing: 0;
@@ -988,13 +1012,13 @@ def create_ui():
                 border-bottom: none;
             }
             
-            /* 状态图标样式 */
+            /* Status icon style */
             .status-icon-cell {
                 text-align: center;
                 font-size: 1.2em;
             }
             
-            /* 链接样式 */
+            /* Link style */
             .guide-link {
                 color: #2c7be5;
                 text-decoration: none;
@@ -1045,48 +1069,48 @@ def create_ui():
             with gr.Column(scale=1):
                 question_input = gr.Textbox(
                     lines=5,
-                    placeholder="请输入您的问题...",
-                    label="问题",
+                    placeholder="Please enter your question...",
+                    label="Question",
                     elem_id="question_input",
                     show_copy_button=True,
-                    value="打开百度搜索，总结一下camel-ai的camel框架的github star、fork数目等，并把数字用plot包写成python文件保存到本地，并运行生成的python文件。",
+                    value="Open Baidu search, summarize the github stars, fork counts, etc. of camel-ai's camel framework, and write the numbers into a python file using the plot package, save it locally, and run the generated python file.",
                 )
 
-                # 增强版模块选择下拉菜单
-                # 只包含MODULE_DESCRIPTIONS中定义的模块
+                # Enhanced module selection dropdown
+                # Only includes modules defined in MODULE_DESCRIPTIONS
                 module_dropdown = gr.Dropdown(
                     choices=list(MODULE_DESCRIPTIONS.keys()),
                     value="run_qwen_zh",
-                    label="选择功能模块",
+                    label="Select Function Module",
                     interactive=True,
                 )
 
-                # 模块描述文本框
+                # Module description text box
                 module_description = gr.Textbox(
                     value=MODULE_DESCRIPTIONS["run_qwen_zh"],
-                    label="模块描述",
+                    label="Module Description",
                     interactive=False,
                     elem_classes="module-info",
                 )
 
                 with gr.Row():
                     run_button = gr.Button(
-                        "运行", variant="primary", elem_classes="primary"
+                        "Run", variant="primary", elem_classes="primary"
                     )
 
                 status_output = gr.HTML(
-                    value="<span class='status-indicator status-success'></span> 已就绪",
-                    label="状态",
+                    value="<span class='status-indicator status-success'></span> Ready",
+                    label="Status",
                 )
                 token_count_output = gr.Textbox(
-                    label="令牌计数", interactive=False, elem_classes="token-count"
+                    label="Token Count", interactive=False, elem_classes="token-count"
                 )
 
-            with gr.Tabs():  # 设置对话记录为默认选中的标签页
-                with gr.TabItem("对话记录"):
-                    # 添加对话记录显示区域
+            with gr.Tabs():  # Set conversation record as the default selected tab
+                with gr.TabItem("Conversation Record"):
+                    # Add conversation record display area
                     log_display2 = gr.Textbox(
-                        label="对话记录",
+                        label="Conversation Record",
                         lines=25,
                         max_lines=100,
                         interactive=False,
@@ -1098,78 +1122,84 @@ def create_ui():
                     )
 
                     with gr.Row():
-                        refresh_logs_button2 = gr.Button("刷新记录")
+                        refresh_logs_button2 = gr.Button("Refresh Record")
                         auto_refresh_checkbox2 = gr.Checkbox(
-                            label="自动刷新", value=True, interactive=True
+                            label="Auto Refresh", value=True, interactive=True
                         )
-                        clear_logs_button2 = gr.Button("清空记录", variant="secondary")
+                        clear_logs_button2 = gr.Button(
+                            "Clear Record", variant="secondary"
+                        )
 
-                with gr.TabItem("环境变量管理", id="env-settings"):
+                with gr.TabItem("Environment Variable Management", id="env-settings"):
                     with gr.Box(elem_classes="env-manager-container"):
                         gr.Markdown("""
-                            ## 环境变量管理
+                            ## Environment Variable Management
                             
-                            在此处设置模型API密钥和其他服务凭证。这些信息将保存在本地的`.env`文件中，确保您的API密钥安全存储且不会上传到网络。正确设置API密钥对于OWL系统的功能至关重要, 可以按找工具需求灵活配置环境变量。
+                            Set model API keys and other service credentials here. This information will be saved in a local `.env` file, ensuring your API keys are securely stored and not uploaded to the network. Correctly setting API keys is crucial for the functionality of the OWL system. Environment variables can be flexibly configured according to tool requirements.
                             """)
 
-                        # 主要内容分为两列布局
+                        # Main content divided into two-column layout
                         with gr.Row():
-                            # 左侧列：环境变量管理控件
+                            # Left column: Environment variable management controls
                             with gr.Column(scale=3):
                                 with gr.Box(elem_classes="env-controls"):
-                                    # 环境变量表格 - 设置为可交互以直接编辑
+                                    # Environment variable table - set to interactive for direct editing
                                     gr.Markdown("""
                                     <div style="background-color: #e7f3fe; border-left: 6px solid #2196F3; padding: 10px; margin: 15px 0; border-radius: 4px;">
-                                      <strong>提示：</strong> 请确保运行cp .env_template .env创建本地.env文件，根据运行模块灵活配置所需环境变量
+                                      <strong>Tip:</strong> Please make sure to run cp .env_template .env to create a local .env file, and flexibly configure the required environment variables according to the running module
                                     </div>
                                     """)
 
-                                    # 增强版环境变量表格，支持添加和删除行
+                                    # Enhanced environment variable table, supporting adding and deleting rows
                                     env_table = gr.Dataframe(
-                                        headers=["变量名", "值", "获取指南"],
+                                        headers=[
+                                            "Variable Name",
+                                            "Value",
+                                            "Retrieval Guide",
+                                        ],
                                         datatype=[
                                             "str",
                                             "str",
                                             "html",
-                                        ],  # 将最后一列设置为html类型以支持链接
-                                        row_count=10,  # 增加行数，以便添加新变量
+                                        ],  # Set the last column as HTML type to support links
+                                        row_count=10,  # Increase row count to allow adding new variables
                                         col_count=(3, "fixed"),
                                         value=update_env_table,
-                                        label="API密钥和环境变量",
-                                        interactive=True,  # 设置为可交互，允许直接编辑
+                                        label="API Keys and Environment Variables",
+                                        interactive=True,  # Set as interactive, allowing direct editing
                                         elem_classes="env-table",
                                     )
 
-                                    # 操作说明
+                                    # Operation instructions
                                     gr.Markdown(
                                         """
                                     <div style="background-color: #fff3cd; border-left: 6px solid #ffc107; padding: 10px; margin: 15px 0; border-radius: 4px;">
-                                    <strong>操作指南</strong>:
+                                    <strong>Operation Guide</strong>:
                                     <ul style="margin-top: 8px; margin-bottom: 8px;">
-                                      <li><strong>编辑变量</strong>: 直接点击表格中的"值"单元格进行编辑</li>
-                                      <li><strong>添加变量</strong>: 在空白行中输入新的变量名和值</li>
-                                      <li><strong>删除变量</strong>: 清空变量名即可删除该行</li>
-                                      <li><strong>获取API密钥</strong>: 点击"获取指南"列中的链接获取相应API密钥</li>
+                                      <li><strong>Edit Variable</strong>: Click directly on the "Value" cell in the table to edit</li>
+                                      <li><strong>Add Variable</strong>: Enter a new variable name and value in a blank row</li>
+                                      <li><strong>Delete Variable</strong>: Clear the variable name to delete that row</li>
+                                      <li><strong>Get API Key</strong>: Click on the link in the "Retrieval Guide" column to get the corresponding API key</li>
                                     </ul>
                                     </div>
                                     """,
                                         elem_classes="env-instructions",
                                     )
 
-                                    # 环境变量操作按钮
+                                    # Environment variable operation buttons
                                     with gr.Row(elem_classes="env-buttons"):
                                         save_env_button = gr.Button(
-                                            "💾 保存更改",
+                                            "💾 Save Changes",
                                             variant="primary",
                                             elem_classes="env-button",
                                         )
                                         refresh_button = gr.Button(
-                                            "🔄 刷新列表", elem_classes="env-button"
+                                            "🔄 Refresh List", elem_classes="env-button"
                                         )
 
-                                    # 状态显示
+                                    # Status display
                                     env_status = gr.HTML(
-                                        label="操作状态",
+                                        label="Operation Status",
                                         value="",
                                         elem_classes="env-status",
                                     )
@@ -1183,46 +1213,46 @@ def create_ui():
 
                     refresh_button.click(fn=update_env_table, outputs=[env_table])
 
-        # 示例问题
+        # Example questions
         examples = [
-            "打开百度搜索，总结一下camel-ai的camel框架的github star、fork数目等，并把数字用plot包写成python文件保存到本地，并运行生成的python文件。",
-            "浏览亚马逊并找出一款对程序员有吸引力的产品。请提供产品名称和价格",
-            "写一个hello world的python文件，保存到本地",
+            "Open Baidu search, summarize the github stars, fork counts, etc. of camel-ai's camel framework, and write the numbers into a python file using the plot package, save it locally, and run the generated python file.",
+            "Browse Amazon and find a product that is attractive to programmers. Please provide the product name and price",
+            "Write a hello world python file and save it locally",
         ]
 
         gr.Examples(examples=examples, inputs=question_input)
 
         gr.HTML("""
                 <div class="footer" id="about">
-                    <h3>关于 OWL 多智能体协作系统</h3>
-                    <p>OWL 是一个基于CAMEL框架开发的先进多智能体协作系统，旨在通过智能体协作解决复杂问题。</p>
-                    <p>© 2025 CAMEL-AI.org. 基于Apache License 2.0开源协议</p>
+                    <h3>About OWL Multi-Agent Collaboration System</h3>
+                    <p>OWL is an advanced multi-agent collaboration system developed based on the CAMEL framework, designed to solve complex problems through agent collaboration.</p>
+                    <p>© 2025 CAMEL-AI.org. Based on Apache License 2.0 open source license</p>
                     <p><a href="https://github.com/camel-ai/owl" target="_blank">GitHub</a></p>
                 </div>
             """)
 
-        # 设置事件处理
+        # Set up event handling
         run_button.click(
             fn=process_with_live_logs,
             inputs=[question_input, module_dropdown],
             outputs=[token_count_output, status_output, log_display2],
         )
 
-        # 模块选择更新描述
+        # Module selection updates description
         module_dropdown.change(
             fn=update_module_description,
             inputs=module_dropdown,
             outputs=module_description,
         )
 
-        # 对话记录相关事件处理
+        # Conversation record related event handling
         refresh_logs_button2.click(
             fn=lambda: get_latest_logs(100, LOG_QUEUE), outputs=[log_display2]
         )
 
         clear_logs_button2.click(fn=clear_log_file, outputs=[log_display2])
 
-        # 自动刷新控制
+        # Auto refresh control
         def toggle_auto_refresh(enabled):
             if enabled:
                 return gr.update(every=3)
@@ -1235,51 +1265,51 @@ def create_ui():
             outputs=[log_display2],
         )
 
-        # 不再默认自动刷新日志
+        # No longer automatically refresh logs by default
 
     return app
 
 
-# 主函数
+# Main function
 def main():
     try:
-        # 初始化日志系统
+        # Initialize logging system
         global LOG_FILE
         LOG_FILE = setup_logging()
-        logging.info("OWL Web应用程序启动")
+        logging.info("OWL Web application started")
 
-        # 启动日志读取线程
+        # Start log reading thread
         log_thread = threading.Thread(
             target=log_reader_thread, args=(LOG_FILE,), daemon=True
         )
         log_thread.start()
-        logging.info("日志读取线程已启动")
+        logging.info("Log reading thread started")
 
-        # 初始化.env文件（如果不存在）
+        # Initialize .env file (if it doesn't exist)
         init_env_file()
         app = create_ui()
 
-        # 注册应用关闭时的清理函数
+        # Register cleanup function for when the application closes
         def cleanup():
             global STOP_LOG_THREAD, STOP_REQUESTED
             STOP_LOG_THREAD.set()
             STOP_REQUESTED.set()
-            logging.info("应用程序关闭，停止日志线程")
+            logging.info("Application closed, stopping log thread")
 
         app.queue()
         app.launch(share=False, server_name="127.0.0.1", server_port=7860)
     except Exception as e:
-        logging.error(f"启动应用程序时发生错误: {str(e)}")
-        print(f"启动应用程序时发生错误: {str(e)}")
+        logging.error(f"Error occurred while starting the application: {str(e)}")
+        print(f"Error occurred while starting the application: {str(e)}")
         import traceback
 
         traceback.print_exc()
 
     finally:
-        # 确保日志线程停止
+        # Ensure log thread stops
         STOP_LOG_THREAD.set()
         STOP_REQUESTED.set()
-        logging.info("应用程序关闭")
+        logging.info("Application closed")
 
 
 if __name__ == "__main__":

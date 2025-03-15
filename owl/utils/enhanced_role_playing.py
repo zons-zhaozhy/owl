@@ -461,6 +461,10 @@ def run_society(
             assistant_response.info["usage"]["completion_tokens"]
             + user_response.info["usage"]["completion_tokens"]
         )
+        overall_prompt_token_count += (
+            assistant_response.info["usage"]["prompt_tokens"]
+            + user_response.info["usage"]["prompt_tokens"]
+        )
 
         # convert tool call to dict
         tool_call_records: List[dict] = []

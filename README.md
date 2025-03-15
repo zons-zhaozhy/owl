@@ -224,7 +224,7 @@ OWL requires various API keys to interact with different services. The `owl/.env
 2. **Configure Your API Keys**:
    Open the `.env` file in your preferred text editor and insert your API keys in the corresponding fields.
    
-   > **Note**: For the minimal example (`run_mini.py`), you only need to configure the LLM API key (e.g., `OPENAI_API_KEY`).
+   > **Note**: For the minimal example (`examples/run_mini.py`), you only need to configure the LLM API key (e.g., `OPENAI_API_KEY`).
 
 ### Option 2: Setting Environment Variables Directly
 
@@ -275,7 +275,7 @@ cd .. && source .venv/bin/activate && cd owl
 playwright install-deps 
 
 #run example demo script
-xvfb-python run.py
+xvfb-python examples/run.py
 
 # Option 2: Build and run using the provided scripts
 cd .container
@@ -299,17 +299,17 @@ npx -y @smithery/cli install @wonderwhy-er/desktop-commander --client claude
 npx @wonderwhy-er/desktop-commander setup
 
 # Run the MCP example
-python owl/run_mcp.py
+python examples/run_mcp.py
 ```
 
-This example showcases how OWL agents can seamlessly interact with file systems, web automation, and information retrieval through the MCP protocol. Check out `owl/run_mcp.py` for the full implementation.
+This example showcases how OWL agents can seamlessly interact with file systems, web automation, and information retrieval through the MCP protocol. Check out `examples/run_mcp.py` for the full implementation.
 
 ## Basic Usage
 
 After installation and setting up your environment variables, you can start using OWL right away:
 
 ```bash
-python owl/run.py
+python examples/run.py
 ```
 
 ## Running with Different Models
@@ -330,28 +330,28 @@ OWL supports various LLM backends, though capabilities may vary depending on the
 
 ```bash
 # Run with Qwen model
-python owl/examples/run_qwen_zh.py
+python examples/run_qwen_zh.py
 
 # Run with Deepseek model
-python owl/examples/run_deepseek_zh.py
+python examples/run_deepseek_zh.py
 
 # Run with other OpenAI-compatible models
-python owl/examples/run_openai_compatiable_model.py
+python examples/run_openai_compatiable_model.py
 
 # Run with Azure OpenAI
-python owl/run_azure_openai.py
+python examples/run_azure_openai.py
 
 # Run with Ollama
-python owl/examples/run_ollama.py
+python examples/run_ollama.py
 ```
 
 For a simpler version that only requires an LLM API key, you can try our minimal example:
 
 ```bash
-python owl/examples/run_mini.py
+python examples/run_mini.py
 ```
 
-You can run OWL agent with your own task by modifying the `run.py` script:
+You can run OWL agent with your own task by modifying the `examples/run.py` script:
 
 ```python
 # Define your own task
@@ -393,7 +393,7 @@ Here are some tasks you can try with OWL:
 
 OWL's MCP integration provides a standardized way for AI models to interact with various tools and data sources:
 
-Try our comprehensive MCP example in `owl/run_mcp.py` to see these capabilities in action!
+Try our comprehensive MCP example in `examples/run_mcp.py` to see these capabilities in action!
 
 ## Available Toolkits
 
@@ -464,10 +464,10 @@ OWL includes an intuitive web-based user interface that makes it easier to inter
 
 ```bash
 # Start the Chinese version
-python owl/webapp_zh.py
+python examples/webapp_zh.py
 
 # Start the English version
-python owl/webapp.py
+python examples/webapp.py
 ```
 
 ## Features
@@ -545,7 +545,7 @@ Join us ([*Discord*](https://discord.camel-ai.org/) or [*WeChat*](https://ghli.o
 
 Join us for further discussions!
 <!-- ![](./assets/community.png) -->
-![](./assets/community_8.jpg)
+![](./assets/community.jpg)
 
 # ❓ FAQ
 
