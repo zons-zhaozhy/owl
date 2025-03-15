@@ -121,7 +121,19 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
   </p>
 </div>
 
-- **[2025.03.15]**: Restructured the web-based user interface architecture for improved system stability; optimized OWL Agent execution mechanisms for enhanced efficiency and performance; integrated Baidu search engine into SearchToolkit.
+<div style="background-color: #e3f2fd; padding: 12px; border-radius: 8px; border-left: 4px solid #1e88e5; margin: 10px 0;">
+  <h4 style="color: #1e88e5; margin: 0 0 8px 0;">
+    🎉 Latest Major Update - March 15, 2025
+  </h4>
+  <p style="margin: 0;">
+    <b>Significant Improvements:</b>
+    <ul style="margin: 5px 0 0 0; padding-left: 20px;">
+      <li>Restructured web-based UI architecture for enhanced stability 🏗️</li>
+      <li>Optimized OWL Agent execution mechanisms for better performance 🚀</li>
+    </ul>
+    <i>Try it now and experience the improved performance in your automation tasks!</i>
+  </p>
+</div>
 - **[2025.03.12]**: Added Bocha search in SearchToolkit, integrated Volcano Engine model platform, and enhanced Azure and OpenAI Compatible models with structured output and tool calling.
 - **[2025.03.11]**: We added MCPToolkit, FileWriteToolkit, and TerminalToolkit to enhance OWL agents with MCP tool calling, file writing capabilities, and terminal command execution.
 - **[2025.03.09]**: We added a web-based user interface that makes it easier to interact with the system.
@@ -476,7 +488,15 @@ Selecting only necessary toolkits optimizes performance and reduces resource usa
 
 # 🌐 Web Interface
 
-OWL includes an intuitive web-based user interface that makes it easier to interact with the system. 
+<div align="center" style="background-color: #f0f7ff; padding: 15px; border-radius: 10px; border: 2px solid #1e88e5; margin: 20px 0;">
+  <h3 style="color: #1e88e5; margin: 0;">
+    🚀 Enhanced Web Interface Now Available!
+  </h3>
+  <p style="margin: 10px 0;">
+    Experience improved system stability and optimized performance with our latest update.
+    Start exploring the power of OWL through our user-friendly interface!
+  </p>
+</div>
 
 ## Starting the Web UI
 

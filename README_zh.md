@@ -104,7 +104,19 @@
   </p>
 </div>
 
-- **[2025.03.15]**: 重构网页用户界面，提升系统稳定性；优化OWL Agent的运行机制，提高执行效率与性能；在SearchToolkit中整合百度搜索引擎
+<div style="background-color: #e3f2fd; padding: 12px; border-radius: 8px; border-left: 4px solid #1e88e5; margin: 10px 0;">
+  <h4 style="color: #1e88e5; margin: 0 0 8px 0;">
+    🎉 最新重大更新 - 2025年3月15日
+  </h4>
+  <p style="margin: 0;">
+    <b>重要改进：</b>
+    <ul style="margin: 5px 0 0 0; padding-left: 20px;">
+      <li>重构网页用户界面架构，显著提升系统稳定性 🏗️</li>
+      <li>优化OWL Agent执行机制，大幅提升性能与效率 🚀</li>
+    </ul>
+    <i>立即体验全新升级的自动化任务处理能力！</i>
+  </p>
+</div>
 - **[2025.03.12]**: 在SearchToolkit中添加了Bocha搜索功能，集成了火山引擎模型平台，并更新了Azure和OpenAI Compatible模型的结构化输出和工具调用能力。
 - **[2025.03.11]**: 我们添加了 MCPToolkit、FileWriteToolkit 和 TerminalToolkit，增强了 OWL Agent 的 MCP（模型上下文协议）集成、文件写入能力和终端命令执行功能。MCP 作为一个通用协议层，标准化了 AI 模型与各种数据源和工具的交互方式。
 - **[2025.03.09]**: 我们添加了基于网页的用户界面，使系统交互变得更加简便。
@@ -448,6 +460,16 @@ assistant_agent_kwargs = {"model": models["assistant"], "tools": tools}
 选择必要的工具包可优化性能并减少资源使用。
 
 # 🌐 网页界面
+
+<div align="center" style="background-color: #f0f7ff; padding: 15px; border-radius: 10px; border: 2px solid #1e88e5; margin: 20px 0;">
+  <h3 style="color: #1e88e5; margin: 0;">
+    🚀 全新升级的网页界面现已发布！
+  </h3>
+  <p style="margin: 10px 0;">
+    体验更稳定的系统性能和优化后的执行效率。
+    通过我们直观的界面，开启OWL强大功能的探索之旅！
+  </p>
+</div>
 
 OWL 现在包含一个基于网页的用户界面，使与系统交互变得更加容易。要启动网页界面，请运行：
 
