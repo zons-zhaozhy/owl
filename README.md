@@ -277,21 +277,6 @@ For more detailed Docker usage instructions, including cross-platform support, o
 
 # 🚀 Quick Start
 
-## Try MCP (Model Context Protocol) Integration
-
-Experience the power of MCP by running our example that demonstrates multi-agent information retrieval and processing:
-
-```bash
-# Set up MCP servers (one-time setup)
-npx -y @smithery/cli install @wonderwhy-er/desktop-commander --client claude
-npx @wonderwhy-er/desktop-commander setup
-
-# Run the MCP example
-python examples/run_mcp.py
-```
-
-This example showcases how OWL agents can seamlessly interact with file systems, web automation, and information retrieval through the MCP protocol. Check out `examples/run_mcp.py` for the full implementation.
-
 ## Basic Usage
 
 After installation and setting up your environment variables, you can start using OWL right away:

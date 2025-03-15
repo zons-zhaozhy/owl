@@ -270,21 +270,6 @@ chmod +x build_docker.sh
 
 # 🚀 快速开始
 
-## 尝试 MCP（模型上下文协议）集成
-
-体验 MCP 的强大功能，运行我们的示例来展示多智能体信息检索和处理：
-
-```bash
-# 设置 MCP 服务器（仅需一次性设置）
-npx -y @smithery/cli install @wonderwhy-er/desktop-commander --client claude
-npx @wonderwhy-er/desktop-commander setup
-
-# 运行 MCP 示例
-python examples/run_mcp.py
-```
-
-这个示例展示了 OWL 智能体如何通过 MCP 协议无缝地与文件系统、网页自动化和信息检索进行交互。查看 `examples/run_mcp.py` 了解完整实现。
-
 ## 基本用法
    
 运行以下示例：
