@@ -25,7 +25,7 @@ from camel.toolkits import (
 )
 from camel.types import ModelPlatformType
 
-from utils import OwlRolePlaying, run_society
+from owl.utils import OwlRolePlaying, run_society
 
 from camel.logger import set_log_level
 

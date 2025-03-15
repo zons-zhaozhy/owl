@@ -102,7 +102,7 @@ from camel.types import ModelPlatformType, ModelType
 from camel.logger import set_log_level
 from camel.toolkits import MCPToolkit
 
-from utils.enhanced_role_playing import OwlRolePlaying, arun_society
+from owl.utils.enhanced_role_playing import OwlRolePlaying, arun_society
 
 
 load_dotenv()
