@@ -104,6 +104,7 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
   </p>
 </div>
 
+- **[2025.03.15]**: Restructured the web application architecture for significantly improved system stability; optimized OWL Agent execution mechanisms for enhanced efficiency and performance; integrated Baidu search engine into SearchToolkit.
 - **[2025.03.12]**: Added Bocha search in SearchToolkit, integrated Volcano Engine model platform, and enhanced Azure and OpenAI Compatible models with structured output and tool calling.
 - **[2025.03.11]**: We added MCPToolkit, FileWriteToolkit, and TerminalToolkit to enhance OWL agents with MCP tool calling, file writing capabilities, and terminal command execution.
 - **[2025.03.09]**: We added a web-based user interface that makes it easier to interact with the system.
@@ -119,7 +120,7 @@ https://private-user-images.githubusercontent.com/55657767/420212194-e813fc05-13
 
 # ✨️ Core Features
 
-- **Real-time Information Retrieval**: Leverage Wikipedia, Google Search, and other online sources for up-to-date information.
+- **Online Search**: Support for multiple search engines (including Wikipedia, Google, DuckDuckGo, Baidu, Bocha, etc.) for real-time information retrieval and knowledge acquisition.
 - **Multimodal Processing**: Support for handling internet or local videos, images, and audio data.
 - **Browser Automation**: Utilize the Playwright framework for simulating browser interactions, including scrolling, clicking, input handling, downloading, navigation, and more.
 - **Document Parsing**: Extract content from Word, Excel, PDF, and PowerPoint files, converting them into text or Markdown format.

@@ -104,6 +104,7 @@
   </p>
 </div>
 
+- **[2025.03.15]**: 重构Web应用架构，显著提升系统稳定性；优化OWL Agent的运行机制，提高执行效率与性能；在SearchToolkit中整合百度搜索引擎
 - **[2025.03.12]**: 在SearchToolkit中添加了Bocha搜索功能，集成了火山引擎模型平台，并更新了Azure和OpenAI Compatible模型的结构化输出和工具调用能力。
 - **[2025.03.11]**: 我们添加了 MCPToolkit、FileWriteToolkit 和 TerminalToolkit，增强了 OWL Agent 的 MCP（模型上下文协议）集成、文件写入能力和终端命令执行功能。MCP 作为一个通用协议层，标准化了 AI 模型与各种数据源和工具的交互方式。
 - **[2025.03.09]**: 我们添加了基于网页的用户界面，使系统交互变得更加简便。
@@ -118,7 +119,7 @@ https://private-user-images.githubusercontent.com/55657767/420212194-e813fc05-13
 
 # ✨️ 核心功能
 
-- **在线搜索**：使用维基百科、谷歌搜索等，进行实时信息检索
+- **在线搜索**：支持多种搜索引擎（包括维基百科、Google、DuckDuckGo、百度、博查等），实现实时信息检索与知识获取
 - **多模态处理**：支持互联网或本地视频、图片、语音处理
 - **浏览器操作**：借助Playwright框架开发浏览器模拟交互，支持页面滚动、点击、输入、下载、历史回退等功能
 - **文件解析**：word、excel、PDF、PowerPoint信息提取，内容转文本/Markdown
