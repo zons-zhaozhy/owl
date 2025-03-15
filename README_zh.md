@@ -537,9 +537,8 @@ python examples/run_gaia_roleplaying.py
 加入我们的 ([*Discord*](https://discord.camel-ai.org/) 或 [*微信*](https://ghli.org/camel/wechat.png)) 社区，一起探索智能体扩展规律的边界。
 
 加入我们，参与更多讨论！
-<!-- ![](./assets/community.png) -->
+
 ![](./assets/community.jpeg)
-<!-- ![](./assets/meetup.jpg) -->
 
 # ❓ 常见问题
 
