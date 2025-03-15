@@ -87,6 +87,7 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
 
 # 🔥 News
 
+
 <div align="center" style="background-color: #fffacd; padding: 15px; border-radius: 10px; border: 2px solid #ffd700; margin: 20px 0;">
   <h3 style="color: #d81b60; margin: 0; font-size: 1.3em;">
     🌟🌟🌟 <b>COMMUNITY CALL FOR USE CASES!</b> 🌟🌟🌟
@@ -109,6 +110,7 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
 - **[2025.03.07]**: We open-sourced the codebase of the 🦉 OWL project.
 - **[2025.03.03]**: OWL achieved the #1 position among open-source frameworks on the GAIA benchmark with a score of 58.18.
 
+
 # 🎬 Demo Video
 
 https://github.com/user-attachments/assets/2a2a825d-39ea-45c5-9ba1-f9d58efbc372
@@ -122,7 +124,9 @@ https://private-user-images.githubusercontent.com/55657767/420212194-e813fc05-13
 - **Browser Automation**: Utilize the Playwright framework for simulating browser interactions, including scrolling, clicking, input handling, downloading, navigation, and more.
 - **Document Parsing**: Extract content from Word, Excel, PDF, and PowerPoint files, converting them into text or Markdown format.
 - **Code Execution**: Write and execute Python code using interpreter.
-- **Built-in Toolkits**: Access to a comprehensive set of built-in toolkits including ArxivToolkit, AudioAnalysisToolkit, CodeExecutionToolkit, DalleToolkit, DataCommonsToolkit, ExcelToolkit, GitHubToolkit, GoogleMapsToolkit, GoogleScholarToolkit, ImageAnalysisToolkit, MathToolkit, NetworkXToolkit, NotionToolkit, OpenAPIToolkit, RedditToolkit, SearchToolkit, SemanticScholarToolkit, SymPyToolkit, VideoAnalysisToolkit, WeatherToolkit, WebToolkit, and many more for specialized tasks.
+- **Built-in Toolkits**: Access to a comprehensive set of built-in toolkits including:
+  - **Model Context Protocol (MCP)**: A universal protocol layer that standardizes AI model interactions with various tools and data sources
+  - **Core Toolkits**: ArxivToolkit, AudioAnalysisToolkit, CodeExecutionToolkit, DalleToolkit, DataCommonsToolkit, ExcelToolkit, GitHubToolkit, GoogleMapsToolkit, GoogleScholarToolkit, ImageAnalysisToolkit, MathToolkit, NetworkXToolkit, NotionToolkit, OpenAPIToolkit, RedditToolkit, SearchToolkit, SemanticScholarToolkit, SymPyToolkit, VideoAnalysisToolkit, WeatherToolkit, BrowserToolkit, and many more for specialized tasks
 
 # 🛠️ Installation
 
@@ -177,7 +181,7 @@ source .venv/bin/activate
 .venv\Scripts\activate
 
 # Install from requirements.txt
-pip install -r requirements.txt
+pip install -r requirements.txt --use-pep517
 ```
 
 ## Option 3: Using conda
@@ -199,7 +203,7 @@ conda activate owl
 pip install -e .
 
 # Option 2: Install from requirements.txt
-pip install -r requirements.txt
+pip install -r requirements.txt --use-pep517
 
 # Exit the conda environment when done
 conda deactivate
@@ -259,9 +263,19 @@ cp owl/.env_template owl/.env
 
 # Option 1: Using docker-compose directly
 cd .container
+
 docker-compose up -d
+
 # Run OWL inside the container
-docker-compose exec owl bash -c "xvfb-python run.py"
+docker-compose exec owl bash
+
+# activate the virtual environment
+cd .. && source .venv/bin/activate && cd owl
+
+playwright install-deps 
+
+#run example demo script
+xvfb-python run.py
 
 # Option 2: Build and run using the provided scripts
 cd .container
@@ -274,6 +288,23 @@ chmod +x build_docker.sh
 For more detailed Docker usage instructions, including cross-platform support, optimized configurations, and troubleshooting, please refer to [DOCKER_README.md](.container/DOCKER_README_en.md).
 
 # 🚀 Quick Start
+
+## Try MCP (Model Context Protocol) Integration
+
+Experience the power of MCP by running our example that demonstrates multi-agent information retrieval and processing:
+
+```bash
+# Set up MCP servers (one-time setup)
+npx -y @smithery/cli install @wonderwhy-er/desktop-commander --client claude
+npx @wonderwhy-er/desktop-commander setup
+
+# Run the MCP example
+python owl/run_mcp.py
+```
+
+This example showcases how OWL agents can seamlessly interact with file systems, web automation, and information retrieval through the MCP protocol. Check out `owl/run_mcp.py` for the full implementation.
+
+## Basic Usage
 
 After installation and setting up your environment variables, you can start using OWL right away:
 
@@ -306,6 +337,9 @@ python owl/examples/run_deepseek_zh.py
 
 # Run with other OpenAI-compatible models
 python owl/examples/run_openai_compatiable_model.py
+
+# Run with Azure OpenAI
+python owl/run_azure_openai.py
 
 # Run with Ollama
 python owl/examples/run_ollama.py
@@ -355,6 +389,14 @@ Here are some tasks you can try with OWL:
 
 # 🧰 Toolkits and Capabilities
 
+## Model Context Protocol (MCP)
+
+OWL's MCP integration provides a standardized way for AI models to interact with various tools and data sources:
+
+Try our comprehensive MCP example in `owl/run_mcp.py` to see these capabilities in action!
+
+## Available Toolkits
+
 > **Important**: Effective use of toolkits requires models with strong tool calling capabilities. For multimodal toolkits (Web, Image, Video), models must also have multimodal understanding abilities.
 
 OWL supports various toolkits that can be customized by modifying the `tools` list in your script:
@@ -362,7 +404,7 @@ OWL supports various toolkits that can be customized by modifying the `tools` li
 ```python
 # Configure toolkits
 tools = [
-    *WebToolkit(headless=False).get_tools(),  # Browser automation
+    *BrowserToolkit(headless=False).get_tools(),  # Browser automation
     *VideoAnalysisToolkit(model=models["video"]).get_tools(),
     *AudioAnalysisToolkit().get_tools(),  # Requires OpenAI Key
     *CodeExecutionToolkit(sandbox="subprocess").get_tools(),
@@ -381,7 +423,7 @@ tools = [
 Key toolkits include:
 
 ### Multimodal Toolkits (Require multimodal model capabilities)
-- **WebToolkit**: Browser automation for web interaction and navigation
+- **BrowserToolkit**: Browser automation for web interaction and navigation
 - **VideoAnalysisToolkit**: Video processing and content analysis
 - **ImageAnalysisToolkit**: Image analysis and interpretation
 
@@ -399,11 +441,11 @@ To customize available tools:
 
 ```python
 # 1. Import toolkits
-from camel.toolkits import WebToolkit, SearchToolkit, CodeExecutionToolkit
+from camel.toolkits import BrowserToolkit, SearchToolkit, CodeExecutionToolkit
 
 # 2. Configure tools list
 tools = [
-    *WebToolkit(headless=True).get_tools(),
+    *BrowserToolkit(headless=True).get_tools(),
     SearchToolkit().search_wiki,
     *CodeExecutionToolkit(sandbox="subprocess").get_tools(),
 ]
@@ -490,10 +532,11 @@ We welcome contributions from the community! Here's how you can help:
 3. Submit pull requests with your improvements
 
 **Current Issues Open for Contribution:**
+- [#1857](https://github.com/camel-ai/camel/issues/1857)
 - [#1770](https://github.com/camel-ai/camel/issues/1770)
 - [#1712](https://github.com/camel-ai/camel/issues/1712)
 - [#1537](https://github.com/camel-ai/camel/issues/1537)
-- [#1827](https://github.com/camel-ai/camel/issues/1827)
+
 
 To take on an issue, simply leave a comment stating your interest.
 
@@ -501,8 +544,8 @@ To take on an issue, simply leave a comment stating your interest.
 Join us ([*Discord*](https://discord.camel-ai.org/) or [*WeChat*](https://ghli.org/camel/wechat.png)) in pushing the boundaries of finding the scaling laws of agents. 
 
 Join us for further discussions!
-![](./assets/community.jpg)
-<!-- ![](./assets/meetup.jpg) -->
+<!-- ![](./assets/community.png) -->
+![](./assets/community_8.jpg)
 
 # ❓ FAQ
 

@@ -105,7 +105,7 @@
 </div>
 
 - **[2025.03.12]**: 在SearchToolkit中添加了Bocha搜索功能，集成了火山引擎模型平台，并更新了Azure和OpenAI Compatible模型的结构化输出和工具调用能力。
-- **[2025.03.11]**: 我们添加了 MCPToolkit、FileWriteToolkit 和 TerminalToolkit，增强 OWL Agent的工具调用、文件写入能力和终端命令执行功能。
+- **[2025.03.11]**: 我们添加了 MCPToolkit、FileWriteToolkit 和 TerminalToolkit，增强了 OWL Agent 的 MCP（模型上下文协议）集成、文件写入能力和终端命令执行功能。MCP 作为一个通用协议层，标准化了 AI 模型与各种数据源和工具的交互方式。
 - **[2025.03.09]**: 我们添加了基于网页的用户界面，使系统交互变得更加简便。
 - **[2025.03.07]**: 我们开源了 🦉 OWL 项目的代码库。
 - **[2025.03.03]**: OWL 在 GAIA 基准测试中取得 58.18 平均分，在开源框架中排名第一！
@@ -123,7 +123,7 @@ https://private-user-images.githubusercontent.com/55657767/420212194-e813fc05-13
 - **浏览器操作**：借助Playwright框架开发浏览器模拟交互，支持页面滚动、点击、输入、下载、历史回退等功能
 - **文件解析**：word、excel、PDF、PowerPoint信息提取，内容转文本/Markdown
 - **代码执行**：编写python代码，并使用解释器运行
-- **丰富工具包**：提供丰富的工具包，包括ArxivToolkit（学术论文检索）、AudioAnalysisToolkit（音频分析）、CodeExecutionToolkit（代码执行）、DalleToolkit（图像生成）、DataCommonsToolkit（数据共享）、ExcelToolkit（Excel处理）、GitHubToolkit（GitHub交互）、GoogleMapsToolkit（地图服务）、GoogleScholarToolkit（学术搜索）、ImageAnalysisToolkit（图像分析）、MathToolkit（数学计算）、NetworkXToolkit（图形分析）、NotionToolkit（Notion交互）、OpenAPIToolkit（API操作）、RedditToolkit（Reddit交互）、SearchToolkit（搜索服务）、SemanticScholarToolkit（语义学术搜索）、SymPyToolkit（符号计算）、VideoAnalysisToolkit（视频分析）、WeatherToolkit（天气查询）、WebToolkit（网页交互）等多种专业工具，满足各类特定任务需求。
+- **丰富工具包**：提供丰富的工具包，包括ArxivToolkit（学术论文检索）、AudioAnalysisToolkit（音频分析）、CodeExecutionToolkit（代码执行）、DalleToolkit（图像生成）、DataCommonsToolkit（数据共享）、ExcelToolkit（Excel处理）、GitHubToolkit（GitHub交互）、GoogleMapsToolkit（地图服务）、GoogleScholarToolkit（学术搜索）、ImageAnalysisToolkit（图像分析）、MathToolkit（数学计算）、NetworkXToolkit（图形分析）、NotionToolkit（Notion交互）、OpenAPIToolkit（API操作）、RedditToolkit（Reddit交互）、SearchToolkit（搜索服务）、SemanticScholarToolkit（语义学术搜索）、SymPyToolkit（符号计算）、VideoAnalysisToolkit（视频分析）、WeatherToolkit（天气查询）、BrowserToolkit（网页交互）等多种专业工具，满足各类特定任务需求。
 
 # 🛠️ 安装
 
@@ -176,7 +176,7 @@ source .venv/bin/activate
 .venv\Scripts\activate
 
 # 从 requirements.txt 安装
-pip install -r requirements.txt
+pip install -r requirements.txt --use-pep517
 ```
 
 ## 选项3：使用 conda
@@ -198,7 +198,7 @@ conda activate owl
 pip install -e .
 
 # 选项2：从 requirements.txt 安装
-pip install -r requirements.txt
+pip install -r requirements.txt --use-pep517
 
 # 完成后退出 conda 环境
 conda deactivate
@@ -257,9 +257,19 @@ cp owl/.env_template owl/.env
 
 # 选项1：直接使用docker-compose
 cd .container
+
 docker-compose up -d
+
 # 在容器中运行OWL
-docker-compose exec owl bash -c "xvfb-python run.py"
+docker-compose exec owl bash
+
+# 激活虚拟环境
+cd .. && source .venv/bin/activate && cd owl
+
+playwright install-deps 
+
+#运行例子演示脚本
+xvfb-python run.py
 
 # 选项2：使用提供的脚本构建和运行
 cd .container
@@ -272,6 +282,23 @@ chmod +x build_docker.sh
 更多详细的Docker使用说明，包括跨平台支持、优化配置和故障排除，请参阅 [DOCKER_README.md](.container/DOCKER_README.md)
 
 # 🚀 快速开始
+
+## 尝试 MCP（模型上下文协议）集成
+
+体验 MCP 的强大功能，运行我们的示例来展示多智能体信息检索和处理：
+
+```bash
+# 设置 MCP 服务器（仅需一次性设置）
+npx -y @smithery/cli install @wonderwhy-er/desktop-commander --client claude
+npx @wonderwhy-er/desktop-commander setup
+
+# 运行 MCP 示例
+python owl/run_mcp.py
+```
+
+这个示例展示了 OWL 智能体如何通过 MCP 协议无缝地与文件系统、网页自动化和信息检索进行交互。查看 `owl/run_mcp.py` 了解完整实现。
+
+## 基本用法
    
 运行以下示例：
 
@@ -311,6 +338,9 @@ python owl/examples/run_deepseek_zh.py
 # 使用其他 OpenAI 兼容模型运行
 python owl/examples/run_openai_compatiable_model.py
 
+# 使用 Azure OpenAI模型运行
+python owl/run_azure_openai.py
+
 # 使用 Ollama 运行
 python owl/examples/run_ollama.py
 ```
@@ -349,6 +379,14 @@ OWL 将自动调用与文档相关的工具来处理文件并提取答案。
 
 # 🧰 工具包与功能
 
+## 模型上下文协议（MCP）
+
+OWL 的 MCP 集成为 AI 模型与各种工具和数据源的交互提供了标准化的方式。
+
+查看我们的综合示例 `owl/run_mcp.py` 来体验这些功能！
+
+## 可用工具包
+
 > **重要提示**：有效使用工具包需要具备强大工具调用能力的模型。对于多模态工具包（Web、图像、视频），模型还必须具备多模态理解能力。
 
 OWL支持多种工具包，可通过修改脚本中的`tools`列表进行自定义：
@@ -356,7 +394,7 @@ OWL支持多种工具包，可通过修改脚本中的`tools`列表进行自定�
 ```python
 # 配置工具包
 tools = [
-    *WebToolkit(headless=False).get_tools(),  # 浏览器自动化
+    *BrowserToolkit(headless=False).get_tools(),  # 浏览器自动化
     *VideoAnalysisToolkit(model=models["video"]).get_tools(),
     *AudioAnalysisToolkit().get_tools(),  # 需要OpenAI API密钥
     *CodeExecutionToolkit(sandbox="subprocess").get_tools(),
@@ -375,7 +413,7 @@ tools = [
 关键工具包包括：
 
 ### 多模态工具包（需要模型具备多模态能力）
-- **WebToolkit**：浏览器自动化，用于网页交互和导航
+- **BrowserToolkit**：浏览器自动化，用于网页交互和导航
 - **VideoAnalysisToolkit**：视频处理和内容分析
 - **ImageAnalysisToolkit**：图像分析和解释
 
@@ -393,11 +431,11 @@ tools = [
 
 ```python
 # 1. 导入工具包
-from camel.toolkits import WebToolkit, SearchToolkit, CodeExecutionToolkit
+from camel.toolkits import BrowserToolkit, SearchToolkit, CodeExecutionToolkit
 
 # 2. 配置工具列表
 tools = [
-    *WebToolkit(headless=True).get_tools(),
+    *BrowserToolkit(headless=True).get_tools(),
     SearchToolkit().search_wiki,
     *CodeExecutionToolkit(sandbox="subprocess").get_tools(),
 ]
@@ -481,10 +519,10 @@ python run_gaia_roleplaying.py
 3. 提交包含您改进的拉取请求
 
 **当前开放贡献的问题：**
+- [#1857](https://github.com/camel-ai/camel/issues/1857)
 - [#1770](https://github.com/camel-ai/camel/issues/1770)
 - [#1712](https://github.com/camel-ai/camel/issues/1712)
 - [#1537](https://github.com/camel-ai/camel/issues/1537)
-- [#1827](https://github.com/camel-ai/camel/issues/1827)
 
 要认领一个问题，只需在该问题下留言表明您的兴趣即可。
 
@@ -492,7 +530,8 @@ python run_gaia_roleplaying.py
 加入我们的 ([*Discord*](https://discord.camel-ai.org/) 或 [*微信*](https://ghli.org/camel/wechat.png)) 社区，一起探索智能体扩展规律的边界。
 
 加入我们，参与更多讨论！
-![](./assets/community.jpg)
+<!-- ![](./assets/community.png) -->
+![](./assets/community_8.jpg)
 <!-- ![](./assets/meetup.jpg) -->
 
 # ❓ 常见问题
