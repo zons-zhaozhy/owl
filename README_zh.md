@@ -273,7 +273,7 @@ docker-compose up -d
 docker-compose exec owl bash
 
 # 激活虚拟环境
-cd .. && source .venv/bin/activate && cd owl
+cd .. && source .venv/bin/activate
 
 playwright install-deps 
 
