@@ -24,7 +24,7 @@ import importlib
 from dotenv import load_dotenv, set_key, find_dotenv, unset_key
 import threading
 import queue
-import re  # For regular expression operations
+import re
 
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
@@ -170,7 +170,7 @@ def get_latest_logs(max_lines=100, queue_source=None):
     processed_messages = set()
 
     def process_message(role, content):
-        # 创建一个唯一标识符来跟踪消息
+        # Create a unique identifier to track messages
         msg_id = f"{role}:{content}"
         if msg_id in processed_messages:
             return None
@@ -184,7 +184,7 @@ def get_latest_logs(max_lines=100, queue_source=None):
 
     for log in filtered_logs:
         formatted_messages = []
-        # 尝试提取消息数组
+        # Try to extract message array
         messages_match = re.search(
             r"Model (.*?), index (\d+), processed these messages: (\[.*\])", log
         )
@@ -671,7 +671,7 @@ def save_env_table_changes(data):
         current_env_vars = load_env_vars()
         processed_keys = set()  # Record processed keys to detect deleted variables
 
-        # 处理pandas DataFrame对象
+        # Process pandas DataFrame object
         import pandas as pd
 
         if isinstance(data, pd.DataFrame):
@@ -681,7 +681,7 @@ def save_env_table_changes(data):
 
             # Iterate through each row of the DataFrame
             for index, row in data.iterrows():
-                # 使用列名访问数据
+                # Use column names to access data
                 if len(columns) >= 3:
                     # Get variable name and value (column 0 is name, column 1 is value)
                     key = row[0] if isinstance(row, pd.Series) else row.iloc[0]
@@ -696,10 +696,10 @@ def save_env_table_changes(data):
                         )
                         add_env_var(key, str(value))
                         processed_keys.add(key)
-        # 处理其他格式
+        # Process other formats
         elif isinstance(data, dict):
             logging.info(f"Dictionary format data keys: {list(data.keys())}")
-            # 如果是字典格式，尝试不同的键
+            # If dictionary format, try different keys
             if "data" in data:
                 rows = data["data"]
             elif "values" in data:
@@ -707,7 +707,7 @@ def save_env_table_changes(data):
             elif "value" in data:
                 rows = data["value"]
             else:
-                # 尝试直接使用字典作为行数据
+                # Try using dictionary directly as row data
                 rows = []
                 for key, value in data.items():
                     if key not in ["headers", "types", "columns"]:
@@ -765,11 +765,6 @@ def get_env_var_value(key):
 
 def create_ui():
     """Create enhanced Gradio interface"""
-
-    # Define conversation record update function
-    def update_logs2():
-        """Get the latest conversation records and return them to the frontend for display"""
-        return get_latest_logs(100, LOG_QUEUE)
 
     def clear_log_file():
         """Clear log file content"""
@@ -1288,13 +1283,6 @@ def main():
         # Initialize .env file (if it doesn't exist)
         init_env_file()
         app = create_ui()
-
-        # Register cleanup function for when the application closes
-        def cleanup():
-            global STOP_LOG_THREAD, STOP_REQUESTED
-            STOP_LOG_THREAD.set()
-            STOP_REQUESTED.set()
-            logging.info("Application closed, stopping log thread")
 
         app.queue()
         app.launch(share=False, server_name="127.0.0.1", server_port=7860)

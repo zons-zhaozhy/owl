@@ -744,11 +744,6 @@ def get_env_var_value(key):
 def create_ui():
     """创建增强版Gradio界面"""
 
-    # 定义对话记录更新函数
-    def update_logs2():
-        """获取最新对话记录并返回给前端显示"""
-        return get_latest_logs(100, LOG_QUEUE)
-
     def clear_log_file():
         """清空日志文件内容"""
         try:
@@ -1258,13 +1253,6 @@ def main():
         # 初始化.env文件（如果不存在）
         init_env_file()
         app = create_ui()
-
-        # 注册应用关闭时的清理函数
-        def cleanup():
-            global STOP_LOG_THREAD, STOP_REQUESTED
-            STOP_LOG_THREAD.set()
-            STOP_REQUESTED.set()
-            logging.info("应用程序关闭，停止日志线程")
 
         app.queue()
         app.launch(share=False, server_name="127.0.0.1", server_port=7860)
