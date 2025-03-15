@@ -520,7 +520,8 @@ python examples/run_gaia_roleplaying.py
 3. 提交包含您改进的拉取请求
 
 **当前开放贡献的问题：**
-- [#1857](https://github.com/camel-ai/camel/issues/1857)
+- [#1868](https://github.com/camel-ai/camel/issues/1868)
+- [#1866](https://github.com/camel-ai/camel/issues/1866)
 - [#1770](https://github.com/camel-ai/camel/issues/1770)
 - [#1712](https://github.com/camel-ai/camel/issues/1712)
 - [#1537](https://github.com/camel-ai/camel/issues/1537)
