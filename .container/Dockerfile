@@ -7,7 +7,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple \
     PLAYWRIGHT_DOWNLOAD_HOST=https://npmmirror.com/mirrors/playwright \
     PLAYWRIGHT_BROWSERS_PATH=/root/.cache/ms-playwright \
-    DEBIAN_FRONTEND=noninteractive
+    DEBIAN_FRONTEND=noninteractive \
+    PATH="/app/.venv/bin:$PATH"
 
 # 设置工作目录
 WORKDIR /app
@@ -23,7 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN uv venv .venv --python=3.10 && \
     . .venv/bin/activate && \
     uv pip install -e .
-    
+
 # 复制项目文件
 COPY owl/ ./owl/
 COPY licenses/ ./licenses/
