@@ -29,7 +29,7 @@ Environment Setup:
    npx -y @smithery/cli install @wonderwhy-er/desktop-commander --client claude
    npx @wonderwhy-er/desktop-commander setup
 
-   # Configure in owl/mcp_servers_config.json:
+   # Configure in owl/examples/mcp_servers_config.json:
    {
      "desktop-commander": {
        "command": "npx",
@@ -165,9 +165,10 @@ async def main():
         await mcp_toolkit.connect()
 
         question = (
-            "I'd like a academic report about Andrew Ng, including his research "
-            "direction, published papers (At least 3), institutions, etc."
-            "Then organize the report in Markdown format and save it to my desktop"
+            "I'd like a academic report about Andrew Ng, including "
+            "his research direction, published papers (At least 3),"
+            " institutions, etc.Then organize the report in Markdown "
+            "format and save it to my desktop"
         )
 
         # Connect to all MCP toolkits
