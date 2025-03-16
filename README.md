@@ -66,29 +66,10 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
 - [🎬 Demo Video](#-demo-video)
 - [✨️ Core Features](#️-core-features)
 - [🛠️ Installation](#️-installation)
-  - [Option 1: Using uv (Recommended)](#option-1-using-uv-recommended)
-  - [Option 2: Using venv and pip](#option-2-using-venv-and-pip)
-  - [Option 3: Using conda](#option-3-using-conda)
-  - [**Setup Environment Variables**](#setup-environment-variables)
-    - [Option 1: Using a `.env` File (Recommended)](#option-1-using-a-env-file-recommended)
-    - [Option 2: Setting Environment Variables Directly](#option-2-setting-environment-variables-directly)
-  - [**Running with Docker**](#running-with-docker)
 - [🚀 Quick Start](#-quick-start)
-  - [Basic Usage](#basic-usage)
-  - [Running with Different Models](#running-with-different-models)
-    - [Model Requirements](#model-requirements)
-      - [Supported Models](#supported-models)
-    - [Example Tasks](#example-tasks)
 - [🧰 Toolkits and Capabilities](#-toolkits-and-capabilities)
   - [Model Context Protocol (MCP)](#model-context-protocol-mcp)
-  - [Available Toolkits](#available-toolkits)
-  - [Available Toolkits](#available-toolkits-1)
-    - [Multimodal Toolkits (Require multimodal model capabilities)](#multimodal-toolkits-require-multimodal-model-capabilities)
-    - [Text-Based Toolkits](#text-based-toolkits)
-  - [Customizing Your Configuration](#customizing-your-configuration)
 - [🌐 Web Interface](#-web-interface)
-  - [Starting the Web UI](#starting-the-web-ui)
-  - [Features](#features)
 - [🧪 Experiments](#-experiments)
 - [⏱️ Future Plans](#️-future-plans)
 - [📄 License](#-license)
@@ -97,7 +78,6 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
 - [🔥 Community](#-community)
 - [❓ FAQ](#-faq)
 - [📚 Exploring CAMEL Dependency](#-exploring-camel-dependency)
-  - [Accessing CAMEL Source Code](#accessing-camel-source-code)
 - [⭐ Star History](#-star-history)
 
 # 🔥 News
@@ -280,6 +260,10 @@ Alternatively, you can set environment variables directly in your terminal:
 
 ## **Running with Docker**
 
+OWL can be easily deployed using Docker, which provides a consistent environment across different platforms.
+
+### **Setup Instructions**
+
 ```bash
 # Clone the repository
 git clone https://github.com/camel-ai/owl.git
@@ -288,39 +272,61 @@ cd owl
 # Configure environment variables
 cp owl/.env_template owl/.env
 # Edit the .env file and fill in your API keys
+```
 
-# Option 1: Using docker-compose directly
-# Docker image options:
-# Option 1: Use pre-built image from Docker Hub (default, faster)
-# This option downloads a ready-to-use image and is recommended for most users
+### **Deployment Options**
+
+#### **Option 1: Using Pre-built Image (Recommended)**
+
+```bash
+# This option downloads a ready-to-use image from Docker Hub
+# Fastest and recommended for most users
 docker-compose up -d
 
-# Option 2: Build image locally (more customizable)
-# If you need to customize the Docker image or are unable to access Docker Hub:
+# Run OWL inside the container
+docker-compose exec owl bash
+cd .. && source .venv/bin/activate
+playwright install-deps
+xvfb-python examples/run.py
+```
+
+#### **Option 2: Building Image Locally**
+
+```bash
+# For users who need to customize the Docker image or cannot access Docker Hub:
 # 1. Open docker-compose.yml
 # 2. Comment out the "image: mugglejinx/owl:latest" line
 # 3. Uncomment the "build:" section and its nested properties
 # 4. Then run:
 docker-compose up -d --build
-cd .container
 
 # Run OWL inside the container
 docker-compose exec owl bash
-
-# activate the virtual environment
 cd .. && source .venv/bin/activate
-
-playwright install-deps 
-
-#run example demo script
+playwright install-deps
 xvfb-python examples/run.py
+```
 
-# Option 3: Build and run using the provided scripts
+#### **Option 3: Using Convenience Scripts**
+
+```bash
+# Navigate to container directory
 cd .container
+
+# Make the script executable and build the Docker image
 chmod +x build_docker.sh
 ./build_docker.sh
-# Run OWL inside the container
+
+# Run OWL with your question
 ./run_in_docker.sh "your question"
+```
+
+### **MCP Desktop Commander Setup**
+
+If using MCP Desktop Commander within Docker, run:
+
+```bash
+npx -y @wonderwhy-er/desktop-commander setup --force-file-protocol
 ```
 
 For more detailed Docker usage instructions, including cross-platform support, optimized configurations, and troubleshooting, please refer to [DOCKER_README.md](.container/DOCKER_README_en.md).
