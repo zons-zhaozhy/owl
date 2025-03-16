@@ -559,11 +559,9 @@ python examples/run_gaia_roleplaying.py
 3. 提交包含您改进的拉取请求
 
 **当前开放贡献的问题：**
-- [#1868](https://github.com/camel-ai/camel/issues/1868)
-- [#1866](https://github.com/camel-ai/camel/issues/1866)
-- [#1770](https://github.com/camel-ai/camel/issues/1770)
+- [#1876](https://github.com/camel-ai/camel/issues/1876)
+- [#1877](https://github.com/camel-ai/camel/issues/1877)
 - [#1712](https://github.com/camel-ai/camel/issues/1712)
-- [#1537](https://github.com/camel-ai/camel/issues/1537)
 
 要认领一个问题，只需在该问题下留言表明您的兴趣即可。
 
