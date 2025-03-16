@@ -260,6 +260,10 @@ Alternatively, you can set environment variables directly in your terminal:
 
 ## **Running with Docker**
 
+OWL can be easily deployed using Docker, which provides a consistent environment across different platforms.
+
+### **Setup Instructions**
+
 ```bash
 # Clone the repository
 git clone https://github.com/camel-ai/owl.git
@@ -268,30 +272,61 @@ cd owl
 # Configure environment variables
 cp owl/.env_template owl/.env
 # Edit the .env file and fill in your API keys
+```
 
-# Option 1: Using docker-compose directly
-# (By default it's using pre-built online image, you can also check the docker-compose.yml for building locally)
-cd .container
+### **Deployment Options**
 
+#### **Option 1: Using Pre-built Image (Recommended)**
+
+```bash
+# This option downloads a ready-to-use image from Docker Hub
+# Fastest and recommended for most users
 docker-compose up -d
 
 # Run OWL inside the container
 docker-compose exec owl bash
-
-# activate the virtual environment
 cd .. && source .venv/bin/activate
-
-playwright install-deps 
-
-#run example demo script
+playwright install-deps
 xvfb-python examples/run.py
+```
 
-# Option 2: Build and run using the provided scripts
+#### **Option 2: Building Image Locally**
+
+```bash
+# For users who need to customize the Docker image or cannot access Docker Hub:
+# 1. Open docker-compose.yml
+# 2. Comment out the "image: mugglejinx/owl:latest" line
+# 3. Uncomment the "build:" section and its nested properties
+# 4. Then run:
+docker-compose up -d --build
+
+# Run OWL inside the container
+docker-compose exec owl bash
+cd .. && source .venv/bin/activate
+playwright install-deps
+xvfb-python examples/run.py
+```
+
+#### **Option 3: Using Convenience Scripts**
+
+```bash
+# Navigate to container directory
 cd .container
+
+# Make the script executable and build the Docker image
 chmod +x build_docker.sh
 ./build_docker.sh
-# Run OWL inside the container
+
+# Run OWL with your question
 ./run_in_docker.sh "your question"
+```
+
+### **MCP Desktop Commander Setup**
+
+If using MCP Desktop Commander within Docker, run:
+
+```bash
+npx -y @wonderwhy-er/desktop-commander setup --force-file-protocol
 ```
 
 For more detailed Docker usage instructions, including cross-platform support, optimized configurations, and troubleshooting, please refer to [DOCKER_README.md](.container/DOCKER_README_en.md).
