@@ -1,13 +1,13 @@
 services:
   owl:
     # Option 1: Use pre-built image from Docker Hub
-    image: mugglejinx/owl:latest
+    # image: mugglejinx/owl:latest
     
     # Option 2: Build image locally
     # Uncomment the following lines and comment out the 'image' line above to build locally
-    # build:
-    #   context: ..
-    #   dockerfile: .container/Dockerfile
+    build:
+      context: ..
+      dockerfile: .container/Dockerfile
     
     volumes:
       # 挂载.env文件，方便配置API密钥
@@ -23,8 +23,8 @@ services:
       - PYTHONDONTWRITEBYTECODE=1
       - PYTHONUNBUFFERED=1
       - TERM=xterm-256color
-      - GRADIO_SERVER_NAME="0.0.0.0"
-      - GRADIO_SERVER_PORT="7860"
+      - GRADIO_SERVER_NAME=0.0.0.0
+      - GRADIO_SERVER_PORT=7860
     ports:
       - "7860:7860"
     stdin_open: true

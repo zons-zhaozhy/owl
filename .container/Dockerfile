@@ -16,7 +16,7 @@ WORKDIR /app
 # 安装系统依赖（合并为一个RUN命令减少层数）
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl git ffmpeg libsm6 libxext6 xvfb xauth x11-utils \
-    build-essential python3-dev \
+    build-essential python3-dev vim\
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -39,6 +39,7 @@ COPY owl/ ./owl/
 COPY licenses/ ./licenses/
 COPY assets/ ./assets/
 COPY README_zh.md .
+
 
 
 # 创建启动脚本
