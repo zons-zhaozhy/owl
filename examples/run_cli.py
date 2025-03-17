@@ -127,7 +127,7 @@ def construct_society() -> RolePlaying:
     # Configure toolkits
     tools = [
         *BrowserToolkit(
-            headless=False,  # Set to True for headless mode (e.g., on remote servers)
+            headless=False,
             web_agent_model=models["web"],
             planning_agent_model=models["planning"],
             output_language="Chinese",
@@ -136,7 +136,7 @@ def construct_society() -> RolePlaying:
         *CodeExecutionToolkit(sandbox="subprocess", verbose=True).get_tools(),
         *ImageAnalysisToolkit(model=models["image"]).get_tools(),
         SearchToolkit().search_duckduckgo,
-        SearchToolkit().search_google,  # Comment this out if you don't have Google search
+        SearchToolkit().search_google,
         SearchToolkit().search_wiki,
         SearchToolkit().search_baidu,
         SearchToolkit().search_bing,
