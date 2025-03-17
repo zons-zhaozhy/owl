@@ -12,7 +12,7 @@
 # limitations under the License.
 # ========= Copyright 2023-2024 @ CAMEL-AI.org. All Rights Reserved. =========
 # Import from the correct module path
-from owl.utils import run_society
+from utils import run_society
 import os
 import gradio as gr
 import time
