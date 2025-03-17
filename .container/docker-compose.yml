@@ -12,6 +12,8 @@ services:
     volumes:
       # 挂载.env文件，方便配置API密钥
       - ../owl/.env:/app/owl/.env
+      # 挂载example文件夹，以支持docker容器内运行代码案例
+      - ../examples:/app/examples
       # 挂载数据目录
       - ./data:/app/owl/data
       # 挂载缓存目录，避免重复下载
