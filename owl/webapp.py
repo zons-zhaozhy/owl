@@ -1287,7 +1287,7 @@ def main():
         app = create_ui()
 
         app.queue()
-        app.launch(share=False, server_name="127.0.0.1", server_port=7860)
+        app.launch(share=False)
     except Exception as e:
         logging.error(f"Error occurred while starting the application: {str(e)}")
         print(f"Error occurred while starting the application: {str(e)}")
