@@ -39,6 +39,7 @@ COPY owl/ ./owl/
 COPY licenses/ ./licenses/
 COPY assets/ ./assets/
 COPY README_zh.md .
+COPY examples/ ./examples/
 
 
 
