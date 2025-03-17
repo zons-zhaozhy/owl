@@ -238,9 +238,8 @@ def get_latest_logs(max_lines=100, queue_source=None):
         if not log.endswith("\n"):
             formatted_logs.append("\n")
 
-    with open("tmp.md", "w") as f:
-        f.write("\n".join(formatted_logs))
-
+    # with open("logs.md", "w") as f:
+    #     f.write("\n".join(formatted_logs))
     return "\n".join(formatted_logs)
 
 
@@ -911,14 +910,6 @@ def create_ui():
                 white-space: pre-wrap;
                 line-height: 1.4;
             }
-            
-            /* 环境变量管理样式 */
-            .env-manager-container {
-                border-radius: 10px;
-                padding: 15px;
-                background-color: #f9f9f9;
-                margin-bottom: 20px;
-            }
 
             .log-display {
                 border-radius: 10px;
@@ -926,6 +917,14 @@ def create_ui():
                 margin-bottom: 20px;
                 min-height: 50vh;
                 max-height: 75vh;
+            }
+            
+            /* 环境变量管理样式 */
+            .env-manager-container {
+                border-radius: 10px;
+                padding: 15px;
+                background-color: #f9f9f9;
+                margin-bottom: 20px;
             }
             
             .env-controls, .api-help-container {
