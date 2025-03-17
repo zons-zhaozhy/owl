@@ -1,13 +1,13 @@
 services:
   owl:
     # Option 1: Use pre-built image from Docker Hub
-    # image: mugglejinx/owl:latest
+    image: mugglejinx/owl:latest
     
     # Option 2: Build image locally
     # Uncomment the following lines and comment out the 'image' line above to build locally
-    build:
-      context: ..
-      dockerfile: .container/Dockerfile
+    # build:
+    #   context: ..
+    #   dockerfile: .container/Dockerfile
     
     volumes:
       # Mount .env file for easy API key configuration
