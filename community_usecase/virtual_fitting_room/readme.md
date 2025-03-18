@@ -1,7 +1,7 @@
 # Virtual Fitting Room
 ## What's this?
 
-This code example can automatically search for suitable trending products from your designated websites (e.g. Uniqlo) and show you realistic try-on effects with different virtual models (you can also use your own photo as the model to get a more intuitive try-on experience). All with one prompt.
+This code example can automatically search for suitable trending products from your designated websites (e.g. Uniqlo) and show you realistic try-on effects with different virtual models (you can also use your own photo as the model to get a more intuitive try-on experience).
 
 All with one prompt 🪄
 
