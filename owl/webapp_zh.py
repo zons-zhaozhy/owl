@@ -181,7 +181,6 @@ def get_latest_logs(max_lines=100, queue_source=None):
         content = "\n".join(lines)
 
         role_emoji = "🙋" if role.lower() == "user" else "🤖"
-        # return f"[{role.title()} Agent]: {content}"
         return f"""### {role_emoji} {role.title()} Agent
 
 {content}"""
@@ -238,8 +237,6 @@ def get_latest_logs(max_lines=100, queue_source=None):
         if not log.endswith("\n"):
             formatted_logs.append("\n")
 
-    # with open("logs.md", "w") as f:
-    #     f.write("\n".join(formatted_logs))
     return "\n".join(formatted_logs)
 
 
@@ -1116,7 +1113,7 @@ def create_ui():
                     # 添加对话记录显示区域
                     with gr.Box():
                         log_display2 = gr.Markdown(
-                            value="暂无对话记录",
+                            value="暂无对话记录。",
                             elem_classes="log-display",
                         )
 
