@@ -54,7 +54,7 @@ def construct_society(question: str) -> RolePlaying:
         "user": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
             model_type=os.getenv("USER_ROLE_API_MODEL_TYPE", os.getenv("LLM_ROLE_API_MODEL_TYPE", "qwen-max")),
-            api_key=os.getenv("USER_ROLE_API_KEY", os.getenv("LLM_ROLE_API_KEY", os.getenv("QWEN_API_KEY"))),
+            api_key=os.getenv("USER_ROLE_API_KEY", os.getenv("LLM_ROLE_API_KEY", os.getenv("QWEN_API_KEY", "Your_Key"))),
             url=os.getenv("USER_ROLE_API_BASE_URL", os.getenv("LLM_ROLE_API_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")),
             model_config_dict={
                 "temperature": float(os.getenv("USER_ROLE_API_MODEL_TEMPERATURE", os.getenv("LLM_ROLE_API_MODEL_TEMPERATURE", "0.4"))), 
@@ -64,7 +64,7 @@ def construct_society(question: str) -> RolePlaying:
         "assistant": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
             model_type=os.getenv("ASSISTANT_ROLE_API_MODEL_TYPE", os.getenv("LLM_ROLE_API_MODEL_TYPE", "qwen-max")),
-            api_key=os.getenv("ASSISTANT_ROLE_API_KEY", os.getenv("LLM_ROLE_API_KEY", os.getenv("QWEN_API_KEY"))),
+            api_key=os.getenv("ASSISTANT_ROLE_API_KEY", os.getenv("LLM_ROLE_API_KEY", os.getenv("QWEN_API_KEY", "Your_Key"))),
             url=os.getenv("ASSISTANT_ROLE_API_BASE_URL", os.getenv("LLM_ROLE_API_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")),
             model_config_dict={
                 "temperature": float(os.getenv("ASSISTANT_ROLE_API_MODEL_TEMPERATURE", os.getenv("LLM_ROLE_API_MODEL_TEMPERATURE", "0.4"))), 
@@ -74,7 +74,7 @@ def construct_society(question: str) -> RolePlaying:
         "web": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
             model_type=os.getenv("WEB_ROLE_API_BASE_URL", os.getenv("VLLM_ROLE_API_MODEL_TYPE", "qwen-vl-max")),
-            api_key=os.getenv("WEB_ROLE_API_KEY", os.getenv("VLLM_ROLE_API_KEY", os.getenv("QWEN_API_KEY"))),
+            api_key=os.getenv("WEB_ROLE_API_KEY", os.getenv("VLLM_ROLE_API_KEY", os.getenv("QWEN_API_KEY", "Your_Key"))),
             url=os.getenv("USER_ROLE_API_BASE_URL", os.getenv("VLLM_ROLE_API_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")),
             model_config_dict={
                 "temperature": float(os.getenv("WEB_ROLE_API_MODEL_TEMPERATURE", os.getenv("VLLM_ROLE_API_MODEL_TEMPERATURE", "0.4"))), 
@@ -84,7 +84,7 @@ def construct_society(question: str) -> RolePlaying:
         "planning": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
             model_type=os.getenv("PLANNING_ROLE_API_MODEL_TYPE", os.getenv("LLM_ROLE_API_MODEL_TYPE", "qwen-max")),
-            api_key=os.getenv("PLANNING_ROLE_API_KEY", os.getenv("LLM_ROLE_API_KEY", os.getenv("QWEN_API_KEY"))),
+            api_key=os.getenv("PLANNING_ROLE_API_KEY", os.getenv("LLM_ROLE_API_KEY", os.getenv("QWEN_API_KEY", "Your_Key"))),
             url=os.getenv("PLANNING_ROLE_API_BASE_URL", os.getenv("LLM_ROLE_API_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")),
             model_config_dict={
                 "temperature": float(os.getenv("PLANNING_ROLE_API_MODEL_TEMPERATURE", os.getenv("LLM_ROLE_API_MODEL_TEMPERATURE", "0.4"))), 
@@ -94,7 +94,7 @@ def construct_society(question: str) -> RolePlaying:
         "image": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
             model_type=os.getenv("IMAGE_ROLE_API_MODEL_TYPE", os.getenv("VLLM_ROLE_API_MODEL_TYPE", "qwen-vl-max")),
-            api_key=os.getenv("IMAGE_ROLE_API_KEY", os.getenv("VLLM_ROLE_API_KEY", os.getenv("QWEN_API_KEY"))),
+            api_key=os.getenv("IMAGE_ROLE_API_KEY", os.getenv("VLLM_ROLE_API_KEY", os.getenv("QWEN_API_KEY", "Your_Key"))),
             url=os.getenv("IMAGE_ROLE_API_BASE_URL", os.getenv("VLLM_ROLE_API_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")),
             model_config_dict={
                 "temperature": float(os.getenv("IMAGE_ROLE_API_MODEL_TEMPERATURE", os.getenv("VLLM_ROLE_API_MODEL_TEMPERATURE", "0.4"))), 
