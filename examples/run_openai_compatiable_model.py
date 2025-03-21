@@ -53,6 +53,7 @@ def construct_society(question: str) -> RolePlaying:
     models = {
         "user": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
+
             model_type=os.getenv("USER_ROLE_API_MODEL_TYPE", os.getenv("LLM_ROLE_API_MODEL_TYPE", "qwen-max")),
             api_key=os.getenv("USER_ROLE_API_KEY", os.getenv("LLM_ROLE_API_KEY", os.getenv("QWEN_API_KEY", "Your_Key"))),
             url=os.getenv("USER_ROLE_API_BASE_URL", os.getenv("LLM_ROLE_API_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")),
@@ -70,9 +71,11 @@ def construct_society(question: str) -> RolePlaying:
                 "temperature": float(os.getenv("ASSISTANT_ROLE_API_MODEL_TEMPERATURE", os.getenv("LLM_ROLE_API_MODEL_TEMPERATURE", "0.4"))), 
                 "max_tokens": int(os.getenv("ASSISTANT_ROLE_API_MODEL_MAX_TOKENS", os.getenv("LLM_ROLE_API_MODEL_MAX_TOKENS", "4096")))
             },
+
         ),
-        "web": ModelFactory.create(
+        "browsing": ModelFactory.create(
             model_platform=ModelPlatformType.OPENAI_COMPATIBLE_MODEL,
+
             model_type=os.getenv("WEB_ROLE_API_BASE_URL", os.getenv("VLLM_ROLE_API_MODEL_TYPE", "qwen-vl-max")),
             api_key=os.getenv("WEB_ROLE_API_KEY", os.getenv("VLLM_ROLE_API_KEY", os.getenv("QWEN_API_KEY", "Your_Key"))),
             url=os.getenv("USER_ROLE_API_BASE_URL", os.getenv("VLLM_ROLE_API_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")),
@@ -107,7 +110,7 @@ def construct_society(question: str) -> RolePlaying:
     tools = [
         *BrowserToolkit(
             headless=False,  # Set to True for headless mode (e.g., on remote servers)
-            web_agent_model=models["web"],
+            web_agent_model=models["browsing"],
             planning_agent_model=models["planning"],
         ).get_tools(),
         *CodeExecutionToolkit(sandbox="subprocess", verbose=True).get_tools(),
@@ -141,6 +144,7 @@ def construct_society(question: str) -> RolePlaying:
     return society
 
 
+
 def main(question: str = "Navigate to Amazon.com and identify one product that is attractive to coders. Please provide me with the product name and price. No need to verify your answer."):
     r"""Main function to run the OWL system with an example question.
     Args:
@@ -150,8 +154,10 @@ def main(question: str = "Navigate to Amazon.com and identify one product that i
     Returns:
         None
     """
+
     # Construct and run the society
-    society = construct_society(question)
+    society = construct_society(task)
+
     answer, chat_history, token_count = run_society(society)
 
     # Output the result
