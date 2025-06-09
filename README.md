@@ -603,19 +603,19 @@ The web interface is built using Gradio and runs locally on your machine. No dat
 
 # 🧪 Experiments
 
-To reproduce OWL's GAIA benchmark score of 58.18:
-Furthermore, to ensure optimal performance on the GAIA benchmark, please note that our `gaia58.18` branch includes a customized version of the CAMEL framework in the `owl/camel` directory. This version contains enhanced toolkits with improved stability for gaia benchmark compared to the standard CAMEL installation.
+To reproduce OWL's GAIA benchmark score:
+Furthermore, to ensure optimal performance on the GAIA benchmark, please note that our `gaia69` branch includes a customized version of the CAMEL framework in the `owl/camel` directory. This version contains enhanced toolkits with improved stability for gaia benchmark compared to the standard CAMEL installation.
 
 When running the benchmark evaluation:
 
-1. Switch to the `gaia58.18` branch:
+1. Switch to the `gaia69` branch:
    ```bash
-   git checkout gaia58.18
+   git checkout gaia69
    ```
 
 2. Run the evaluation script:
    ```bash
-   python run_gaia_roleplaying.py
+   python run_gaia_workforce_claude.py
    ```
 
 This will execute the same configuration that achieved our top-ranking performance on the GAIA benchmark.
