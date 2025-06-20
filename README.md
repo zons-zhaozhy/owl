@@ -28,7 +28,7 @@
 [Community](https://github.com/camel-ai/owl#community) |
 [Installation](#️-installation) |
 [Examples](https://github.com/camel-ai/owl/tree/main/owl) |
-[Paper](https://github.com/camel-ai/owl/blob/main/assets/OWL_Technical_Report.pdf) |
+[Paper](https://arxiv.org/abs/2505.23885) |
 <!-- [Technical Report](https://hypnotic-mind-6bd.notion.site/OWL-Optimized-Workforce-Learning-for-General-Multi-Agent-Assistance-in-Real-World-Task-Automation-1d4004aeb21380158749c7f84b20643f) | -->
 [Citation](https://github.com/camel-ai/owl#citation) |
 [Contributing](https://github.com/camel-ai/owl/graphs/contributors) |
@@ -143,7 +143,7 @@ Our vision is to revolutionize how AI agents collaborate to solve real-world tas
   </p>
 </div>
 
-- **[2025.05.27]**: We released the technical report of OWL, including more details on the workforce (framework) and optimized workforce learning (training methodology).  [paper](https://github.com/camel-ai/owl/blob/main/assets/OWL_Technical_Report.pdf).
+- **[2025.05.27]**: We released the technical report of OWL, including more details on the workforce (framework) and optimized workforce learning (training methodology).  [paper](https://arxiv.org/abs/2505.23885).
 - **[2025.05.18]**: We open-sourced an initial version for replicating workforce experiment on GAIA [here](https://github.com/camel-ai/owl/tree/gaia69).
 - **[2025.04.18]**: We uploaded OWL's new GAIA benchmark score of **69.09%**, ranking #1 among open-source frameworks. Check the technical report [here](https://hypnotic-mind-6bd.notion.site/OWL-Optimized-Workforce-Learning-for-General-Multi-Agent-Assistance-in-Real-World-Task-Automation-1d4004aeb21380158749c7f84b20643f).
 - **[2025.03.27]**: Integrate SearxNGToolkit performing web searches using SearxNG search engine.
