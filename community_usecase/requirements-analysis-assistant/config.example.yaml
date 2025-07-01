@@ -1,0 +1,77 @@
+# OWL需求分析助手配置示例
+
+# 应用基本配置
+app_name: "OWL需求分析助手"
+debug: false
+environment: "development"  # development, production, testing
+log_level: "DEBUG"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+
+# LLM配置
+llm:
+  provider: "deepseek"
+  model_name: "deepseek-chat"
+  api_key: ""  # 从环境变量 DEEPSEEK_API_KEY 读取
+  temperature: 0.7
+  max_tokens: 2000
+  api_base: "https://api.deepseek.com/v1"
+
+# Web服务器配置
+web:
+  host: "127.0.0.1"
+  port: 7860
+  allowed_hosts:
+    - "localhost"
+    - "127.0.0.1"
+  debug: false
+  static_dir: "static"
+  template_dir: "templates"
+
+# 智能体配置
+agents:
+  requirements_extractor:
+    name: "RequirementsExtractor"
+    description: "需求提取智能体"
+    enabled: true
+    tools:
+      - "nlp_toolkit"
+      - "text_analyzer"
+    model: "deepseek-chat"
+    temperature: 0.1
+    max_tokens: 2000
+
+  requirements_analyzer:
+    name: "RequirementsAnalyzer"
+    description: "需求分析智能体"
+    enabled: true
+    tools:
+      - "dependency_analyzer"
+      - "risk_assessor"
+    model: "deepseek-chat"
+    temperature: 0.2
+    max_tokens: 3000
+
+  documentation_generator:
+    name: "DocumentationGenerator"
+    description: "文档生成智能体"
+    enabled: true
+    tools:
+      - "template_engine"
+      - "markdown_generator"
+    model: "deepseek-chat"
+    temperature: 0.3
+    max_tokens: 4000
+
+  quality_checker:
+    name: "QualityChecker"
+    description: "质量检查智能体"
+    enabled: true
+    tools:
+      - "quality_rules"
+      - "consistency_checker"
+    model: "deepseek-chat"
+    temperature: 0.1
+    max_tokens: 2000
+
+# 输出配置
+output_dir: "output"
+template_dir: "templates"
