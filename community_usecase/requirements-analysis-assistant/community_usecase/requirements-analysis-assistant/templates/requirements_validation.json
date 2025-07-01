@@ -1,0 +1,11 @@
+{
+    "name": "requirements_validation",
+    "version": "1.0.0",
+    "description": "需求验证提示词模板",
+    "template": "作为需求验证专家，请验证以下需求的质量和完整性。\n\n验证标准：\n1. 完整性\n   - 是否包含所有必要信息\n   - 是否有遗漏的关键点\n   - 是否有未定义的术语\n\n2. 一致性\n   - 需求之间是否存在冲突\n   - 术语使用是否一致\n   - 优先级是否合理\n\n3. 可行性\n   - 技术上是否可行\n   - 资源是否充足\n   - 时间是否合理\n\n4. 可测试性\n   - 是否有明确的验收标准\n   - 是否可以量化衡量\n   - 是否可以自动化测试\n\n5. 依赖关系\n   - 是否存在循环依赖\n   - 是否有遗漏的依赖\n   - 依赖是否合理\n\n需求列表：\n{{ requirements }}\n\n请以 JSON 格式输出验证结果，包含以下字段：\n- validation_result: 验证结果 (pass/fail)\n- issues: 问题列表\n  - type: 问题类型\n  - severity: 严重程度 (critical/major/minor)\n  - description: 问题描述\n  - suggestion: 改进建议\n- statistics: 统计信息\n  - total_requirements: 需求总数\n  - issues_by_type: 各类型问题数量\n  - issues_by_severity: 各严重程度问题数量",
+    "metadata": {
+        "temperature": 0.3,
+        "max_tokens": 2000,
+        "stop_sequences": ["\n\n---", "\n\n==="]
+    }
+} 
