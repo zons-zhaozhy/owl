@@ -1,0 +1,188 @@
+/* 主题颜色 */
+:root {
+    --primary: #3B82F6;
+    --primary-dark: #2563EB;
+    --secondary: #6B7280;
+    --success: #10B981;
+    --danger: #EF4444;
+    --warning: #F59E0B;
+    --info: #3B82F6;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #F3F4F6;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--secondary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
+/* 动画 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .grid {
+        gap: 1rem;
+    }
+
+    .text-4xl {
+        font-size: 2rem;
+    }
+}
+
+/* 打印优化 */
+@media print {
+    body {
+        background: white;
+    }
+
+    .container {
+        max-width: none;
+        padding: 0;
+    }
+
+    .shadow-lg {
+        box-shadow: none;
+    }
+
+    .grid {
+        display: block;
+    }
+
+    section {
+        margin-bottom: 2rem;
+        page-break-inside: avoid;
+    }
+
+    button {
+        display: none;
+    }
+}
+
+/* 悬停效果 */
+.hover-scale {
+    transition: transform 0.2s ease-out;
+}
+
+.hover-scale:hover {
+    transform: scale(1.02);
+}
+
+/* 过渡效果 */
+.transition-all {
+    transition: all 0.3s ease-out;
+}
+
+/* 结果区域样式 */
+.result-section {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.result-section.show {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+/* 加载动画 */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* 错误提示样式 */
+.error-shake {
+    animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+    10%, 90% {
+        transform: translate3d(-1px, 0, 0);
+    }
+    
+    20%, 80% {
+        transform: translate3d(2px, 0, 0);
+    }
+    
+    30%, 50%, 70% {
+        transform: translate3d(-4px, 0, 0);
+    }
+    
+    40%, 60% {
+        transform: translate3d(4px, 0, 0);
+    }
+}
+
+/* 表单样式 */
+textarea:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+button:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
+}
+
+/* 内容格式化 */
+.content {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.content ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+}
+
+.content ol {
+    list-style-type: decimal;
+    padding-left: 1.5rem;
+}
+
+.content p {
+    margin-bottom: 0.5rem;
+}
+
+/* 辅助类 */
+.hidden {
+    display: none !important;
+}
+
+.visible {
+    display: block !important;
+} 

@@ -1,0 +1,120 @@
+# 系统配置
+system:
+  name: "需求分析助手"
+  version: "1.0.0"
+  description: "基于OWL框架的智能需求分析系统"
+  
+  # 运行模式配置
+  modes:
+    # Web模式配置
+    web:
+      host: "0.0.0.0"
+      port: 8000
+      workers: 4
+      reload: true
+      cors_origins: ["*"]
+      static_dir: "web/static"
+      templates_dir: "web/templates"
+    
+    # CLI模式配置
+    cli:
+      history_file: ".cli_history"
+      max_history: 1000
+      prompt: "需求分析助手> "
+    
+    # 单次执行模式配置
+    once:
+      output_format: "json"
+      save_results: true
+      results_dir: "results"
+
+# 日志配置
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/system.log"
+  max_size: 10485760  # 10MB
+  backup_count: 5
+  console: true
+
+# 智能体配置
+agents:
+  # 需求提取智能体
+  requirements_extractor:
+    name: "RequirementsExtractionAgent"
+    description: "从用户输入中提取结构化的需求信息"
+    config_file: "config/llm.yaml"
+    prompt_key: "requirements_extraction"
+    cache_enabled: true
+  
+  # 需求分析智能体
+  requirements_analyzer:
+    name: "RequirementsAnalysisAgent"
+    description: "分析需求的可行性、资源需求和风险"
+    config_file: "config/llm.yaml"
+    prompt_key: "requirements_analysis"
+    cache_enabled: true
+  
+  # 质量检查智能体
+  quality_checker:
+    name: "QualityCheckAgent"
+    description: "检查需求的质量和完整性"
+    config_file: "config/llm.yaml"
+    prompt_key: "quality_check"
+    cache_enabled: true
+  
+  # 文档生成智能体
+  documentation_generator:
+    name: "DocumentationGeneratorAgent"
+    description: "生成完整的需求文档"
+    config_file: "config/llm.yaml"
+    prompt_key: "documentation_generation"
+    cache_enabled: true
+
+# 存储配置
+storage:
+  # 文件存储
+  files:
+    base_dir: "data"
+    requirements_dir: "data/requirements"
+    analysis_dir: "data/analysis"
+    documents_dir: "data/documents"
+    format: "json"
+  
+  # 数据库存储（可选）
+  database:
+    enabled: false
+    type: "sqlite"
+    path: "data/database.sqlite"
+    
+# 监控配置
+monitoring:
+  enabled: true
+  metrics:
+    - name: "request_count"
+      type: "counter"
+      description: "请求总数"
+    - name: "processing_time"
+      type: "histogram"
+      description: "处理时间"
+    - name: "error_count"
+      type: "counter"
+      description: "错误总数"
+  prometheus:
+    enabled: true
+    port: 9090
+
+# 运行模式配置
+mode: web  # web, cli, once
+input_text: null  # 单次执行模式的输入文本
+
+# Web服务配置
+host: 127.0.0.1
+port: 8080
+
+# LLM配置
+llm_provider: deepseek  # openai, deepseek, ollama
+
+# 日志配置
+log_level: INFO
+log_file: logs/owl.log 

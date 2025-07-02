@@ -1,254 +1,385 @@
-"""Requirements extractor agent implementation."""
+"""需求提取智能体"""
 
 import json
 import logging
-import re
-from typing import Dict, Any, Optional, List
-from pathlib import Path
+from typing import Dict, Any, List, Optional
 
-from ..core.base import BaseAgent
-from ..services.base import BaseLLMService
-from ..core.config import OWLJSONEncoder, SystemConfig
-from ..utils.enums import AgentRole
+from ..core.base_agent import BaseAgent
+from ..core.exceptions import ExtractionError
+from ..services.llm_manager import get_llm_manager
+from ..utils.json_utils import extract_json_safely
 
 logger = logging.getLogger(__name__)
 
 class RequirementsExtractor(BaseAgent):
-    """Requirements extractor agent implementation."""
-    
-    def __init__(
-        self,
-        llm_service: BaseLLMService,
-        config: SystemConfig
-    ):
-        """Initialize requirements extractor.
-        
+    """需求提取智能体，负责从输入文本中提取结构化需求。"""
+
+    def __init__(self, config: Dict[str, Any]):
+        """初始化需求提取智能体。
+
         Args:
-            llm_service: LLM service instance
-            config: Agent configuration
+            config: 配置字典
         """
-        super().__init__(config.get_agent_config(AgentRole.REQUIREMENTS_EXTRACTOR).to_dict())
-        self.system_config = config
-        self.llm_service = llm_service
-        self.max_retries = self.system_config.max_retries
-        self.prompt_template = self._load_prompt_template()
-        
-    def _load_prompt_template(self) -> str:
-        """Load prompt template from file.
-        
+        super().__init__(config)
+        self.llm_manager = get_llm_manager()
+        self.extraction_prompt = config.get("extraction_prompt", "default_extraction_prompt")
+
+    async def process(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        """处理输入数据，提取需求。
+
+        这是智能体的主要处理方法，实现了BaseAgent的抽象方法。
+
         Args:
-            None
-            
+            input_data: 输入数据字典，必须包含：
+                - input_text: 输入文本
+                - context: 可选的对话上下文
+
         Returns:
-            Prompt template string
+            Dict[str, Any]: 提取结果，包含：
+                - status: 处理状态 ("success" 或 "error")
+                - requirements: 提取的需求（如果成功）
+                - error: 错误信息（如果失败）
+
+        Raises:
+            ExtractionError: 提取过程中出错
         """
-        template_path = Path(self.system_config.templates_dir) / "requirements_extraction.json"
-        
-        current_file_dir = Path(__file__).parent
-        project_root = current_file_dir.parent.parent.parent
-        absolute_template_path = project_root / template_path
+        try:
+            # 验证输入
+            if "input_text" not in input_data:
+                raise ValueError("缺少必要的input_text字段")
 
-        if not absolute_template_path.exists():
-            # 如果模板文件不存在，使用默认模板
-            return """你是一个专业的需求分析师，请分析以下输入文本，提取关键需求。如果需要澄清，请提出具体问题。
+            input_text = input_data["input_text"]
+            context = input_data.get("context", {})
 
-用户输入:
-{text}
+            # 记录开始处理
+            self.logger.info(f"开始处理输入文本，长度: {len(input_text)}")
 
-{context}
+            # 准备提示
+            prompt = self._prepare_extraction_prompt(input_text, context)
 
-请以JSON格式返回结果，包含以下字段:
-1. requirements: 提取的需求列表，每个需求应包含:
-   - id: 需求ID (如 REQ-001)
-   - title: 需求标题
-   - description: 需求描述
-   - priority: 优先级 (high/medium/low)
-   - type: 需求类型 (functional/non-functional)
-2. clarification_needed: 如果需要澄清，提供具体问题
-3. requirements_complete: 布尔值，表示需求是否完整
+            # 调用LLM
+            response = await self.llm_manager.generate_text(prompt)
 
-示例输出:
+            # 提取JSON
+            requirements = extract_json_safely(response)
+            if not requirements:
+                raise ExtractionError("无法从LLM响应中提取有效的JSON")
+
+            # 验证提取结果
+            self._validate_requirements(requirements)
+
+            # 记录成功
+            self.logger.info("需求提取成功")
+            return {
+                "status": "success",
+                "requirements": requirements
+            }
+
+        except Exception as e:
+            # 记录错误
+            await self.handle_error(e)
+            return {
+                "status": "error",
+                "error": str(e)
+            }
+
+    def _prepare_extraction_prompt(self, text: str, context: Dict[str, Any]) -> str:
+        """准备提取提示。
+
+        Args:
+            text: 输入文本
+            context: 对话上下文
+
+        Returns:
+            str: 格式化的提示
+        """
+        # 这里可以根据上下文调整提示
+        base_prompt = """请分析以下文本，提取所有需求并按以下JSON格式返回：
 {
-    "requirements": [
+    "functional_requirements": [
         {
-            "id": "REQ-001",
-            "title": "用户登录功能",
-            "description": "系统需要提供用户登录功能，包括用户名和密码验证",
-            "priority": "high",
-            "type": "functional"
+            "id": "FR1",
+            "description": "需求描述",
+            "priority": "高/中/低",
+            "category": "功能类别"
         }
     ],
-    "clarification_needed": "请问系统需要支持第三方登录吗？",
-    "requirements_complete": false
-}"""
-            
-        with open(absolute_template_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            return data["template"]
-            
-    async def _prepare_prompt(self, input_text: str, context: Optional[Dict[str, Any]] = None) -> str:
-        """Prepare prompt for LLM.
-        
+    "non_functional_requirements": [
+        {
+            "id": "NFR1",
+            "description": "需求描述",
+            "type": "性能/安全/可用性等",
+            "constraint": "具体约束"
+        }
+    ]
+}
+
+输入文本：
+"""
+        return f"{base_prompt}\n{text}"
+
+    def _validate_requirements(self, requirements: Dict[str, Any]) -> None:
+        """验证提取的需求。
+
         Args:
-            input_text: Input text to process
-            context: Optional context information
-            
-        Returns:
-            Prepared prompt string
+            requirements: 需求字典
+
+        Raises:
+            ExtractionError: 验证失败
         """
-        context_info = ""
-        if context:
-            context_info = "\n当前上下文:\n"
-            if context.get("requirements"):
-                context_info += "已收集的需求:\n"
-                for req in context["requirements"]:
-                    if isinstance(req, dict):
-                        context_info += f"- [{req.get('id', 'N/A')}] {req.get('title', 'N/A')}: {req.get('description', 'N/A')}\n"
-                    else:
-                        context_info += f"- {req}\n"
-            if context.get("clarifications"):
-                context_info += "\n历史澄清:\n"
-                for c in context["clarifications"]:
-                    context_info += f"Q: {c['question']}\nA: {c['answer']}\n"
+        required_keys = ["functional_requirements", "non_functional_requirements"]
+        for key in required_keys:
+            if key not in requirements:
+                raise ExtractionError(f"缺少必要的需求类别: {key}")
+
+            if not isinstance(requirements[key], list):
+                raise ExtractionError(f"需求类别 {key} 必须是列表")
+
+        # 验证功能需求
+        for req in requirements["functional_requirements"]:
+            if not all(k in req for k in ["id", "description", "priority", "category"]):
+                raise ExtractionError("功能需求缺少必要字段")
+
+        # 验证非功能需求
+        for req in requirements["non_functional_requirements"]:
+            if not all(k in req for k in ["id", "description", "type", "constraint"]):
+                raise ExtractionError("非功能需求缺少必要字段")
+
+    def get_required_config_fields(self) -> List[str]:
+        """获取必需的配置字段。
+
+        Returns:
+            List[str]: 必需的配置字段列表
+        """
+        return ["name", "extraction_prompt"]
+
+    def _parse_llm_response(self, response: str) -> Dict[str, Any]:
+        """解析LLM响应"""
+        try:
+            # 尝试直接解析JSON
+            return json.loads(response)
+            
+        except json.JSONDecodeError:
+            # 如果不是JSON，尝试提取JSON部分
+            return self._extract_json_from_text(response)
+    
+    def _extract_json_from_text(self, text: str) -> Dict[str, Any]:
+        """从文本中提取JSON"""
+        try:
+            # 查找JSON代码块
+            json_start = text.find('{')
+            json_end = text.rfind('}') + 1
+            
+            if json_start != -1 and json_end > json_start:
+                json_str = text[json_start:json_end]
+                return json.loads(json_str)
+            
+            # 如果找不到JSON，返回结构化的文本解析结果
+            return self._parse_text_response(text)
+            
+        except Exception as e:
+            logger.warning(f"JSON提取失败: {str(e)}")
+            return self._parse_text_response(text)
+    
+    def _parse_text_response(self, text: str) -> Dict[str, Any]:
+        """解析文本响应为结构化格式"""
+        # 基本的文本解析逻辑
+        lines = text.split('\n')
         
-        return self.prompt_template.format(
-            input=input_text,
-            context=context_info
-        )
+        functional_requirements = []
+        non_functional_requirements = []
+        constraints = []
+        assumptions = []
         
-    def _extract_json(self, content: str) -> Dict[str, Any]:
-        """Extract JSON from content."""
-        # 清理中文标点符号
-        content = content.replace("，", ",").replace("：", ":")
+        current_section = None
         
-        # 记录原始内容的前100个字符（用于调试）
-        logger.debug(f"Attempting to extract JSON from content (first 100 chars): {content[:100]}...")
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+                
+            # 识别章节
+            if "功能需求" in line or "functional" in line.lower():
+                current_section = "functional"
+                continue
+            elif "非功能需求" in line or "non-functional" in line.lower():
+                current_section = "non_functional"
+                continue
+            elif "约束" in line or "constraint" in line.lower():
+                current_section = "constraints"
+                continue
+            elif "假设" in line or "assumption" in line.lower():
+                current_section = "assumptions"
+                continue
+            
+            # 添加到相应章节
+            if line.startswith(('-', '*', '•')) or line[0].isdigit():
+                content = line.lstrip('-*•0123456789. ')
+                
+                if current_section == "functional":
+                    functional_requirements.append({
+                        "id": f"FR_{len(functional_requirements) + 1:03d}",
+                        "description": content,
+                        "priority": "medium",
+                        "category": "general"
+                    })
+                elif current_section == "non_functional":
+                    non_functional_requirements.append({
+                        "id": f"NFR_{len(non_functional_requirements) + 1:03d}",
+                        "type": "general",
+                        "description": content,
+                        "metrics": ""
+                    })
+                elif current_section == "constraints":
+                    constraints.append({
+                        "type": "general",
+                        "description": content
+                    })
+                elif current_section == "assumptions":
+                    assumptions.append(content)
         
-        # 尝试提取 JSON 格式的内容
-        patterns = [
-            r"```json\s*(.*?)\s*```",  # ```json ... ```
-            r"```\s*(.*?)\s*```",      # ``` ... ```
-            r"\{.*\}"                   # {...}
+        return {
+            "functional_requirements": functional_requirements,
+            "non_functional_requirements": non_functional_requirements,
+            "constraints": constraints,
+            "assumptions": assumptions,
+            "dependencies": []
+        }
+    
+    def _validate_requirements(self, requirements: Dict[str, Any]) -> Dict[str, Any]:
+        """验证和标准化需求"""
+        validated = {
+            "functional_requirements": [],
+            "non_functional_requirements": [],
+            "constraints": [],
+            "assumptions": [],
+            "dependencies": []
+        }
+        
+        # 验证功能需求
+        for req in requirements.get("functional_requirements", []):
+            if isinstance(req, dict) and "description" in req:
+                validated_req = {
+                    "id": req.get("id", f"FR_{len(validated['functional_requirements']) + 1:03d}"),
+                    "description": req["description"],
+                    "priority": req.get("priority", "medium"),
+                    "category": req.get("category", "general")
+                }
+                validated["functional_requirements"].append(validated_req)
+            elif isinstance(req, str):
+                validated["functional_requirements"].append({
+                    "id": f"FR_{len(validated['functional_requirements']) + 1:03d}",
+                    "description": req,
+                    "priority": "medium",
+                    "category": "general"
+                })
+        
+        # 验证非功能需求
+        for req in requirements.get("non_functional_requirements", []):
+            if isinstance(req, dict) and "description" in req:
+                validated_req = {
+                    "id": req.get("id", f"NFR_{len(validated['non_functional_requirements']) + 1:03d}"),
+                    "type": req.get("type", "general"),
+                    "description": req["description"],
+                    "metrics": req.get("metrics", "")
+                }
+                validated["non_functional_requirements"].append(validated_req)
+            elif isinstance(req, str):
+                validated["non_functional_requirements"].append({
+                    "id": f"NFR_{len(validated['non_functional_requirements']) + 1:03d}",
+                    "type": "general",
+                    "description": req,
+                    "metrics": ""
+                })
+        
+        # 验证约束条件
+        for constraint in requirements.get("constraints", []):
+            if isinstance(constraint, dict):
+                validated["constraints"].append({
+                    "type": constraint.get("type", "general"),
+                    "description": constraint.get("description", "")
+                })
+            elif isinstance(constraint, str):
+                validated["constraints"].append({
+                    "type": "general",
+                    "description": constraint
+                })
+        
+        # 验证假设
+        validated["assumptions"] = [
+            assumption for assumption in requirements.get("assumptions", [])
+            if isinstance(assumption, str) and assumption.strip()
         ]
         
-        for pattern in patterns:
-            matches = re.findall(pattern, content, re.DOTALL)
-            if matches:
-                try:
-                    logger.debug(f"Found match with pattern '{pattern}', attempting to parse JSON")
-                    match_content = matches[0]
-                    logger.debug(f"JSON content to parse (first 100 chars): {match_content[:100]}...")
-                    result = json.loads(match_content)
-                    logger.debug(f"Successfully parsed JSON with keys: {list(result.keys())}")
-                    return result
-                except json.JSONDecodeError as e:
-                    logger.warning(f"Failed to parse JSON with pattern {pattern}: {e}")
-                    logger.debug(f"Problematic JSON content: {matches[0][:200]}...")
-                    continue
+        # 验证依赖关系
+        for dep in requirements.get("dependencies", []):
+            if isinstance(dep, dict) and "from" in dep and "to" in dep:
+                validated["dependencies"].append({
+                    "from": dep["from"],
+                    "to": dep["to"],
+                    "type": dep.get("type", "depends_on")
+                })
         
-        # 如果所有模式都失败，记录完整内容以便调试
-        logger.error(f"No valid JSON found in content. Full content: {content}")
-        raise ValueError("No valid JSON found in content")
-        
-    def _validate_result(self, result: Dict[str, Any]) -> bool:
-        """Validate extraction result."""
-        if not isinstance(result, dict):
-            logger.warning(f"Result is not a dictionary, but {type(result)}")
-            return False
+        return validated
+    
+    async def extract_from_text(self, text: str, **kwargs) -> Dict[str, Any]:
+        """便捷方法：从文本提取需求"""
+        return await self.process({
+            "input_text": text,
+            **kwargs
+        })
+    
+    async def extract_from_document(self, document_path: str, **kwargs) -> Dict[str, Any]:
+        """从文档文件提取需求"""
+        try:
+            # 这里可以添加文档解析逻辑
+            # 目前简单读取文本文件
+            with open(document_path, 'r', encoding='utf-8') as f:
+                text = f.read()
             
-        # 检查是否包含必要的字段
-        required_fields = ["requirements"]
-        for field in required_fields:
-            if field not in result:
-                logger.warning(f"Required field '{field}' not found in result. Available keys: {list(result.keys())}")
-                return False
-                
-        # 验证需求列表的格式
+            return await self.extract_from_text(text, **kwargs)
+            
+        except Exception as e:
+            logger.error(f"文档读取失败: {str(e)}")
+            return {
+                "status": "error",
+                "error": f"文档读取失败: {str(e)}",
+                "requirements": None
+            }
+    
+    def get_extraction_statistics(self, result: Dict[str, Any]) -> Dict[str, Any]:
+        """获取提取统计信息"""
+        if result.get("status") != "success" or not result.get("requirements"):
+            return {"error": "无效的提取结果"}
+        
         requirements = result["requirements"]
-        if not isinstance(requirements, list):
-            logger.warning(f"'requirements' field is not a list, but {type(requirements)}")
-            return False
-            
-        if len(requirements) == 0:
-            logger.warning("'requirements' list is empty")
-            return False
-            
-        for i, req in enumerate(requirements):
-            if not isinstance(req, dict):
-                logger.warning(f"Requirement #{i} is not a dictionary, but {type(req)}")
-                return False
-                
-            required_req_fields = ["id", "title", "description", "priority", "type"]
-            missing_fields = [field for field in required_req_fields if field not in req]
-            
-            if missing_fields:
-                logger.warning(f"Requirement #{i} is missing required fields: {missing_fields}. Available keys: {list(req.keys())}")
-                return False
-                    
-        logger.debug(f"Validation successful: Found {len(requirements)} valid requirements")
-        return True
         
-    async def process(self, input_text: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Process input text and extract requirements.
+        return {
+            "functional_requirements_count": len(requirements.get("functional_requirements", [])),
+            "non_functional_requirements_count": len(requirements.get("non_functional_requirements", [])),
+            "constraints_count": len(requirements.get("constraints", [])),
+            "assumptions_count": len(requirements.get("assumptions", [])),
+            "dependencies_count": len(requirements.get("dependencies", [])),
+            "total_requirements": (
+                len(requirements.get("functional_requirements", [])) +
+                len(requirements.get("non_functional_requirements", []))
+            )
+        }
+    
+    async def extract(self, input_text: str, context: Optional[str] = None) -> Dict[str, Any]:
+        """提取需求的接口方法，供AgentCoordinator调用
         
         Args:
-            input_text: Input text to process
-            context: Optional context information
+            input_text: 输入文本
+            context: 可选的上下文信息
             
         Returns:
-            Extracted requirements
+            提取结果
         """
-        logger.info(f"Processing input: {json.dumps({'text': input_text}, cls=OWLJSONEncoder, indent=2)}")
-        
-        # 准备 prompt
-        prompt = await self._prepare_prompt(input_text, context)
-        logger.debug(f"Prepared prompt (first 200 chars): {prompt[:200]}...")
-        
-        # 调用 LLM 服务
-        for i in range(self.max_retries):
-            try:
-                logger.info(f"Calling LLM service (attempt {i+1}/{self.max_retries})")
-                response = await self.llm_service.generate(prompt)
-                
-                # 记录完整响应以便调试
-                logger.debug(f"LLM response (first 500 chars): {response.text[:500]}...")
-                
-                # 提取并验证结果
-                try:
-                    result = self._extract_json(response.text)
-                    if self._validate_result(result):
-                        logger.info(f"Successfully extracted requirements: {json.dumps(result, cls=OWLJSONEncoder, indent=2)}")
-                        return result
-                    
-                    logger.warning(f"Invalid result format: {json.dumps(result, cls=OWLJSONEncoder)}")
-                except ValueError as e:
-                    logger.warning(f"Failed to extract JSON: {e}")
-                
-            except Exception as e:
-                logger.error(f"Failed to process input (attempt {i+1}/{self.max_retries}): {e}", exc_info=True)
-                if i == self.max_retries - 1:
-                    raise
-                    
-        raise RuntimeError("Failed to process input after maximum retries")
+        input_data = {
+            "input_text": input_text
+        }
+        if context:
+            input_data["context"] = context
             
-    async def extract(self, input_text: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Extract requirements from input text.
-        
-        Args:
-            input_text: Input text to process
-            context: Optional context information
-            
-        Returns:
-            Extracted requirements
-        """
-        logger.info(f"Extracting requirements from: {json.dumps({'text': input_text}, indent=2, cls=OWLJSONEncoder)}")
-        
-        for attempt in range(self.max_retries):
-            try:
-                return await self.process(input_text, context)
-            except Exception as e:
-                if attempt == self.max_retries - 1:
-                    logger.error(f"Failed to extract requirements after {self.max_retries} attempts")
-                    raise
-                logger.warning(f"Attempt {attempt + 1} failed: {e}")
-                continue 
+        return await self.process(input_data) 

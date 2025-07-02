@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>需求分析助手</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="/static/style.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">需求分析助手</h1>
+            <p class="text-gray-600 mt-2">基于OWL框架的智能需求分析系统</p>
+        </header>
+
+        <main>
+            <!-- 输入区域 -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">输入需求</h2>
+                <textarea 
+                    id="requirementText"
+                    class="w-full h-40 p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="请输入您的需求描述..."
+                ></textarea>
+                <button 
+                    id="analyzeBtn"
+                    class="mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                    开始分析
+                </button>
+            </div>
+
+            <!-- 加载提示 -->
+            <div id="loading" class="hidden text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 loading-spinner"></div>
+                <p class="text-gray-600 mt-2">正在分析中，请稍候...</p>
+            </div>
+
+            <!-- 结果区域 -->
+            <div id="results" class="hidden space-y-8">
+                <!-- 需求提取结果 -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">需求提取结果</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="font-medium text-gray-700 mb-2">功能需求</h3>
+                            <ul id="functionalRequirements" class="list-disc list-inside text-gray-600"></ul>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-gray-700 mb-2">非功能需求</h3>
+                            <ul id="nonFunctionalRequirements" class="list-disc list-inside text-gray-600"></ul>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-gray-700 mb-2">约束条件</h3>
+                            <ul id="constraints" class="list-disc list-inside text-gray-600"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 需求分析结果 -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">需求分析结果</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="font-medium text-gray-700 mb-2">技术可行性</h3>
+                            <ul id="technicalFeasibility" class="list-disc list-inside text-gray-600"></ul>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-gray-700 mb-2">资源需求</h3>
+                            <ul id="resourceRequirements" class="list-disc list-inside text-gray-600"></ul>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-gray-700 mb-2">风险分析</h3>
+                            <ul id="riskAnalysis" class="list-disc list-inside text-gray-600"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 质量检查结果 -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">质量检查结果</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="font-medium text-gray-700 mb-2">发现的问题</h3>
+                            <ul id="issues" class="list-disc list-inside text-gray-600"></ul>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-gray-700 mb-2">改进建议</h3>
+                            <ul id="recommendations" class="list-disc list-inside text-gray-600"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 需求文档 -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">需求文档</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="font-medium text-gray-700 mb-2">项目概述</h3>
+                            <div id="projectOverview" class="text-gray-600"></div>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-gray-700 mb-2">需求清单</h3>
+                            <div id="requirementsList" class="text-gray-600"></div>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-gray-700 mb-2">技术方案</h3>
+                            <div id="technicalSolution" class="text-gray-600"></div>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-gray-700 mb-2">实现计划</h3>
+                            <div id="implementationPlan" class="text-gray-600"></div>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-gray-700 mb-2">风险管理</h3>
+                            <div id="riskManagement" class="text-gray-600"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html> 

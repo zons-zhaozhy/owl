@@ -8,17 +8,70 @@ from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from dotenv import load_dotenv
 from enum import Enum, auto
+from pydantic import BaseModel, Field
 
 # 加载环境变量
 load_dotenv()
 
+class LLMProvider(str, Enum):
+    """LLM提供商"""
+    OPENAI = "openai"
+    ANTHROPIC = "anthropic"
+    AZURE = "azure"
+    DEEPSEEK = "deepseek"
+    OLLAMA = "ollama"
+
 class AgentRole(str, Enum):
-    """Agent roles in the system."""
-    REQUIREMENTS_EXTRACTOR = "requirements_extractor"
-    REQUIREMENTS_ANALYZER = "requirements_analyzer"
-    DOCUMENT_GENERATOR = "document_generator"
-    QUALITY_CHECKER = "quality_checker"
-    COORDINATOR = "coordinator"
+    """智能体角色"""
+    EXTRACTOR = "extractor"
+    ANALYZER = "analyzer"
+    CHECKER = "checker"
+    GENERATOR = "generator"
+
+class LLMConfig(BaseModel):
+    """LLM配置"""
+    provider: LLMProvider
+    model: str
+    api_key: Optional[str] = None
+    temperature: float = 0.7
+    max_tokens: int = 4000
+
+class WebConfig(BaseModel):
+    """Web服务器配置"""
+    host: str = "0.0.0.0"
+    port: int = 8000
+    debug: bool = False
+    cors_origins: list[str] = ["*"]
+    static_dir: str = "static"
+    templates_dir: str = "templates"
+
+class AgentConfig(BaseModel):
+    """智能体配置"""
+    name: str
+    role: AgentRole
+    description: str
+    prompt_template: str
+
+class SystemConfig(BaseModel):
+    """系统配置"""
+    name: str = "OWL需求分析助手"
+    version: str = "0.1.0"
+    description: str = "基于多智能体的需求分析系统"
+    log_level: str = "INFO"
+    log_file: str = "logs/owl.log"
+    
+    # LLM配置
+    llm_provider: LLMProvider = LLMProvider.DEEPSEEK
+    llm_model: str = "deepseek-chat"
+    llm_api_key: Optional[str] = None
+    llm_temperature: float = 0.7
+    llm_max_tokens: int = 4000
+    
+    # Web配置
+    web: WebConfig = WebConfig()
+    
+    # 智能体配置
+    agents: Dict[str, AgentConfig] = Field(default_factory=dict)
 
 class AgentStatus(Enum):
     """Agent status states."""
@@ -26,6 +79,12 @@ class AgentStatus(Enum):
     BUSY = "busy"
     ERROR = "error"
     TERMINATED = "terminated"
+
+class RunMode(Enum):
+    """运行模式枚举。"""
+    WEB = auto()  # Web界面模式
+    CLI = auto()  # 命令行交互模式
+    ONCE = auto()  # 单次执行模式
 
 class OWLJSONEncoder(json.JSONEncoder):
     """Custom JSON encoder for OWL objects."""
@@ -43,254 +102,118 @@ class OWLJSONEncoder(json.JSONEncoder):
         return super().default(obj)
 
 @dataclass
-class AgentConfig:
-    """Agent-specific configuration."""
-    role: AgentRole
-    name: str
-    model: str = "deepseek-chat"
-    temperature: float = 0.1
-    max_tokens: int = 4000
-    stop_sequences: Optional[List[str]] = None
-    extra_config: Optional[Dict[str, Any]] = None
-    
-    def get(self, key: str, default: Any = None) -> Any:
-        """Get a configuration value.
-        
-        Args:
-            key: Configuration key
-            default: Default value if key not found
-            
-        Returns:
-            Configuration value or default
-        """
-        if hasattr(self, key):
-            return getattr(self, key)
-        if self.extra_config and key in self.extra_config:
-            return self.extra_config[key]
-        return default
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert config to dictionary.
-        
-        Returns:
-            Dictionary representation
-        """
-        return {
-            "role": self.role.value,
-            "name": self.name,
-            "model": self.model,
-            "temperature": self.temperature,
-            "max_tokens": self.max_tokens,
-            "stop_sequences": self.stop_sequences,
-            **(self.extra_config or {})
-        }
-        
-    def to_json(self) -> str:
-        """Convert config to JSON string.
-        
-        Returns:
-            JSON string representation
-        """
-        return json.dumps(self.to_dict(), cls=OWLJSONEncoder, indent=2)
-        
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "AgentConfig":
-        """Create config from dictionary.
-        
-        Args:
-            data: Dictionary data
-            
-        Returns:
-            AgentConfig instance
-        """
-        role = data.pop("role")
-        if isinstance(role, str):
-            role = AgentRole(role)
-        return cls(role=role, **data)
-        
-    @classmethod
-    def from_json(cls, json_str: str) -> "AgentConfig":
-        """Create config from JSON string.
-        
-        Args:
-            json_str: JSON string
-            
-        Returns:
-            AgentConfig instance
-        """
-        data = json.loads(json_str)
-        return cls.from_dict(data)
-
-@dataclass
 class SystemConfig:
-    """System-wide configuration settings."""
+    """系统配置类。"""
     
-    # LLM settings
-    llm_provider: str = "deepseek"
-    llm_model: str = "deepseek-chat"
-    llm_api_key: str = field(default_factory=lambda: os.getenv("DEEPSEEK_API_KEY", ""))
-    llm_temperature: float = 0.1
-    llm_max_tokens: int = 4000
+    # 运行模式配置
+    mode: RunMode = RunMode.WEB  # 默认使用Web界面模式
+    input_text: Optional[str] = None  # 单次执行模式的输入文本
     
-    # Default model settings
-    default_model: str = "deepseek-chat"
-    default_temperature: float = 0.1
-    default_max_tokens: int = 4000
+    # Web服务配置
+    host: str = "127.0.0.1"  # Web服务主机
+    port: int = 8080  # Web服务端口
     
-    # Agent settings
-    agent_configs: Dict[AgentRole, AgentConfig] = field(default_factory=dict)
+    # LLM配置
+    llm_provider: LLMProvider = LLMProvider.DEEPSEEK  # 默认使用DeepSeek
+    config_file: str = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+        "config",
+        "system.yaml"
+    )  # 配置文件路径
     
-    # Global retry settings
-    max_retries: int = 3
+    # 日志配置
+    log_level: str = "INFO"  # 日志级别
+    log_file: Optional[str] = None  # 日志文件路径
     
-    # Logging settings
-    log_level: str = "DEBUG"
-    log_file: str = "logs/owl.log"
-    
-    # Web interface settings
-    web_host: str = "127.0.0.1"
-    web_port: int = 8080
-    
-    # Output settings
-    output_dir: str = "output"
-    template_dir: str = "templates"
-    workspace_dir: str = "workspace"
-    
-    # Templates settings
-    templates_dir: str = "templates/prompts"
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert config to dictionary.
-        
-        Returns:
-            Dictionary representation
-        """
-        return {
-            "llm_provider": self.llm_provider,
-            "llm_model": self.llm_model,
-            "llm_api_key": self.llm_api_key,
-            "llm_temperature": self.llm_temperature,
-            "llm_max_tokens": self.llm_max_tokens,
-            "default_model": self.default_model,
-            "default_temperature": self.default_temperature,
-            "default_max_tokens": self.default_max_tokens,
-            "agent_configs": {
-                role.value: config.to_dict()
-                for role, config in self.agent_configs.items()
-            },
-            "log_level": self.log_level,
-            "log_file": self.log_file,
-            "web_host": self.web_host,
-            "web_port": self.web_port,
-            "output_dir": self.output_dir,
-            "template_dir": self.template_dir,
-            "workspace_dir": self.workspace_dir,
-            "templates_dir": self.templates_dir,
-            "max_retries": self.max_retries
-        }
-        
-    def to_json(self) -> str:
-        """Convert config to JSON string.
-        
-        Returns:
-            JSON string representation
-        """
-        return json.dumps(self.to_dict(), cls=OWLJSONEncoder, indent=2)
-    
-    def save(self, config_path: str) -> None:
-        """Save the current configuration to a YAML file.
-        
-        Args:
-            config_path: Path where to save the configuration
-        """
-        # 使用 to_dict() 获取可序列化的数据
-        config_data = self.to_dict()
-        
-        # 将 agent_configs 移动到 agents 字段下
-        agents_data = config_data.pop('agent_configs')
-        config_data['agents'] = agents_data
-        
-        # 将 templates_dir 移动到 templates 字段下
-        templates_dir = config_data.pop('templates_dir')
-        config_data['templates'] = {
-            'directory': templates_dir
-        }
-        
-        os.makedirs(os.path.dirname(config_path), exist_ok=True)
-        with open(config_path, 'w', encoding='utf-8') as f:
-            yaml.safe_dump(config_data, f, default_flow_style=False)
-            
-    def get_agent_config(self, role: AgentRole) -> AgentConfig:
-        """Get the configuration for a specific agent role.
-        
-        Args:
-            role: The role of the agent
-            
-        Returns:
-            Configuration for the specified agent role
-        """
-        return self.agent_configs[role]
-
     @classmethod
-    def from_yaml(cls, config_path: str) -> "SystemConfig":
-        """Load configuration from YAML file.
-        
-        Args:
-            config_path: Path to YAML configuration file
-            
-        Returns:
-            SystemConfig instance
+    def from_dict(cls, config_dict: dict) -> "SystemConfig":
         """
-        with open(config_path, "r", encoding="utf-8") as f:
-            config_data = yaml.safe_load(f)
+        从字典创建配置对象。
 
-        # 处理智能体配置
-        agent_configs = {}
-        if "agents" in config_data:
-            for role_str, agent_config in config_data["agents"].items():
-                role = AgentRole(role_str)
-                agent_configs[role] = AgentConfig(
-                    role=role,
-                    name=agent_config.get("name", f"{role.value}_agent"),
-                    model=agent_config.get("model", "deepseek-chat"),
-                    temperature=agent_config.get("temperature", 0.1),
-                    max_tokens=agent_config.get("max_tokens", 4000),
-                    stop_sequences=agent_config.get("stop_sequences"),
-                    extra_config={
-                        k: v for k, v in agent_config.items()
-                        if k not in ["role", "name", "model", "temperature", "max_tokens", "stop_sequences"]
-                    } or None
-                )
+        Args:
+            config_dict: 配置字典
 
-        # 创建系统配置实例
+        Returns:
+            系统配置对象
+        """
+        # 处理运行模式
+        mode_str = config_dict.get("mode", "web").lower()
+        if mode_str == "web":
+            mode = RunMode.WEB
+        elif mode_str == "cli":
+            mode = RunMode.CLI
+        elif mode_str == "once":
+            mode = RunMode.ONCE
+        else:
+            raise ValueError(f"无效的运行模式: {mode_str}")
+        
+        # 处理LLM提供商
+        provider_str = config_dict.get("llm_provider", "deepseek").lower()
+        try:
+            llm_provider = LLMProvider(provider_str)
+        except ValueError:
+            raise ValueError(f"无效的LLM提供商: {provider_str}")
+        
         return cls(
-            llm_provider=config_data.get("llm_provider", "deepseek"),
-            llm_model=config_data.get("llm_model", "deepseek-chat"),
-            llm_api_key=config_data.get("llm_api_key", os.getenv("DEEPSEEK_API_KEY", "")),
-            llm_temperature=config_data.get("llm_temperature", cls.llm_temperature),
-            llm_max_tokens=config_data.get("llm_max_tokens", cls.llm_max_tokens),
-            default_model=config_data.get("default_model", "deepseek-chat"),
-            default_temperature=config_data.get("default_temperature", 0.1),
-            default_max_tokens=config_data.get("default_max_tokens", 4000),
-            agent_configs=agent_configs,
-            log_level=config_data.get("log_level", "DEBUG"),
-            log_file=config_data.get("log_file", "logs/owl.log"),
-            web_host=config_data.get("web_host", "127.0.0.1"),
-            web_port=config_data.get("web_port", 8080),
-            output_dir=config_data.get("output_dir", "output"),
-            template_dir=config_data.get("template_dir", "templates"),
-            workspace_dir=config_data.get("workspace_dir", "workspace"),
-            templates_dir=config_data.get("templates_dir", "templates/prompts"),
-            max_retries=config_data.get("max_retries", 3)
+            mode=mode,
+            input_text=config_dict.get("input_text"),
+            host=config_dict.get("host", "127.0.0.1"),
+            port=int(config_dict.get("port", 8080)),
+            llm_provider=llm_provider,
+            config_file=config_dict.get("config_file", cls.config_file),
+            log_level=config_dict.get("log_level", "INFO"),
+            log_file=config_dict.get("log_file")
         )
 
 def load_config(config_path: str) -> SystemConfig:
-    """Load configuration from file.
+    """Load system configuration from YAML file.
     
     Args:
         config_path: Path to configuration file
         
     Returns:
-        SystemConfig instance
+        Loaded system configuration
+        
+    Raises:
+        FileNotFoundError: If config file not found
+        yaml.YAMLError: If config file is invalid
     """
-    return SystemConfig.from_yaml(config_path)
+    # 确保配置文件存在
+    if not os.path.exists(config_path):
+        raise FileNotFoundError(f"配置文件不存在: {config_path}")
+    
+    # 读取配置文件
+    with open(config_path, "r", encoding="utf-8") as f:
+        config_data = yaml.safe_load(f)
+    
+    # 提取系统配置
+    system_config = config_data.get("system", {})
+    
+    # 提取LLM配置
+    llm_config = config_data.get("llm", {})
+    
+    # 提取Web配置
+    web_config = WebConfig(**config_data.get("web", {}))
+    
+    # 提取智能体配置
+    agents_config = {}
+    for agent_id, agent_data in config_data.get("agents", {}).items():
+        agents_config[agent_id] = AgentConfig(**agent_data)
+    
+    # 创建系统配置对象
+    return SystemConfig(
+        name=system_config.get("name", "OWL需求分析助手"),
+        version=system_config.get("version", "0.1.0"),
+        description=system_config.get("description", "基于多智能体的需求分析系统"),
+        log_level=system_config.get("log_level", "INFO"),
+        log_file=system_config.get("log_file", "logs/owl.log"),
+        
+        llm_provider=llm_config.get("provider", "openai"),
+        llm_model=llm_config.get("model", "gpt-4-turbo-preview"),
+        llm_api_key=llm_config.get("api_key") or os.getenv("OPENAI_API_KEY"),
+        llm_temperature=llm_config.get("temperature", 0.7),
+        llm_max_tokens=llm_config.get("max_tokens", 4000),
+        
+        web=web_config,
+        agents=agents_config
+    )

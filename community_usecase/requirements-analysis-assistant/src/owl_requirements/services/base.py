@@ -83,30 +83,17 @@ class BaseLLMService(ABC):
                 raise InvalidParameterError("Stop sequences must be strings")
     
     @abstractmethod
-    async def generate(
-        self,
-        prompt: str,
-        temperature: float = 0.7,
-        max_tokens: int = 2000,
-        stop: Optional[list] = None,
-        **kwargs
-    ) -> str:
-        """Generate text using LLM.
-        
-        Args:
-            prompt: Input prompt
-            temperature: Sampling temperature
-            max_tokens: Maximum number of tokens to generate
-            stop: Stop sequences
-            **kwargs: Additional parameters
-            
-        Returns:
-            Generated text
-            
-        Raises:
-            NotImplementedError: If not implemented by subclass
+    async def generate(self, prompt: str) -> str:
         """
-        raise NotImplementedError
+        生成文本。
+
+        Args:
+            prompt: 提示词
+
+        Returns:
+            生成的文本
+        """
+        pass
         
     @abstractmethod
     async def generate_with_history(

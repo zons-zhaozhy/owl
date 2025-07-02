@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>需求分析助手 API 文档</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="/static/style.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">需求分析助手 API 文档</h1>
+            <p class="text-gray-600 mt-2">API 版本 1.0.0</p>
+        </header>
+
+        <main class="space-y-8">
+            <!-- 概述 -->
+            <section class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">API 概述</h2>
+                <p class="text-gray-600 mb-4">
+                    需求分析助手提供了一套 RESTful API，用于需求提取、分析、质量检查和文档生成。
+                    所有 API 端点都返回 JSON 格式的响应。
+                </p>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-medium text-gray-700 mb-2">基本信息</h3>
+                    <ul class="list-disc list-inside text-gray-600">
+                        <li>基础 URL: <code class="bg-gray-200 px-2 py-1 rounded">http://localhost:8000</code></li>
+                        <li>内容类型: <code class="bg-gray-200 px-2 py-1 rounded">application/json</code></li>
+                        <li>字符编码: <code class="bg-gray-200 px-2 py-1 rounded">UTF-8</code></li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 认证 -->
+            <section class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">认证</h2>
+                <p class="text-gray-600">
+                    目前 API 不需要认证即可访问。在未来的版本中可能会添加认证机制。
+                </p>
+            </section>
+
+            <!-- 端点文档 -->
+            <section class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">API 端点</h2>
+
+                <!-- 分析需求 -->
+                <div class="mb-8">
+                    <h3 class="font-medium text-gray-800 mb-2">分析需求</h3>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <p class="font-mono mb-2">POST /analyze</p>
+                        <p class="text-gray-600 mb-4">分析输入的需求文本，返回需求提取、分析、质量检查和文档生成的结果。</p>
+                        
+                        <h4 class="font-medium text-gray-700 mb-2">请求体</h4>
+                        <pre class="bg-gray-800 text-white p-4 rounded-lg mb-4 overflow-x-auto">
+{
+    "text": "string"  // 需求描述文本
+}</pre>
+
+                        <h4 class="font-medium text-gray-700 mb-2">响应</h4>
+                        <pre class="bg-gray-800 text-white p-4 rounded-lg mb-4 overflow-x-auto">
+{
+    "requirements": {
+        "functional_requirements": ["string"],
+        "non_functional_requirements": ["string"],
+        "constraints": ["string"]
+    },
+    "analysis": {
+        "technical_feasibility": ["string"],
+        "resource_requirements": ["string"],
+        "risk_analysis": ["string"]
+    },
+    "quality_check": {
+        "issues": ["string"],
+        "recommendations": ["string"]
+    },
+    "documentation": {
+        "project_overview": ["string"],
+        "requirements_list": ["string"],
+        "technical_solution": ["string"],
+        "implementation_plan": ["string"],
+        "risk_management": ["string"]
+    }
+}</pre>
+
+                        <h4 class="font-medium text-gray-700 mb-2">状态码</h4>
+                        <ul class="list-disc list-inside text-gray-600">
+                            <li>200: 成功</li>
+                            <li>400: 请求参数错误</li>
+                            <li>500: 服务器内部错误</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 健康检查 -->
+                <div class="mb-8">
+                    <h3 class="font-medium text-gray-800 mb-2">健康检查</h3>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <p class="font-mono mb-2">GET /health</p>
+                        <p class="text-gray-600 mb-4">检查 API 服务的健康状态。</p>
+
+                        <h4 class="font-medium text-gray-700 mb-2">响应</h4>
+                        <pre class="bg-gray-800 text-white p-4 rounded-lg mb-4 overflow-x-auto">
+{
+    "status": "healthy"
+}</pre>
+
+                        <h4 class="font-medium text-gray-700 mb-2">状态码</h4>
+                        <ul class="list-disc list-inside text-gray-600">
+                            <li>200: 服务正常</li>
+                            <li>503: 服务不可用</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 错误处理 -->
+            <section class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">错误处理</h2>
+                <p class="text-gray-600 mb-4">
+                    当发生错误时，API 将返回一个包含错误详情的 JSON 响应。
+                </p>
+                <pre class="bg-gray-800 text-white p-4 rounded-lg mb-4 overflow-x-auto">
+{
+    "detail": "错误描述信息"
+}</pre>
+            </section>
+
+            <!-- 速率限制 -->
+            <section class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">速率限制</h2>
+                <p class="text-gray-600">
+                    目前没有实施速率限制。在未来的版本中可能会添加速率限制机制。
+                </p>
+            </section>
+        </main>
+
+        <footer class="text-center mt-8 text-gray-600">
+            <p>© 2024 需求分析助手. 基于 OWL 框架构建.</p>
+        </footer>
+    </div>
+</body>
+</html> 

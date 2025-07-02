@@ -1,65 +1,96 @@
-# OWL Requirements Analysis System Configuration
+# OWL需求分析助手配置文件
 
-# LLM Service Configuration
-llm_provider: "deepseek"  # or "openai"
-llm_model: "deepseek-chat"  # or "gpt-4-turbo-preview"
-llm_temperature: 0.1
-llm_max_tokens: 4000
+# 系统配置
+system:
+  name: "OWL需求分析助手"
+  version: "0.1.0"
+  description: "基于多智能体的需求分析系统"
+  log_level: "INFO"
+  log_file: "logs/owl.log"
 
-# Default Model Settings
-default_model: "deepseek-chat"
-default_temperature: 0.7
-default_max_tokens: 2000
+# LLM配置
+llm:
+  provider: "openai"  # openai, anthropic, azure
+  model: "gpt-4-turbo-preview"  # 或其他模型
+  api_key: ""  # 从环境变量获取
+  temperature: 0.7
+  max_tokens: 4000
 
-# Logging Configuration
-log_level: "DEBUG"
-log_file: "logs/owl.log"
-log_format: "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
-log_rotation: "1 day"
-log_retention: "7 days"
-log_compression: "zip"
+# Web服务器配置
+web:
+  host: "0.0.0.0"
+  port: 8000
+  debug: false
+  cors_origins: ["*"]
+  static_dir: "static"
+  templates_dir: "templates"
 
-# Agent Configuration
+# 智能体配置
 agents:
   requirements_extractor:
     name: "需求提取智能体"
-    description: "从用户输入中提取需求"
-    model: "deepseek-chat"
-    temperature: 0.1
-    max_tokens: 4000
-    extra_config:
-      prompt_template: "templates/prompts/extractor.txt"
-      log_level: "DEBUG"
-    
+    role: "extractor"
+    description: "负责从用户输入中提取关键需求"
+    prompt_template: |
+      你是一个专业的需求分析师，负责从用户输入中提取关键需求。
+      请仔细分析以下输入，提取出所有明确和隐含的需求：
+      
+      {input_text}
+      
+      请以结构化的方式输出需求列表，包括：
+      1. 功能需求
+      2. 非功能需求
+      3. 约束条件
+      4. 优先级
+      5. 依赖关系
+
   requirements_analyzer:
     name: "需求分析智能体"
-    description: "分析需求的可行性和依赖关系"
-    model: "deepseek-chat"
-    temperature: 0.1
-    max_tokens: 4000
-    extra_config:
-      prompt_template: "templates/prompts/analyzer.txt"
-      log_level: "DEBUG"
-    
+    role: "analyzer"
+    description: "负责深入分析需求的可行性和影响"
+    prompt_template: |
+      作为需求分析专家，请对以下需求进行深入分析：
+      
+      {requirements}
+      
+      请提供以下分析：
+      1. 技术可行性评估
+      2. 资源需求评估
+      3. 风险分析
+      4. 实现复杂度评估
+      5. 建议的技术方案
+
   quality_checker:
     name: "质量检查智能体"
-    description: "检查需求的质量和完整性"
-    model: "deepseek-chat"
-    temperature: 0.1
-    max_tokens: 4000
-    extra_config:
-      prompt_template: "templates/prompts/checker.txt"
-      log_level: "DEBUG"
-    
-  document_generator:
+    role: "checker"
+    description: "负责检查需求的质量和完整性"
+    prompt_template: |
+      作为质量保证专家，请检查以下需求的质量：
+      
+      {requirements}
+      
+      请评估以下方面：
+      1. 需求的完整性
+      2. 需求的清晰度
+      3. 需求的一致性
+      4. 需求的可测试性
+      5. 需求的可追踪性
+
+  documentation_generator:
     name: "文档生成智能体"
-    description: "生成需求文档"
-    model: "deepseek-chat"
-    temperature: 0.1
-    max_tokens: 4000
-    extra_config:
-      prompt_template: "templates/prompts/generator.txt"
-      log_level: "DEBUG"
+    role: "generator"
+    description: "负责生成标准化的需求文档"
+    prompt_template: |
+      作为技术文档专家，请根据以下分析结果生成标准化的需求文档：
+      
+      {analysis_results}
+      
+      请生成包含以下部分的文档：
+      1. 项目概述
+      2. 需求清单
+      3. 技术方案
+      4. 实现计划
+      5. 风险管理
 
 # System Configuration
 templates:

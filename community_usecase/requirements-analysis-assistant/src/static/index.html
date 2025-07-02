@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OWL需求分析助手</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">OWL需求分析助手</h1>
+            <p class="text-gray-600">基于OWL框架的智能需求分析系统</p>
+        </header>
+
+        <main class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- 输入区域 -->
+            <section class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">需求输入</h2>
+                <form id="requirementsForm" class="space-y-4">
+                    <div>
+                        <label for="requirements" class="block text-gray-700 font-medium mb-2">
+                            请输入您的需求描述：
+                        </label>
+                        <textarea
+                            id="requirements"
+                            name="requirements"
+                            rows="10"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="在这里输入您的需求描述..."
+                        ></textarea>
+                    </div>
+                    <div class="flex justify-end">
+                        <button
+                            type="submit"
+                            class="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                        >
+                            分析需求
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- 结果区域 -->
+            <section class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">分析结果</h2>
+                <div id="results" class="space-y-6">
+                    <!-- 需求概述 -->
+                    <div class="result-section hidden">
+                        <h3 class="text-xl font-medium text-gray-800 mb-2">需求概述</h3>
+                        <div class="content text-gray-600"></div>
+                    </div>
+
+                    <!-- 功能需求 -->
+                    <div class="result-section hidden">
+                        <h3 class="text-xl font-medium text-gray-800 mb-2">功能需求列表</h3>
+                        <div class="content text-gray-600"></div>
+                    </div>
+
+                    <!-- 非功能需求 -->
+                    <div class="result-section hidden">
+                        <h3 class="text-xl font-medium text-gray-800 mb-2">非功能需求</h3>
+                        <div class="content text-gray-600"></div>
+                    </div>
+
+                    <!-- 约束条件 -->
+                    <div class="result-section hidden">
+                        <h3 class="text-xl font-medium text-gray-800 mb-2">约束条件</h3>
+                        <div class="content text-gray-600"></div>
+                    </div>
+
+                    <!-- 风险分析 -->
+                    <div class="result-section hidden">
+                        <h3 class="text-xl font-medium text-gray-800 mb-2">风险分析</h3>
+                        <div class="content text-gray-600"></div>
+                    </div>
+
+                    <!-- 建议 -->
+                    <div class="result-section hidden">
+                        <h3 class="text-xl font-medium text-gray-800 mb-2">建议和建议</h3>
+                        <div class="content text-gray-600"></div>
+                    </div>
+                </div>
+
+                <!-- 加载指示器 -->
+                <div id="loading" class="hidden">
+                    <div class="flex items-center justify-center py-8">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                    </div>
+                    <p class="text-center text-gray-600">正在分析需求，请稍候...</p>
+                </div>
+
+                <!-- 错误提示 -->
+                <div id="error" class="hidden">
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+                        <p class="font-medium">分析失败</p>
+                        <p class="text-sm message"></p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+</body>
+</html> 

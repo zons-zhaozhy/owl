@@ -1,415 +1,342 @@
-"""Documentation generator agent implementation."""
+"""文档生成智能体"""
 
 import json
 import logging
-import re
 from typing import Dict, Any, Optional
-from pathlib import Path
 from datetime import datetime
 
-from loguru import logger
+from .base import BaseAgent
+from ..core.exceptions import LLMServiceError
 
-from ..services.llm import LLMService
-from ..core.models import QualityReport
-from ..core.config import SystemConfig
-from ..core.base import BaseAgent
-from ..utils.enums import AgentRole
+logger = logging.getLogger(__name__)
 
 class DocumentationGenerator(BaseAgent):
-    """Documentation generator agent implementation."""
+    """文档生成智能体 - 基于需求分析结果生成各种格式的文档"""
     
-    def __init__(self, llm_service: LLMService, config: SystemConfig):
-        """Initialize documentation generator.
-        
-        Args:
-            llm_service: LLM service instance
-            config: Agent configuration
-        """
-        super().__init__(config.get_agent_config(AgentRole.DOCUMENT_GENERATOR).to_dict())
-        self.llm_service = llm_service
-        self.system_config = config
-        self.max_retries = self.system_config.max_retries
-        self.prompt_template = self._load_prompt_template()
-        
-    def _load_prompt_template(self) -> str:
-        """Load prompt template from file."""
-        template_path = Path(self.system_config.templates_dir) / "documentation_generator.json"
-        
-        current_file_dir = Path(__file__).parent
-        project_root = current_file_dir.parent.parent.parent
-        absolute_template_path = project_root / template_path
-
-        if not absolute_template_path.exists():
-            # 使用默认模板
-            return """请根据以下信息生成完整的需求文档。
-
-需求:
-{requirements}
-
-分析:
-{analysis}
-
-质量检查:
-{quality_check}
-
-{context_info}
-
-请以JSON格式返回文档，包含以下字段:
-1. project_overview: 项目概述
-2. executive_summary: 执行摘要
-3. requirements_specification: 需求规格
-4. analysis_results: 分析结果
-5. quality_assessment: 质量评估
-6. implementation_plan: 实施计划
-
-示例输出:
-{
-    "documentation": {
-        "project_overview": {
-            "title": "项目名称",
-            "version": "1.0.0",
-            "date": "2024-03-21",
-            "status": "草稿",
-            "authors": ["需求分析师"],
-            "reviewers": ["质量检查员"],
-            "approvers": ["项目经理"]
-        },
-        "executive_summary": {
-            "background": "项目背景描述...",
-            "objectives": ["目标1", "目标2"],
-            "scope": {
-                "in_scope": ["范围1", "范围2"],
-                "out_of_scope": ["排除1", "排除2"]
-            },
-            "stakeholders": ["干系人1", "干系人2"]
-        }
-    }
-}"""
-            
-        with open(absolute_template_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            return data["template"]
-        
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        """初始化文档生成智能体"""
+        super().__init__("DocumentationGenerator", config)
+    
     async def process(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Process input data.
-
-        Args:
-            input_data: Input data to process
-
-        Returns:
-            Processing results
-        """
-        requirements = input_data.get("requirements")
-        analysis = input_data.get("analysis")
-        quality_check = input_data.get("quality_check")
-        context = input_data.get("context")
-
-        if not all([requirements, analysis, quality_check]):
-            raise ValueError("Missing requirements, analysis, or quality_check data for documentation generation.")
-
-        return await self.generate(requirements, analysis, quality_check, context)
-
-    async def generate(
-        self,
-        requirements: Dict[str, Any],
-        analysis: Dict[str, Any],
-        quality_check: QualityReport,
-        context: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
-        """Generate documentation from requirements, analysis and quality check.
+        """处理文档生成任务
         
         Args:
-            requirements: Requirements data
-            analysis: Analysis results
-            quality_check: Quality check results
-            context: Optional context information
+            input_data: 包含需求、分析和质量报告的数据
             
         Returns:
-            Generated documentation
-            
-        Raises:
-            ValueError: If generation fails
+            生成的文档
         """
         try:
-            # Format prompt
-            quality_check_dict = quality_check.model_dump()
-            prompt = await self._format_prompt(requirements, analysis, quality_check_dict, context)
+            requirements = input_data.get("requirements", {})
+            analysis = input_data.get("analysis", {})
+            quality_report = input_data.get("quality_report", {})
             
-            # Generate documentation
-            response = await self.llm_service.generate(prompt)
-            if not response:
-                raise ValueError("Failed to generate documentation")
-                
-            # Extract JSON from response
-            documentation = self._extract_json_from_text(response)
-            if not documentation:
-                raise ValueError("Failed to extract documentation from response")
-                
-            # Validate documentation structure
-            if not self._validate_documentation(documentation):
-                raise ValueError("Invalid documentation structure")
-                
-            return documentation
+            if not requirements:
+                raise ValueError("需求信息不能为空")
             
-        except Exception as e:
-            logger.error(f"Failed to generate documentation: {str(e)}")
-            raise ValueError(f"Documentation generation failed: {str(e)}")
+            doc_format = input_data.get("format", "markdown")
+            template_type = input_data.get("template", "standard")
             
-    async def _format_prompt(
-        self,
-        requirements: Dict[str, Any],
-        analysis: Dict[str, Any],
-        quality_check: Dict[str, Any],
-        context: Optional[Dict[str, Any]] = None
-    ) -> str:
-        """Format prompt for documentation generation.
-        
-        Args:
-            requirements: Requirements data
-            analysis: Analysis results
-            quality_check: Quality check results
-            context: Optional context information
+            logger.info(f"开始生成{doc_format}格式文档")
             
-        Returns:
-            Formatted prompt
-        """
-        try:
-            # 准备基本数据
-            requirements_json = json.dumps(requirements, indent=2, ensure_ascii=False)
-            analysis_json = json.dumps(analysis, indent=2, ensure_ascii=False)
-            quality_check_json = json.dumps(quality_check, indent=2, ensure_ascii=False)
-            
-            # 准备上下文信息
-            context_info = ""
-            if context:
-                context_info = "\n当前上下文:\n"
-                if context.get("clarifications"):
-                    context_info += "需求澄清历史:\n"
-                    for c in context["clarifications"]:
-                        context_info += f"Q: {c['question']}\nA: {c['answer']}\n"
-                if context.get("current_analysis"):
-                    context_info += "\n当前分析状态:\n"
-                    context_info += json.dumps(context["current_analysis"], indent=2, ensure_ascii=False)
-            
-            # Format template
-            return self.prompt_template.format(
-                requirements=requirements_json,
-                analysis=analysis_json,
-                quality_check=quality_check_json,
-                context_info=context_info
+            # 使用统一的提示词模板
+            response = await self._call_llm_with_template(
+                "documentation_generation",
+                requirements=json.dumps(requirements, ensure_ascii=False),
+                analysis=json.dumps(analysis, ensure_ascii=False),
+                quality_report=json.dumps(quality_report, ensure_ascii=False),
+                format=doc_format,
+                template=template_type
             )
             
-        except Exception as e:
-            logger.error(f"Failed to format prompt: {str(e)}")
-            raise ValueError(f"Failed to format prompt: {str(e)}")
+            # 生成文档内容
+            document_content = self._process_document_content(response, doc_format)
             
-    def _extract_json_from_text(self, text: str) -> Dict[str, Any]:
-        """Extract JSON from text response.
-        
-        Args:
-            text: Text to extract JSON from
+            # 生成元数据
+            metadata = self._generate_metadata(requirements, analysis, quality_report)
             
-        Returns:
-            Extracted JSON
+            logger.info("文档生成完成")
             
-        Raises:
-            ValueError: If no valid JSON found
-        """
-        # 清理中文标点符号
-        text = text.replace("，", ",").replace("：", ":")
-        
-        # 尝试提取 JSON 格式的内容
-        patterns = [
-            r"```json\s*(.*?)\s*```",  # ```json ... ```
-            r"```\s*(.*?)\s*```",      # ``` ... ```
-            r"\{.*\}"                   # {...}
-        ]
-        
-        for pattern in patterns:
-            matches = re.findall(pattern, text, re.DOTALL)
-            if matches:
-                try:
-                    result = json.loads(matches[0])
-                    return result
-                except json.JSONDecodeError as e:
-                    logger.debug(f"Failed to parse JSON with pattern {pattern}: {e}")
-                    continue
-        
-        raise ValueError("No valid JSON found in content")
-        
-    def _validate_documentation(self, documentation: Dict[str, Any]) -> bool:
-        """Validate documentation structure.
-        
-        Args:
-            documentation: Documentation to validate
-            
-        Returns:
-            True if valid, False otherwise
-        """
-        required_fields = [
-            "project_overview",
-            "executive_summary",
-            "requirements_specification",
-            "analysis_results",
-            "quality_assessment",
-            "implementation_plan"
-        ]
-        
-        if not isinstance(documentation, dict):
-            return False
-            
-        doc = documentation.get("documentation", {})
-        if not isinstance(doc, dict):
-            return False
-            
-        for field in required_fields:
-            if field not in doc:
-                return False
-                
-        return True
-        
-    async def save_documentation(
-        self,
-        documentation: Dict[str, Any],
-        output_path: str
-    ) -> None:
-        """Save documentation to file.
-        
-        Args:
-            documentation: Documentation to save
-            output_path: Path to save documentation to
-            
-        Raises:
-            ValueError: If saving fails
-        """
-        try:
-            # 确保输出目录存在
-            output_dir = Path(output_path).parent
-            output_dir.mkdir(parents=True, exist_ok=True)
-            
-            # 保存 JSON 格式
-            json_path = Path(output_path).with_suffix(".json")
-            with open(json_path, "w", encoding="utf-8") as f:
-                json.dump(documentation, f, indent=2, ensure_ascii=False)
-                
-            # 保存 Markdown 格式
-            md_path = Path(output_path).with_suffix(".md")
-            with open(md_path, "w", encoding="utf-8") as f:
-                f.write(self._generate_markdown(documentation))
-                
-            logger.info(f"Documentation saved to {json_path} and {md_path}")
+            return {
+                "status": "success",
+                "document": {
+                    "content": document_content,
+                    "format": doc_format,
+                    "template": template_type,
+                    "metadata": metadata
+                }
+            }
             
         except Exception as e:
-            logger.error(f"Failed to save documentation: {str(e)}")
-            raise ValueError(f"Failed to save documentation: {str(e)}")
+            logger.error(f"文档生成失败: {str(e)}")
+            return {
+                "status": "error",
+                "error": str(e),
+                "document": None
+            }
+    
+    def _process_document_content(self, response: str, doc_format: str) -> str:
+        """处理文档内容"""
+        if doc_format == "markdown":
+            return self._ensure_markdown_format(response)
+        elif doc_format == "html":
+            return self._convert_to_html(response)
+        elif doc_format == "word":
+            return self._prepare_word_content(response)
+        else:
+            return response
+    
+    def _ensure_markdown_format(self, content: str) -> str:
+        """确保内容是有效的Markdown格式"""
+        lines = content.split('\n')
+        processed_lines = []
+        
+        for line in lines:
+            # 确保标题格式正确
+            if line.strip() and not line.startswith('#') and not line.startswith('-') and not line.startswith('*'):
+                # 如果看起来像标题，添加#
+                if len(line.strip()) < 100 and line.strip().endswith(':'):
+                    line = f"## {line.strip()[:-1]}"
+                elif line.strip().isupper() and len(line.strip()) < 50:
+                    line = f"### {line.strip()}"
             
-    def _generate_markdown(self, documentation: Dict[str, Any]) -> str:
-        """Generate Markdown from documentation.
+            processed_lines.append(line)
         
-        Args:
-            documentation: Documentation to convert
-            
-        Returns:
-            Markdown string
-        """
-        doc = documentation.get("documentation", {})
+        return '\n'.join(processed_lines)
+    
+    def _convert_to_html(self, content: str) -> str:
+        """转换为HTML格式"""
+        # 简单的Markdown到HTML转换
+        html_content = content
         
-        md = []
+        # 标题转换
+        html_content = html_content.replace('### ', '<h3>').replace('\n', '</h3>\n', 1)
+        html_content = html_content.replace('## ', '<h2>').replace('\n', '</h2>\n', 1)
+        html_content = html_content.replace('# ', '<h1>').replace('\n', '</h1>\n', 1)
         
-        # 项目概述
-        overview = doc.get("project_overview", {})
-        md.append(f"# {overview.get('title', '需求文档')}")
-        md.append(f"\n**版本:** {overview.get('version', '1.0.0')}")
-        md.append(f"**日期:** {overview.get('date', datetime.now().strftime('%Y-%m-%d'))}")
-        md.append(f"**状态:** {overview.get('status', '草稿')}\n")
+        # 列表转换
+        lines = html_content.split('\n')
+        processed_lines = []
+        in_list = False
         
-        # 执行摘要
-        summary = doc.get("executive_summary", {})
-        md.append("## 执行摘要")
-        md.append(f"\n### 背景\n{summary.get('background', '')}")
+        for line in lines:
+            if line.strip().startswith('- '):
+                if not in_list:
+                    processed_lines.append('<ul>')
+                    in_list = True
+                processed_lines.append(f'<li>{line.strip()[2:]}</li>')
+            else:
+                if in_list:
+                    processed_lines.append('</ul>')
+                    in_list = False
+                processed_lines.append(line)
         
-        if "objectives" in summary:
-            md.append("\n### 目标")
-            for obj in summary["objectives"]:
-                md.append(f"- {obj}")
-                
-        # 需求规格
-        reqs = doc.get("requirements_specification", {})
-        md.append("\n## 需求规格")
+        if in_list:
+            processed_lines.append('</ul>')
         
-        if "functional_requirements" in reqs:
-            md.append("\n### 功能需求")
-            for req in reqs["functional_requirements"]:
-                md.append(f"\n#### {req.get('title', '')}")
-                md.append(f"- ID: {req.get('id', '')}")
-                md.append(f"- 优先级: {req.get('priority', '')}")
-                md.append(f"- 状态: {req.get('status', '')}")
-                md.append(f"\n{req.get('description', '')}")
-                
-                if "acceptance_criteria" in req:
-                    md.append("\n验收标准:")
-                    for ac in req["acceptance_criteria"]:
-                        md.append(f"- {ac}")
-                        
+        return '\n'.join(processed_lines)
+    
+    def _prepare_word_content(self, content: str) -> str:
+        """准备Word文档内容"""
+        # 为Word文档添加样式标记
+        return f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>需求分析文档</title>
+    <style>
+        body {{ font-family: 'Microsoft YaHei', Arial, sans-serif; }}
+        h1 {{ color: #2c3e50; }}
+        h2 {{ color: #34495e; }}
+        h3 {{ color: #7f8c8d; }}
+    </style>
+</head>
+<body>
+{self._convert_to_html(content)}
+</body>
+</html>
+"""
+    
+    def _generate_metadata(self, requirements: Dict[str, Any], analysis: Dict[str, Any], quality_report: Dict[str, Any]) -> Dict[str, Any]:
+        """生成文档元数据"""
+        return {
+            "generated_at": datetime.now().isoformat(),
+            "generator": "OWL需求分析助手",
+            "version": "1.0",
+            "statistics": {
+                "functional_requirements": len(requirements.get("functional_requirements", [])),
+                "non_functional_requirements": len(requirements.get("non_functional_requirements", [])),
+                "constraints": len(requirements.get("constraints", [])),
+                "total_requirements": (
+                    len(requirements.get("functional_requirements", [])) +
+                    len(requirements.get("non_functional_requirements", []))
+                ),
+                "quality_score": quality_report.get("quality_score", 0.0) if isinstance(quality_report, dict) else 0.0
+            }
+        }
+    
+    async def generate_markdown(self, requirements: Dict[str, Any], analysis: Dict[str, Any] = None, quality_report: Dict[str, Any] = None) -> str:
+        """便捷方法：生成Markdown文档"""
+        result = await self.process({
+            "requirements": requirements,
+            "analysis": analysis or {},
+            "quality_report": quality_report or {},
+            "format": "markdown"
+        })
+        
+        if result["status"] == "success":
+            return result["document"]["content"]
+        else:
+            return f"文档生成失败: {result.get('error', '未知错误')}"
+    
+    async def generate_html(self, requirements: Dict[str, Any], analysis: Dict[str, Any] = None, quality_report: Dict[str, Any] = None) -> str:
+        """便捷方法：生成HTML文档"""
+        result = await self.process({
+            "requirements": requirements,
+            "analysis": analysis or {},
+            "quality_report": quality_report or {},
+            "format": "html"
+        })
+        
+        if result["status"] == "success":
+            return result["document"]["content"]
+        else:
+            return f"<p>文档生成失败: {result.get('error', '未知错误')}</p>"
+    
+    def generate_simple_document(self, requirements: Dict[str, Any], analysis: Dict[str, Any] = None, quality_report: Dict[str, Any] = None) -> str:
+        """生成简单的文档（不使用LLM）"""
+        doc_lines = [
+            "# 需求分析文档",
+            "",
+            f"**生成时间**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+            "",
+            "## 功能需求",
+            ""
+        ]
+        
+        # 功能需求
+        for i, req in enumerate(requirements.get("functional_requirements", []), 1):
+            if isinstance(req, dict):
+                desc = req.get("description", "")
+                priority = req.get("priority", "medium")
+                doc_lines.append(f"{i}. **{desc}** (优先级: {priority})")
+            else:
+                doc_lines.append(f"{i}. {req}")
+        
+        doc_lines.extend(["", "## 非功能需求", ""])
+        
+        # 非功能需求
+        for i, req in enumerate(requirements.get("non_functional_requirements", []), 1):
+            if isinstance(req, dict):
+                desc = req.get("description", "")
+                req_type = req.get("type", "general")
+                doc_lines.append(f"{i}. **{desc}** (类型: {req_type})")
+            else:
+                doc_lines.append(f"{i}. {req}")
+        
+        # 约束条件
+        if requirements.get("constraints"):
+            doc_lines.extend(["", "## 约束条件", ""])
+            for i, constraint in enumerate(requirements["constraints"], 1):
+                if isinstance(constraint, dict):
+                    desc = constraint.get("description", "")
+                    doc_lines.append(f"{i}. {desc}")
+                else:
+                    doc_lines.append(f"{i}. {constraint}")
+        
         # 分析结果
-        analysis = doc.get("analysis_results", {})
-        md.append("\n## 分析结果")
+        if analysis:
+            doc_lines.extend(["", "## 分析结果", ""])
+            
+            # 可行性分析
+            feasibility = analysis.get("feasibility_analysis", {})
+            if feasibility:
+                doc_lines.extend([
+                    "### 可行性分析",
+                    f"- 技术可行性: {feasibility.get('technical_feasibility', '待评估')}",
+                    f"- 资源可行性: {feasibility.get('resource_feasibility', '待评估')}",
+                    f"- 时间可行性: {feasibility.get('time_feasibility', '待评估')}",
+                    ""
+                ])
+            
+            # 风险分析
+            risks = analysis.get("risk_analysis", [])
+            if risks:
+                doc_lines.extend(["### 风险分析", ""])
+                for i, risk in enumerate(risks, 1):
+                    if isinstance(risk, dict):
+                        desc = risk.get("description", "")
+                        probability = risk.get("probability", "medium")
+                        impact = risk.get("impact", "medium")
+                        doc_lines.append(f"{i}. **{desc}** (概率: {probability}, 影响: {impact})")
+                doc_lines.append("")
         
-        if "feasibility" in analysis:
-            md.append("\n### 可行性分析")
-            for key, value in analysis["feasibility"].items():
-                md.append(f"\n#### {key.title()}")
-                md.append(f"- 评分: {value.get('score', '')}")
-                md.append(f"- 总结: {value.get('summary', '')}")
-                
-                if "challenges" in value:
-                    md.append("\n挑战:")
-                    for challenge in value["challenges"]:
-                        md.append(f"- {challenge}")
-                        
-                if "recommendations" in value:
-                    md.append("\n建议:")
-                    for rec in value["recommendations"]:
-                        md.append(f"- {rec}")
-                        
-        # 质量评估
-        quality = doc.get("quality_assessment", {})
-        md.append("\n## 质量评估")
-        md.append(f"\n总体评分: {quality.get('overall_score', '')}")
-        md.append(f"\n总结: {quality.get('summary', '')}")
+        # 质量报告
+        if quality_report and isinstance(quality_report, dict):
+            quality_score = quality_report.get("quality_score", 0.0)
+            doc_lines.extend([
+                "## 质量评估",
+                f"**总体质量分数**: {quality_score:.2f}",
+                ""
+            ])
         
-        if "metrics" in quality:
-            for key, value in quality["metrics"].items():
-                md.append(f"\n### {key.title()}")
-                md.append(f"- 评分: {value.get('score', '')}")
-                
-                if "findings" in value:
-                    md.append("\n发现:")
-                    for finding in value["findings"]:
-                        md.append(f"- {finding}")
-                        
-                if "recommendations" in value:
-                    md.append("\n建议:")
-                    for rec in value["recommendations"]:
-                        md.append(f"- {rec}")
-                        
-        # 实施计划
-        plan = doc.get("implementation_plan", {})
-        md.append("\n## 实施计划")
+        return "\n".join(doc_lines)
+    
+    async def generate(self, requirements: Dict[str, Any], analysis: Dict[str, Any] = None, quality_check: Dict[str, Any] = None, context: Optional[str] = None) -> Dict[str, Any]:
+        """生成文档的接口方法，供AgentCoordinator调用
         
-        if "phases" in plan:
-            for phase in plan["phases"]:
-                md.append(f"\n### {phase.get('name', '')}")
-                md.append(f"- 周期: {phase.get('duration', '')}")
-                
-                if "deliverables" in phase:
-                    md.append("\n交付物:")
-                    for deliverable in phase["deliverables"]:
-                        md.append(f"- {deliverable}")
-                        
-                if "milestones" in phase:
-                    md.append("\n里程碑:")
-                    for milestone in phase["milestones"]:
-                        md.append(f"- {milestone}")
-                        
-        return "\n".join(md) 
+        Args:
+            requirements: 需求信息
+            analysis: 分析结果
+            quality_check: 质量检查结果
+            context: 可选的上下文信息
+            
+        Returns:
+            生成的文档
+        """
+        input_data = {
+            "requirements": requirements,
+            "format": "markdown"  # 默认生成markdown格式
+        }
+        if analysis:
+            input_data["analysis"] = analysis
+        if quality_check:
+            input_data["quality_report"] = quality_check
+        if context:
+            input_data["context"] = context
+            
+        result = await self.process(input_data)
+        return result.get("document", {})
+    
+    async def save_documentation(self, documentation: Dict[str, Any], output_path: str) -> None:
+        """保存文档到文件
+        
+        Args:
+            documentation: 文档内容
+            output_path: 输出文件路径
+        """
+        import json
+        from pathlib import Path
+        
+        try:
+            output_file = Path(output_path)
+            output_file.parent.mkdir(parents=True, exist_ok=True)
+            
+            # 如果是JSON格式，保存为JSON
+            if output_path.endswith('.json'):
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    json.dump(documentation, f, ensure_ascii=False, indent=2)
+            # 如果是Markdown格式，提取内容保存
+            elif output_path.endswith('.md'):
+                content = documentation.get("content", "")
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    f.write(content)
+            # 默认保存为JSON
+            else:
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    json.dump(documentation, f, ensure_ascii=False, indent=2)
+                    
+        except Exception as e:
+            logger.error(f"保存文档失败: {str(e)}")
+            raise 

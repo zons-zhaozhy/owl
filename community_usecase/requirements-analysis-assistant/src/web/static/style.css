@@ -1,0 +1,214 @@
+/* 自定义样式 */
+
+/* 主题颜色 */
+:root {
+    --primary-color: #3B82F6;
+    --primary-hover: #2563EB;
+    --success-color: #10B981;
+    --warning-color: #F59E0B;
+    --error-color: #EF4444;
+    --text-primary: #1F2937;
+    --text-secondary: #4B5563;
+    --text-light: #9CA3AF;
+    --bg-primary: #F3F4F6;
+    --bg-secondary: #FFFFFF;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--text-light);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* 动画效果 */
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 加载动画 */
+.loading-spinner {
+    border-color: var(--primary-color);
+}
+
+/* 响应式调整 */
+@media (max-width: 640px) {
+    .container {
+        padding: 1rem;
+    }
+    
+    .text-3xl {
+        font-size: 1.5rem;
+    }
+    
+    .p-6 {
+        padding: 1rem;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    h2 {
+        font-size: 1.25rem;
+    }
+
+    textarea {
+        min-height: 120px;
+    }
+}
+
+/* 打印样式 */
+@media print {
+    body {
+        background: white;
+    }
+    
+    .container {
+        max-width: none;
+        padding: 0;
+    }
+    
+    .shadow-md {
+        box-shadow: none;
+    }
+    
+    .bg-white {
+        background: white;
+    }
+    
+    button,
+    #loading {
+        display: none !important;
+    }
+
+    .bg-white {
+        box-shadow: none !important;
+        border: 1px solid #E5E7EB;
+        margin-bottom: 1rem;
+        page-break-inside: avoid;
+    }
+}
+
+/* 文本区域样式增强 */
+textarea {
+    resize: vertical;
+    min-height: 160px;
+    max-height: 400px;
+    line-height: 1.5;
+    transition: all 0.3s ease;
+}
+
+textarea:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* 按钮悬停效果 */
+button {
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* 卡片悬停效果 */
+.bg-white {
+    transition: all 0.3s ease;
+}
+
+.bg-white:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* 列表项样式 */
+li {
+    transition: all 0.3s ease;
+    padding: 0.5rem 0;
+}
+
+li:hover {
+    padding-left: 0.5rem;
+    color: var(--primary-color);
+}
+
+/* 状态指示器 */
+.status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-success {
+    background-color: var(--success-color);
+}
+
+.status-warning {
+    background-color: var(--warning-color);
+}
+
+.status-error {
+    background-color: var(--error-color);
+}
+
+/* 工具提示 */
+[data-tooltip] {
+    position: relative;
+}
+
+[data-tooltip]:before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 8px;
+    background-color: var(--text-primary);
+    color: white;
+    font-size: 0.875rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+[data-tooltip]:hover:before {
+    opacity: 1;
+    visibility: visible;
+}
+
+.results > div {
+    animation: fadeIn 0.5s ease-out forwards;
+} 

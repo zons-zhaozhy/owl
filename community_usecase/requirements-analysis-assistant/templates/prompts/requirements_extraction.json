@@ -1,66 +1,39 @@
 {
     "name": "requirements_extractor",
-    "template": "你是一个专业的需求分析师。请从以下输入中提取关键需求：\n\n{input}\n\n请以JSON格式返回，包含一个顶层键 \"requirements\"，其值应为一个对象，该对象包含以下结构：\n- 功能需求\n- 非功能需求\n- 业务规则\n- 性能要求\n- 安全要求\n- 用户界面要求\n- 数据管理要求\n- 兼容性要求\n- 可维护性要求\n- 可扩展性要求\n- 部署要求\n- 其他约束\n\n每个需求项都应包含：\n- id (例如: F001, NF001)\n- description (详细描述)\n- priority (优先级：高、中、低)\n- source (来源：用户输入、系统推导等)",
+    "template": "你是专业的需求分析师。请从用户输入中提取需求，并以JSON格式返回。\n\n用户输入：\n{input}\n\n返回格式要求：\n1. 必须返回有效的JSON\n2. requirements字段必须是数组（不是对象）\n3. 每个需求包含：id, title, description, priority, type\n4. priority只能是：high, medium, low\n5. type只能是：functional, non-functional\n\n返回示例：\n{{\n  \"requirements\": [\n    {{\n      \"id\": \"REQ-001\",\n      \"title\": \"需求标题\",\n      \"description\": \"详细描述\",\n      \"priority\": \"high\",\n      \"type\": \"functional\"\n    }}\n  ],\n  \"clarification_needed\": null,\n  \"requirements_complete\": true\n}}\n\n如果需要澄清，设置clarification_needed为问题字符串。\n如果输入过于简单无法提取具体需求，创建一个基础需求项。\n\n请分析上述输入并返回JSON：",
     "description": "从用户输入中提取需求",
     "variables": ["input"],
     "examples": [
         {
-            "input": "我需要一个在线书店系统，支持用户注册、登录、浏览图书、购买图书和评论图书。系统需要有良好的性能，响应时间不超过2秒，并且所有用户数据必须加密存储。系统应该可以在Web浏览器和移动设备上访问。数据需要定期备份。",
+            "input": "我需要一个用户登录系统",
             "output": {
-                "requirements": {
-                    "功能需求": [
-                        {
-                            "id": "F001",
-                            "description": "用户注册和登录功能",
-                            "priority": "高",
-                            "source": "用户输入"
-                        },
-                        {
-                            "id": "F002",
-                            "description": "图书浏览功能",
-                            "priority": "高",
-                            "source": "用户输入"
-                        },
-                        {
-                            "id": "F003",
-                            "description": "购买图书功能",
-                            "priority": "高",
-                            "source": "用户输入"
-                        },
-                        {
-                            "id": "F004",
-                            "description": "评论图书功能",
-                            "priority": "中",
-                            "source": "用户输入"
-                        }
-                    ],
-                    "非功能需求": [
-                        {
-                            "id": "NF001",
-                            "description": "系统响应时间不超过2秒",
-                            "priority": "高",
-                            "source": "系统推导"
-                        },
-                        {
-                            "id": "NF002",
-                            "description": "所有用户数据必须加密存储",
-                            "priority": "高",
-                            "source": "用户输入"
-                        },
-                        {
-                            "id": "NF003",
-                            "description": "系统应可在Web浏览器和移动设备上访问",
-                            "priority": "中",
-                            "source": "用户输入"
-                        },
-                        {
-                            "id": "NF004",
-                            "description": "数据需要定期备份",
-                            "priority": "高",
-                            "source": "用户输入"
-                        }
-                    ]
-                }
+                "requirements": [
+                    {
+                        "id": "REQ-001",
+                        "title": "用户登录功能",
+                        "description": "系统需要提供用户登录功能",
+                        "priority": "high",
+                        "type": "functional"
+                    }
+                ],
+                "clarification_needed": "请问需要支持哪些登录方式？（用户名密码、手机号、第三方登录等）",
+                "requirements_complete": false
+            }
+        },
+        {
+            "input": "这是一个测试",
+            "output": {
+                "requirements": [
+                    {
+                        "id": "REQ-001",
+                        "title": "测试需求",
+                        "description": "这是一个测试需求",
+                        "priority": "medium",
+                        "type": "functional"
+                    }
+                ],
+                "clarification_needed": "请提供更详细的需求描述，比如具体要测试什么功能？",
+                "requirements_complete": false
             }
         }
     ]

@@ -1,0 +1,19 @@
+# 测试依赖包
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-html>=3.1.0
+pytest-xdist>=3.0.0
+pytest-mock>=3.10.0
+pytest-asyncio>=0.21.0
+
+# 代码质量工具
+flake8>=5.0.0
+black>=22.0.0
+isort>=5.10.0
+
+# 开发工具
+coverage>=6.5.0
+
+# 模拟和测试工具
+responses>=0.22.0
+httpx>=0.24.0

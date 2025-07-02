@@ -1,104 +1,156 @@
-"""Logging configuration for the OWL Requirements Analysis system."""
+"""Logging configuration and utilities for OWL Requirements Analysis system."""
 
-import os
-import sys
 import json
+import logging
+import logging.handlers
+import sys
 from pathlib import Path
 from typing import Dict, Any, Optional
-from loguru import logger
+from datetime import datetime
 
-def setup_logging(config: Dict[str, Any]) -> None:
+def setup_logging(
+    level: str = "INFO",
+    log_file: Optional[str] = None,
+    log_format: Optional[str] = None,
+    enable_console: bool = True
+) -> None:
     """Setup logging configuration.
     
     Args:
-        config: Logging configuration dictionary containing:
-            - log_level: Logging level (DEBUG, INFO, etc.)
-            - log_file: Path to log file
-            - log_format: Log message format
-            - log_rotation: Log rotation interval
-            - log_retention: Log retention period
-            - log_compression: Log compression format
+        level: Logging level (DEBUG, INFO, WARNING, ERROR)
+        log_file: Optional log file path
+        log_format: Optional custom log format
+        enable_console: Whether to enable console logging
     """
-    # Create logs directory if it doesn't exist
-    log_dir = Path(config["log_file"]).parent
-    os.makedirs(log_dir, exist_ok=True)
+    # 清除现有的处理器
+    root_logger = logging.getLogger()
+    for handler in root_logger.handlers[:]:
+        root_logger.removeHandler(handler)
     
-    # Remove default handler
-    logger.remove()
+    # 设置日志级别
+    numeric_level = getattr(logging, level.upper(), logging.INFO)
+    root_logger.setLevel(numeric_level)
     
-    # Add console handler with detailed formatting
-    logger.add(
-        sys.stderr,
-        format=config.get("log_format", "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"),
-        level=config.get("console_log_level", "INFO"),  # 控制台默认使用INFO级别，减少输出量
-        colorize=True,
-        backtrace=True,
-        diagnose=True
-    )
+    # 默认日志格式
+    if not log_format:
+        log_format = "%(asctime)s | %(levelname)-8s | %(name)s:%(funcName)s:%(lineno)d - %(message)s"
     
-    # Add detailed file handler with rotation and compression
-    logger.add(
-        config["log_file"],
-        format=config.get("log_format", "{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} - {message}"),
-        level=config.get("log_level", "DEBUG"),  # 文件日志使用DEBUG级别，记录所有详细信息
-        rotation=config.get("log_rotation", "1 day"),
-        retention=config.get("log_retention", "7 days"),
-        compression=config.get("log_compression", "zip"),
-        backtrace=True,
-        diagnose=True,
-        enqueue=True
-    )
+    formatter = logging.Formatter(log_format, datefmt="%Y-%m-%d %H:%M:%S")
     
-    # 添加专门的JSON日志文件，记录结构化数据
-    logger.add(
-        Path(log_dir) / "json_data.log",
-        format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} - {message}",
-        level="DEBUG",
-        rotation="100 MB",
-        retention="7 days",
-        compression="zip",
-        filter=lambda record: "json_data" in record["extra"],
-        enqueue=True
-    )
+    # 控制台处理器
+    if enable_console:
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setFormatter(formatter)
+        root_logger.addHandler(console_handler)
     
-    # Configure exception handling
-    logger.add(
-        Path(log_dir) / "errors.log",
-        format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} - {message}\n{exception}",
-        level="ERROR",
-        rotation="100 MB",
-        retention="30 days",
-        compression="zip",
-        backtrace=True,
-        diagnose=True,
-        enqueue=True,
-        filter=lambda record: record["level"].name == "ERROR"
-    )
-    
-    # 添加专门的LLM交互日志文件
-    logger.add(
-        Path(log_dir) / "llm_interactions.log",
-        format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} - {message}",
-        level="DEBUG",
-        rotation="100 MB",
-        retention="7 days",
-        compression="zip",
-        filter=lambda record: "llm_interaction" in record["extra"],
-        enqueue=True
-    )
-
-def get_logger(name: str) -> "logger":
-    """Get a logger instance with the given name.
-    
-    Args:
-        name: Logger name
+    # 文件处理器
+    if log_file:
+        # 确保日志目录存在
+        log_path = Path(log_file)
+        log_path.parent.mkdir(parents=True, exist_ok=True)
         
-    Returns:
-        Logger instance
-    """
-    return logger.bind(name=name)
+        # 创建轮转文件处理器
+        file_handler = logging.handlers.RotatingFileHandler(
+            log_file,
+            maxBytes=10*1024*1024,  # 10MB
+            backupCount=5,
+            encoding='utf-8'
+        )
+        file_handler.setFormatter(formatter)
+        root_logger.addHandler(file_handler)
+    
+    # 设置第三方库的日志级别
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("openai").setLevel(logging.WARNING)
+    logging.getLogger("asyncio").setLevel(logging.WARNING)
+    
+    # 记录启动信息
+    logger = logging.getLogger(__name__)
+    logger.info(f"日志系统初始化完成，级别: {level}")
 
-def log_json_data(logger: "logger", data_type: str, data: Dict[str, Any]) -> None:
+class StructuredLogger:
+    """结构化日志记录器"""
+    
+    def __init__(self, name: str):
+        self.logger = logging.getLogger(name)
+    
+    def log_request(
+        self,
+        method: str,
+        url: str,
+        params: Optional[Dict[str, Any]] = None,
+        headers: Optional[Dict[str, Any]] = None
+    ) -> None:
+        """记录请求日志"""
+        self.logger.info(
+            f"请求 {method} {url}",
+            extra={
+                "event_type": "request",
+                "method": method,
+                "url": url,
+                "params": params,
+                "headers": headers
+            }
+        )
+    
+    def log_response(
+        self,
+        status_code: int,
+        response_time: float,
+        response_size: Optional[int] = None,
+        response: Optional[str] = None,
+    ) -> None:
+        """记录响应日志"""
+        self.logger.info(
+            f"响应 {status_code} ({response_time:.3f}s)",
+            extra={
+                "event_type": "response",
+                "status_code": status_code,
+                "response_time": response_time,
+                "response_size": response_size,
+                "response": response[:200] if response else None
+            }
+        )
+    
+    def log_error(
+        self,
+        error: Exception,
+        context: Optional[Dict[str, Any]] = None
+    ) -> None:
+        """记录错误日志"""
+        self.logger.error(
+            f"错误: {str(error)}",
+            extra={
+                "event_type": "error",
+                "error_type": type(error).__name__,
+                "error_message": str(error),
+                "context": context
+            },
+            exc_info=True
+        )
+    
+    def log_performance(
+        self,
+        operation: str,
+        duration: float,
+        metadata: Optional[Dict[str, Any]] = None
+    ) -> None:
+        """记录性能日志"""
+        self.logger.info(
+            f"性能: {operation} 耗时 {duration:.3f}s",
+            extra={
+                "event_type": "performance",
+                "operation": operation,
+                "duration": duration,
+                "metadata": metadata
+            }
+        )
+
+def get_logger(name: str) -> StructuredLogger:
+    """获取结构化日志记录器"""
+    return StructuredLogger(name)
+
+def log_json_data(logger: StructuredLogger, data_type: str, data: Dict[str, Any]) -> None:
     """Log structured JSON data to a dedicated log file.
     
     Args:
@@ -106,15 +158,14 @@ def log_json_data(logger: "logger", data_type: str, data: Dict[str, Any]) -> Non
         data_type: Type of data being logged (e.g., 'llm_response', 'extracted_requirements')
         data: The data to log
     """
-    json_logger = logger.bind(json_data=True)
     try:
         json_str = json.dumps(data, ensure_ascii=False, indent=2)
-        json_logger.debug(f"[{data_type}] {json_str}")
+        logger.logger.debug(f"[{data_type}] {json_str}")
     except Exception as e:
-        json_logger.error(f"Failed to serialize {data_type} data: {e}")
+        logger.logger.error(f"Failed to serialize {data_type} data: {e}")
 
 def log_llm_interaction(
-    logger: "logger",
+    logger: StructuredLogger,
     prompt: str,
     response: Optional[str] = None,
     error: Optional[Exception] = None,
@@ -129,32 +180,27 @@ def log_llm_interaction(
         error: Error encountered (if any)
         metadata: Additional metadata about the interaction
     """
-    llm_logger = logger.bind(llm_interaction=True)
-    
-    # 创建结构化的交互日志
-    interaction_log = {
-        "prompt": prompt,
-        "response": response,
-        "error": str(error) if error else None,
-        "metadata": metadata or {}
-    }
-    
-    # 记录简短版本到主日志
     if error:
-        logger.error(f"LLM交互失败: {str(error)}", exc_info=True)
+        logger.logger.error(f"LLM交互失败: {str(error)}", exc_info=True)
     else:
         prompt_preview = prompt[:100] + "..." if len(prompt) > 100 else prompt
         response_preview = response[:100] + "..." if response and len(response) > 100 else response
-        logger.debug(f"LLM交互: 提示={prompt_preview}, 响应={response_preview}")
+        logger.logger.debug(f"LLM交互: 提示={prompt_preview}, 响应={response_preview}")
     
     # 记录完整版本到专用日志文件
     try:
+        interaction_log = {
+            "prompt": prompt,
+            "response": response,
+            "error": str(error) if error else None,
+            "metadata": metadata or {}
+        }
         log_json = json.dumps(interaction_log, ensure_ascii=False, indent=2)
-        llm_logger.debug(f"完整LLM交互:\n{log_json}")
+        logger.logger.debug(f"完整LLM交互:\n{log_json}")
     except Exception as e:
-        llm_logger.error(f"无法序列化LLM交互日志: {e}")
+        logger.logger.error(f"无法序列化LLM交互日志: {e}")
 
-def log_extraction_result(logger: "logger", result: Dict[str, Any], success: bool) -> None:
+def log_extraction_result(logger: StructuredLogger, result: Dict[str, Any], success: bool) -> None:
     """Log requirements extraction result.
     
     Args:
@@ -163,9 +209,9 @@ def log_extraction_result(logger: "logger", result: Dict[str, Any], success: boo
         success: Whether extraction was successful
     """
     if success:
-        logger.info(f"需求提取成功: 找到 {len(result.get('requirements', []))} 条需求")
+        logger.logger.info(f"需求提取成功: 找到 {len(result.get('requirements', []))} 条需求")
         log_json_data(logger, "extraction_result", result)
     else:
-        logger.warning("需求提取失败")
+        logger.logger.warning("需求提取失败")
         if result:
             log_json_data(logger, "invalid_extraction_result", result) 

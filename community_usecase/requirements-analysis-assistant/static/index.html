@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OWL需求分析助手</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>OWL需求分析助手</h1>
+            <p>基于多智能体的需求分析系统</p>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <h2>需求输入</h2>
+                <div class="input-container">
+                    <textarea id="requirements-input" placeholder="请输入您的需求描述..."></textarea>
+                    <button id="analyze-btn">分析需求</button>
+                </div>
+            </section>
+
+            <section class="analysis-section">
+                <h2>分析结果</h2>
+                <div class="analysis-container">
+                    <div class="analysis-status">
+                        <div class="status-indicator"></div>
+                        <span class="status-text">就绪</span>
+                    </div>
+                    <div class="analysis-content">
+                        <div class="requirements-tab">
+                            <h3>需求列表</h3>
+                            <div id="requirements-list" class="markdown-content"></div>
+                        </div>
+                        <div class="analysis-tab">
+                            <h3>分析详情</h3>
+                            <div id="analysis-details" class="markdown-content"></div>
+                        </div>
+                        <div class="quality-tab">
+                            <h3>质量检查</h3>
+                            <div id="quality-check" class="markdown-content"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>© 2024 OWL Framework. 保留所有权利。</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html> 

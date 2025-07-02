@@ -1,164 +1,299 @@
-"""Requirements analyzer agent implementation."""
+"""需求分析智能体"""
 
 import json
 import logging
-import os
-from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional, List
 
-from ..core.base import BaseAgent
-from ..services.base import BaseLLMService
-from ..core.config import OWLJSONEncoder, SystemConfig
-from ..utils.enums import AgentRole
+from .base import BaseAgent
+from ..core.exceptions import LLMServiceError
 
 logger = logging.getLogger(__name__)
 
 class RequirementsAnalyzer(BaseAgent):
-    """Requirements analyzer agent implementation."""
+    """需求分析智能体 - 深入分析需求的可行性、复杂度和影响"""
     
-    def __init__(
-        self,
-        llm_service: BaseLLMService,
-        config: SystemConfig
-    ):
-        """Initialize requirements analyzer.
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        """初始化需求分析智能体"""
+        super().__init__("RequirementsAnalyzer", config)
+    
+    async def process(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        """处理需求分析任务
         
         Args:
-            llm_service: LLM service instance
-            config: Agent configuration
-        """
-        super().__init__(config.get_agent_config(AgentRole.REQUIREMENTS_ANALYZER).to_dict())
-        self.system_config = config
-        self.llm_service = llm_service
-        self.max_retries = self.system_config.max_retries
-        self.prompt_template = self._load_prompt_template()
-
-    def _load_prompt_template(self) -> str:
-        """Load prompt template from file.
-        
-        Args:
-            None
+            input_data: 包含需求信息的数据
             
         Returns:
-            Prompt template string
+            分析结果
         """
-        current_file_dir = Path(__file__).parent
-        project_root = current_file_dir.parent.parent.parent # Navigate up to requirements-analysis-assistant
-        
-        template_path = project_root / self.system_config.templates_dir / "requirements_analysis.json"
-        
-        logger.debug(f"Attempting to load prompt template from: {template_path.resolve()}")
-        logger.debug(f"Current working directory: {os.getcwd()}")
-
         try:
-            with open(template_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                return data["template"]
+            requirements = input_data.get("requirements", {})
+            if not requirements:
+                raise ValueError("需求信息不能为空")
+            
+            constraints = input_data.get("constraints", [])
+            context = input_data.get("context", {})
+            
+            logger.info("开始需求分析")
+            
+            # 使用统一的提示词模板
+            response = await self._call_llm_with_template(
+                "requirements_analysis",
+                requirements=json.dumps(requirements, ensure_ascii=False),
+                constraints=json.dumps(constraints, ensure_ascii=False),
+                project_scope=context.get("project_scope", ""),
+                timeline=context.get("timeline", ""),
+                resources=context.get("resources", "")
+            )
+            
+            # 解析响应
+            analysis_result = self._parse_llm_response(response)
+            
+            # 后处理和验证
+            validated_analysis = self._validate_analysis(analysis_result)
+            
+            logger.info("需求分析完成")
+            
+            return {
+                "status": "success",
+                "analysis": validated_analysis,
+                "metadata": {
+                    "requirements_count": self._count_requirements(requirements),
+                    "analysis_method": "llm_template"
+                }
+            }
+            
         except Exception as e:
-            logger.error(f"Failed to load prompt template: {e}")
-            # 使用默认模板
-            return """请分析以下需求，提供详细的分析结果。
-
-需求:
-{requirements}
-
-{context_info}
-
-请以JSON格式返回分析结果，包含以下字段:
-1. functional_analysis: 功能需求分析
-2. non_functional_analysis: 非功能需求分析
-3. dependencies: 依赖关系
-4. risks: 风险评估
-5. recommendations: 建议
-
-示例输出:
-{
-    "functional_analysis": {
-        "core_features": [],
-        "optional_features": [],
-        "user_interfaces": []
-    },
-    "non_functional_analysis": {
-        "performance": {},
-        "security": {},
-        "scalability": {}
-    },
-    "dependencies": [],
-    "risks": [],
-    "recommendations": []
-}"""
-
-    async def _prepare_prompt(self, requirements: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> str:
-        """Prepare prompt for LLM.
+            logger.error(f"需求分析失败: {str(e)}")
+            return {
+                "status": "error",
+                "error": str(e),
+                "analysis": None
+            }
+    
+    def _parse_llm_response(self, response: str) -> Dict[str, Any]:
+        """解析LLM响应"""
+        try:
+            # 尝试直接解析JSON
+            return json.loads(response)
+            
+        except json.JSONDecodeError:
+            # 如果不是JSON，尝试提取JSON部分
+            return self._extract_json_from_text(response)
+    
+    def _extract_json_from_text(self, text: str) -> Dict[str, Any]:
+        """从文本中提取JSON"""
+        try:
+            # 查找JSON代码块
+            json_start = text.find('{')
+            json_end = text.rfind('}') + 1
+            
+            if json_start != -1 and json_end > json_start:
+                json_str = text[json_start:json_end]
+                return json.loads(json_str)
+            
+            # 如果找不到JSON，返回结构化的文本解析结果
+            return self._parse_text_response(text)
+            
+        except Exception as e:
+            logger.warning(f"JSON提取失败: {str(e)}")
+            return self._parse_text_response(text)
+    
+    def _parse_text_response(self, text: str) -> Dict[str, Any]:
+        """解析文本响应为结构化格式"""
+        # 基本的文本解析逻辑
+        return {
+            "feasibility_analysis": {
+                "technical_feasibility": "medium",
+                "resource_feasibility": "medium",
+                "time_feasibility": "medium",
+                "analysis_details": text
+            },
+            "complexity_assessment": {
+                "overall_complexity": "medium",
+                "technical_complexity": "medium",
+                "integration_complexity": "medium",
+                "complexity_factors": ["需要进一步分析"]
+            },
+            "risk_analysis": [
+                {
+                    "risk_id": "RISK_001",
+                    "description": "从文本解析的通用风险",
+                    "probability": "medium",
+                    "impact": "medium",
+                    "mitigation": "需要详细评估"
+                }
+            ],
+            "effort_estimation": {
+                "development_effort": "待评估",
+                "testing_effort": "待评估",
+                "deployment_effort": "待评估",
+                "total_effort": "待评估"
+            },
+            "recommendations": [
+                {
+                    "type": "process",
+                    "description": "建议进行更详细的需求分析",
+                    "rationale": "基于文本解析的建议"
+                }
+            ]
+        }
+    
+    def _validate_analysis(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
+        """验证和标准化分析结果"""
+        validated = {
+            "feasibility_analysis": {},
+            "complexity_assessment": {},
+            "risk_analysis": [],
+            "effort_estimation": {},
+            "recommendations": []
+        }
+        
+        # 验证可行性分析
+        feasibility = analysis.get("feasibility_analysis", {})
+        validated["feasibility_analysis"] = {
+            "technical_feasibility": feasibility.get("technical_feasibility", "medium"),
+            "resource_feasibility": feasibility.get("resource_feasibility", "medium"),
+            "time_feasibility": feasibility.get("time_feasibility", "medium"),
+            "analysis_details": feasibility.get("analysis_details", "")
+        }
+        
+        # 验证复杂度评估
+        complexity = analysis.get("complexity_assessment", {})
+        validated["complexity_assessment"] = {
+            "overall_complexity": complexity.get("overall_complexity", "medium"),
+            "technical_complexity": complexity.get("technical_complexity", "medium"),
+            "integration_complexity": complexity.get("integration_complexity", "medium"),
+            "complexity_factors": complexity.get("complexity_factors", [])
+        }
+        
+        # 验证风险分析
+        for risk in analysis.get("risk_analysis", []):
+            if isinstance(risk, dict):
+                validated_risk = {
+                    "risk_id": risk.get("risk_id", f"RISK_{len(validated['risk_analysis']) + 1:03d}"),
+                    "description": risk.get("description", ""),
+                    "probability": risk.get("probability", "medium"),
+                    "impact": risk.get("impact", "medium"),
+                    "mitigation": risk.get("mitigation", "")
+                }
+                validated["risk_analysis"].append(validated_risk)
+        
+        # 验证工作量估算
+        effort = analysis.get("effort_estimation", {})
+        validated["effort_estimation"] = {
+            "development_effort": effort.get("development_effort", "待评估"),
+            "testing_effort": effort.get("testing_effort", "待评估"),
+            "deployment_effort": effort.get("deployment_effort", "待评估"),
+            "total_effort": effort.get("total_effort", "待评估")
+        }
+        
+        # 验证建议
+        for rec in analysis.get("recommendations", []):
+            if isinstance(rec, dict):
+                validated_rec = {
+                    "type": rec.get("type", "general"),
+                    "description": rec.get("description", ""),
+                    "rationale": rec.get("rationale", "")
+                }
+                validated["recommendations"].append(validated_rec)
+        
+        return validated
+    
+    def _count_requirements(self, requirements: Dict[str, Any]) -> Dict[str, int]:
+        """统计需求数量"""
+        return {
+            "functional": len(requirements.get("functional_requirements", [])),
+            "non_functional": len(requirements.get("non_functional_requirements", [])),
+            "constraints": len(requirements.get("constraints", [])),
+            "total": (
+                len(requirements.get("functional_requirements", [])) +
+                len(requirements.get("non_functional_requirements", []))
+            )
+        }
+    
+    async def analyze_feasibility(self, requirements: Dict[str, Any], **kwargs) -> Dict[str, Any]:
+        """便捷方法：可行性分析"""
+        result = await self.process({
+            "requirements": requirements,
+            **kwargs
+        })
+        
+        if result["status"] == "success":
+            return result["analysis"]["feasibility_analysis"]
+        else:
+            return {"error": result.get("error", "分析失败")}
+    
+    async def assess_complexity(self, requirements: Dict[str, Any], **kwargs) -> Dict[str, Any]:
+        """便捷方法：复杂度评估"""
+        result = await self.process({
+            "requirements": requirements,
+            **kwargs
+        })
+        
+        if result["status"] == "success":
+            return result["analysis"]["complexity_assessment"]
+        else:
+            return {"error": result.get("error", "评估失败")}
+    
+    async def analyze_risks(self, requirements: Dict[str, Any], **kwargs) -> List[Dict[str, Any]]:
+        """便捷方法：风险分析"""
+        result = await self.process({
+            "requirements": requirements,
+            **kwargs
+        })
+        
+        if result["status"] == "success":
+            return result["analysis"]["risk_analysis"]
+        else:
+            return [{"error": result.get("error", "分析失败")}]
+    
+    def get_analysis_summary(self, result: Dict[str, Any]) -> Dict[str, Any]:
+        """获取分析摘要"""
+        if result.get("status") != "success" or not result.get("analysis"):
+            return {"error": "无效的分析结果"}
+        
+        analysis = result["analysis"]
+        
+        return {
+            "feasibility_score": self._calculate_feasibility_score(analysis["feasibility_analysis"]),
+            "complexity_level": analysis["complexity_assessment"]["overall_complexity"],
+            "risk_count": len(analysis["risk_analysis"]),
+            "high_risks": [
+                risk for risk in analysis["risk_analysis"]
+                if risk.get("probability") == "high" or risk.get("impact") == "high"
+            ],
+            "recommendations_count": len(analysis["recommendations"])
+        }
+    
+    def _calculate_feasibility_score(self, feasibility: Dict[str, Any]) -> float:
+        """计算可行性分数"""
+        scores = {
+            "high": 1.0,
+            "medium": 0.6,
+            "low": 0.3
+        }
+        
+        technical_score = scores.get(feasibility.get("technical_feasibility", "medium"), 0.6)
+        resource_score = scores.get(feasibility.get("resource_feasibility", "medium"), 0.6)
+        time_score = scores.get(feasibility.get("time_feasibility", "medium"), 0.6)
+        
+        return (technical_score + resource_score + time_score) / 3
+    
+    async def analyze(self, requirements: Dict[str, Any], context: Optional[str] = None) -> Dict[str, Any]:
+        """分析需求的接口方法，供AgentCoordinator调用
         
         Args:
-            requirements: Requirements to analyze
-            context: Optional context information
+            requirements: 需求信息
+            context: 可选的上下文信息
             
         Returns:
-            Prepared prompt string
+            分析结果
         """
-        context_info = ""
+        input_data = {
+            "requirements": requirements
+        }
         if context:
-            context_info = "\n当前上下文:\n"
-            if context.get("clarifications"):
-                context_info += "需求澄清历史:\n"
-                for c in context["clarifications"]:
-                    context_info += f"Q: {c['question']}\nA: {c['answer']}\n"
-            if context.get("current_analysis"):
-                context_info += "\n当前分析状态:\n"
-                context_info += json.dumps(context["current_analysis"], indent=2, ensure_ascii=False)
-        
-        return self.prompt_template.format(
-            requirements=json.dumps(requirements, indent=2, ensure_ascii=False),
-            context_info=context_info
-        )
-
-    async def process(self, input_data: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Placeholder for the abstract process method, calls analyze."""
-        return await self.analyze(input_data, context)
-
-    async def analyze(self, requirements: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Process requirements and perform analysis.
-        
-        Args:
-            requirements: Requirements to analyze
-            context: Optional context information
+            input_data["context"] = context
             
-        Returns:
-            Analysis results
-        """
-        logger.info(f"Analyzing requirements: {json.dumps(requirements, cls=OWLJSONEncoder, indent=2)}")
-        
-        # 准备 prompt
-        prompt = await self._prepare_prompt(requirements, context)
-        
-        # 调用 LLM 服务
-        for i in range(self.max_retries):
-            try:
-                response = await self.llm_service.generate(prompt)
-                logger.debug(f"LLM response: {json.dumps({'response': response}, cls=OWLJSONEncoder, indent=2)}")
-                
-                # 清理Markdown代码块标记
-                if response.startswith("```json") and response.endswith("```"):
-                    response = response[len("```json\n"):-len("```")].strip()
-                elif response.startswith("```") and response.endswith("```"):
-                    response = response[len("```\n"):-len("```")].strip()
-
-                # 解析响应
-                try:
-                    result = json.loads(response)
-                    logger.info(f"Successfully analyzed requirements: {json.dumps(result, cls=OWLJSONEncoder, indent=2)}")
-                    return result
-                except json.JSONDecodeError as e:
-                    logger.error(f"Failed to parse response as JSON: {e}")
-                    if i == self.max_retries - 1:
-                        raise
-                    continue
-                    
-            except Exception as e:
-                logger.error(f"Failed to analyze requirements (attempt {i+1}/{self.max_retries}): {e}")
-                if i == self.max_retries - 1:
-                    raise
-                    
-        raise RuntimeError("Failed to analyze requirements after maximum retries") 
+        result = await self.process(input_data)
+        return result.get("analysis", {}) 
