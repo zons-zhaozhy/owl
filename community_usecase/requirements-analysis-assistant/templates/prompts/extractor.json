@@ -1,0 +1,35 @@
+{
+    "name": "requirements_extractor",
+    "description": "从用户输入中提取需求",
+    "template": "你是一个专业的需求分析师。请从以下输入中提取关键需求：\n\n{input}\n\n请以JSON格式返回提取的需求，包含以下类别：\n- 功能需求\n- 非功能需求\n- 业务规则\n- 约束条件\n\n每个需求应包含：\n- 需求ID\n- 需求描述\n- 优先级（高/中/低）\n- 来源（用户输入/系统推导）",
+    "variables": ["input"],
+    "examples": [
+        {
+            "input": "我需要一个在线书店系统，支持用户注册、登录、浏览图书、购买图书和评论图书。系统需要有良好的性能和安全性。",
+            "output": {
+                "功能需求": [
+                    {
+                        "id": "F001",
+                        "description": "用户注册和登录功能",
+                        "priority": "高",
+                        "source": "用户输入"
+                    },
+                    {
+                        "id": "F002",
+                        "description": "图书浏览功能",
+                        "priority": "高",
+                        "source": "用户输入"
+                    }
+                ],
+                "非功能需求": [
+                    {
+                        "id": "NF001",
+                        "description": "系统响应时间不超过2秒",
+                        "priority": "高",
+                        "source": "系统推导"
+                    }
+                ]
+            }
+        }
+    ]
+} 

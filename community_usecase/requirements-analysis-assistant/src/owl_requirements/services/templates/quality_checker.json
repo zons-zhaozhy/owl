@@ -1,0 +1,164 @@
+{
+    "name": "quality_checker",
+    "description": "Template for checking requirements quality and providing improvement suggestions",
+    "template": "你是一个专业的需求质量检查员。请评估以下需求和分析结果的质量。\n\n需求：\n{requirements}\n\n分析：\n{analysis}\n\n请以JSON格式返回以下内容：\n{\n  \"quality_score\": 0-100,  // 总体质量评分\n  \"issues\": [  // 发现的问题\n    {\n      \"category\": \"string\",  // 问题类别（清晰度/完整性/一致性/可测试性/可行性/依赖关系）\n      \"description\": \"string\",  // 问题描述\n      \"severity\": \"低/中/高\"  // 严重程度\n    }\n  ],\n  \"recommendations\": [  // 改进建议\n    {\n      \"category\": \"string\",  // 建议类别\n      \"description\": \"string\",  // 建议内容\n      \"priority\": \"低/中/高\"  // 优先级\n    }\n  ]\n}\n\n请确保：\n1. 返回有效的JSON格式\n2. 包含所有必需的字段\n3. 严重程度和优先级只使用：低/中/高\n4. 质量评分在0-100之间",
+    "variables": ["requirements", "analysis"],
+    "examples": [
+        {
+            "requirements": {
+                "functional_requirements": [
+                    {
+                        "id": "F1",
+                        "category": "File Management",
+                        "description": "Users can upload files",
+                        "priority": "high",
+                        "stakeholders": ["users", "system administrators"]
+                    },
+                    {
+                        "id": "F2",
+                        "category": "File Sharing",
+                        "description": "Users can share files with others",
+                        "priority": "high",
+                        "stakeholders": ["users"]
+                    }
+                ],
+                "non_functional_requirements": [
+                    {
+                        "id": "NF1",
+                        "category": "security",
+                        "description": "System must be secure",
+                        "priority": "high",
+                        "constraints": [
+                            "Must implement secure file storage",
+                            "Must implement access control"
+                        ]
+                    },
+                    {
+                        "id": "NF2",
+                        "category": "performance",
+                        "description": "System must handle large files efficiently",
+                        "priority": "medium",
+                        "constraints": [
+                            "Must support large file uploads",
+                            "Must optimize file transfer speed"
+                        ]
+                    }
+                ]
+            },
+            "analysis": {
+                "feasibility_analysis": {
+                    "technical_feasibility": {
+                        "score": 0.8,
+                        "reasons": [
+                            "Modern cloud storage solutions available",
+                            "Mature file transfer protocols exist",
+                            "Strong security frameworks available"
+                        ]
+                    },
+                    "resource_requirements": {
+                        "human_resources": [
+                            "Backend developers with cloud experience",
+                            "Security specialists",
+                            "DevOps engineers"
+                        ],
+                        "technical_resources": [
+                            "Cloud storage infrastructure",
+                            "Secure file transfer protocol",
+                            "User authentication system"
+                        ]
+                    },
+                    "risk_factors": [
+                        "Data security breaches",
+                        "Performance bottlenecks with large files",
+                        "Storage cost management"
+                    ]
+                },
+                "dependency_analysis": {
+                    "internal_dependencies": [
+                        "User authentication module",
+                        "File management system",
+                        "Sharing permissions system"
+                    ],
+                    "external_dependencies": [
+                        "Cloud storage provider",
+                        "File transfer protocol",
+                        "Security certificates"
+                    ],
+                    "critical_path": [
+                        "Authentication system setup",
+                        "Core file management implementation",
+                        "Security integration",
+                        "Performance optimization"
+                    ]
+                },
+                "complexity_assessment": {
+                    "technical_complexity": {
+                        "score": 0.7,
+                        "factors": [
+                            "Complex security requirements",
+                            "Large file handling optimization",
+                            "Multiple system integrations"
+                        ]
+                    },
+                    "business_complexity": {
+                        "score": 0.5,
+                        "factors": [
+                            "Clear user requirements",
+                            "Standard file operations",
+                            "Common use cases"
+                        ]
+                    }
+                },
+                "recommendations": [
+                    {
+                        "category": "技术",
+                        "suggestion": "实现文件分块上传和断点续传",
+                        "priority": "高"
+                    },
+                    {
+                        "category": "业务",
+                        "suggestion": "先实现基础文件操作，后续迭代高级功能",
+                        "priority": "高"
+                    },
+                    {
+                        "category": "资源",
+                        "suggestion": "需配备专门的安全团队",
+                        "priority": "中"
+                    }
+                ]
+            },
+            "output": {
+                "quality_score": 85,
+                "issues": [
+                    {
+                        "category": "安全性",
+                        "description": "安全需求缺少具体的加密要求",
+                        "severity": "高"
+                    },
+                    {
+                        "category": "性能",
+                        "description": "性能指标未明确定义",
+                        "severity": "中"
+                    }
+                ],
+                "recommendations": [
+                    {
+                        "category": "安全性",
+                        "description": "添加具体的加密要求和标准",
+                        "priority": "高"
+                    },
+                    {
+                        "category": "性能",
+                        "description": "定义清晰的性能指标和阈值",
+                        "priority": "中"
+                    }
+                ]
+            }
+        }
+    ],
+    "metadata": {
+        "version": "1.0",
+        "author": "OWL Framework",
+        "last_updated": "2024-03-20"
+    }
+} 

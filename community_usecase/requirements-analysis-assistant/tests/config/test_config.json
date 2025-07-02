@@ -1,0 +1,47 @@
+{
+  "version": "1.0.0",
+  "description": "Test Configuration for OWL Requirements Analysis Assistant",
+  "agents": {
+    "requirements_analyzer": {
+      "enabled": true,
+      "config_file": "test_requirements_analyzer.json"
+    },
+    "quality_checker": {
+      "enabled": true,
+      "config_file": "test_quality_checker.json"
+    },
+    "documentation_generator": {
+      "enabled": true,
+      "config_file": "test_documentation_generator.json"
+    }
+  },
+  "services": {
+    "llm": {
+      "provider": "mock",
+      "model": "mock-model",
+      "temperature": 0.1,
+      "max_tokens": 4000,
+      "api_key": "test-key"
+    },
+    "prompts": {
+      "templates_dir": "tests/data/templates"
+    }
+  },
+  "web": {
+    "host": "127.0.0.1",
+    "port": 8081,
+    "debug": true,
+    "cors_origins": ["*"]
+  },
+  "cli": {
+    "history_file": ".test_owl_history",
+    "max_history": 100
+  },
+  "logging": {
+    "level": "DEBUG",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "file": "test_owl.log",
+    "max_bytes": 1048576,
+    "backup_count": 2
+  }
+} 

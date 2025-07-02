@@ -1,0 +1,90 @@
+{
+  "name": "test_documentation_generator",
+  "role": "documentation",
+  "description": "Test configuration for documentation generator",
+  "version": "1.0.0",
+  "config": {
+    "max_retries": 2,
+    "llm": {
+      "provider": "mock",
+      "model": "mock-model",
+      "temperature": 0.1,
+      "max_tokens": 1000
+    },
+    "output": {
+      "format": "json",
+      "schema": {
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["title", "content"],
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "章节标题"
+              },
+              "content": {
+                "type": "string",
+                "description": "章节内容"
+              },
+              "subsections": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["title", "content"],
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "description": "子章节标题"
+                    },
+                    "content": {
+                      "type": "string",
+                      "description": "子章节内容"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "required": ["title", "version", "date", "status"],
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "文档标题"
+            },
+            "version": {
+              "type": "string",
+              "description": "版本号"
+            },
+            "date": {
+              "type": "string",
+              "description": "生成日期"
+            },
+            "status": {
+              "type": "string",
+              "description": "文档状态"
+            }
+          }
+        }
+      }
+    },
+    "validation": {
+      "required_sections": [
+        "项目概述",
+        "功能需求",
+        "非功能需求",
+        "技术架构"
+      ],
+      "min_sections": 2,
+      "max_sections": 5,
+      "min_subsections": 1,
+      "max_subsections": 3,
+      "min_content_length": 20,
+      "max_content_length": 500
+    }
+  }
+} 

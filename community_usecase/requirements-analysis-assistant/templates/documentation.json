@@ -1,0 +1,156 @@
+{
+  "template": "请根据以下信息生成一份完整的需求文档：\n\n项目信息：\n{project_info}\n\n需求详情：\n{requirements}\n\n分析结果：\n{analysis}\n\n质量评估：\n{quality}\n\n请确保生成的文档包含以下部分：\n1. 项目概述\n2. 需求规格说明\n3. 分析结果\n4. 质量评估\n5. 建议\n\n生成的文档必须是有效的JSON格式，包含所有必要的字段和结构。",
+  "version": "1.0.0",
+  "description": "需求文档生成模板",
+  "variables": {
+    "project_info": {
+      "type": "object",
+      "description": "项目基本信息"
+    },
+    "requirements": {
+      "type": "object",
+      "description": "需求详情"
+    },
+    "analysis": {
+      "type": "object",
+      "description": "分析结果"
+    },
+    "quality": {
+      "type": "object",
+      "description": "质量评估"
+    }
+  },
+  "example_input": {
+    "project_info": {
+      "name": "示例项目",
+      "description": "这是一个示例项目",
+      "version": "1.0.0"
+    },
+    "requirements": {
+      "functional": [
+        {
+          "id": "FR-001",
+          "title": "用户登录",
+          "description": "用户可以使用账号密码登录系统"
+        }
+      ],
+      "non_functional": [
+        {
+          "id": "NFR-001",
+          "title": "性能要求",
+          "description": "系统响应时间不超过2秒"
+        }
+      ]
+    },
+    "analysis": {
+      "feasibility": 0.85,
+      "complexity": 0.7,
+      "risks": {
+        "technical": ["需要优化性能"],
+        "business": ["市场竞争激烈"]
+      }
+    },
+    "quality": {
+      "overall_score": 0.88,
+      "metrics": {
+        "completeness": 0.9,
+        "clarity": 0.85
+      },
+      "improvements": [
+        "建议细化性能指标",
+        "补充安全需求"
+      ]
+    }
+  },
+  "example_output": {
+    "project_overview": {
+      "title": "示例项目",
+      "description": "这是一个示例项目",
+      "version": "1.0.0",
+      "generated_at": "2024-03-20"
+    },
+    "requirements_specification": {
+      "functional": [
+        {
+          "id": "FR-001",
+          "title": "用户登录",
+          "description": "用户可以使用账号密码登录系统",
+          "priority": "高",
+          "status": "已确认"
+        }
+      ],
+      "non_functional": [
+        {
+          "id": "NFR-001",
+          "title": "性能要求",
+          "description": "系统响应时间不超过2秒",
+          "category": "性能",
+          "priority": "高"
+        }
+      ]
+    },
+    "analysis_results": {
+      "feasibility": {
+        "score": 0.85,
+        "assessment": "项目技术可行"
+      },
+      "complexity": {
+        "score": 0.7,
+        "level": "中等"
+      },
+      "risks": {
+        "technical": [
+          {
+            "description": "需要优化性能",
+            "impact": "高",
+            "mitigation": "采用性能优化最佳实践"
+          }
+        ],
+        "business": [
+          {
+            "description": "市场竞争激烈",
+            "impact": "中",
+            "mitigation": "突出产品差异化优势"
+          }
+        ]
+      }
+    },
+    "quality_assessment": {
+      "overall_score": 0.88,
+      "metrics": {
+        "completeness": {
+          "score": 0.9,
+          "comments": "需求描述完整"
+        },
+        "clarity": {
+          "score": 0.85,
+          "comments": "部分需求可以更清晰"
+        }
+      },
+      "improvements": [
+        {
+          "suggestion": "建议细化性能指标",
+          "priority": "高",
+          "category": "性能"
+        },
+        {
+          "suggestion": "补充安全需求",
+          "priority": "中",
+          "category": "安全"
+        }
+      ]
+    },
+    "recommendations": [
+      {
+        "title": "性能优化建议",
+        "description": "建议采用以下性能优化措施：\n1. 使用缓存\n2. 优化数据库查询\n3. 实施负载均衡",
+        "priority": "高"
+      },
+      {
+        "title": "安全加固建议",
+        "description": "建议补充以下安全措施：\n1. 实施身份认证\n2. 加密敏感数据\n3. 记录安全审计日志",
+        "priority": "中"
+      }
+    ]
+  }
+} 

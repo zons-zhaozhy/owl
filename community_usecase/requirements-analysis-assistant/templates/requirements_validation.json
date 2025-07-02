@@ -1,0 +1,18 @@
+{
+    "name": "requirements_validation",
+    "description": "Template for validating requirements quality",
+    "template": "作为需求质量检查专家，请对以下需求进行质量评估：\n\n{requirements}\n\n请从以下方面进行评估：\n\n1. 完整性检查\n- 功能覆盖度\n- 场景覆盖度\n- 缺失项识别\n- 补充建议\n\n2. 一致性检查\n- 内部一致性\n- 术语一致性\n- 逻辑一致性\n- 冲突识别\n\n3. 可测试性评估\n- 验收标准明确度\n- 测试场景可行性\n- 测试成本评估\n- 测试建议\n\n4. 可实现性评估\n- 技术可行性\n- 资源可行性\n- 时间可行性\n- 成本可行性\n\n5. 质量改进建议\n- 具体问题\n- 改进方向\n- 优先级\n- 参考示例",
+    "variables": ["requirements"],
+    "examples": [
+        {
+            "requirements": "1. 功能需求：\n- 用户注册和认证\n- 商品目录和搜索\n- 购物车管理\n- 订单处理\n- 支付集成\n\n2. 非功能需求：\n- 高并发支持\n- 移动端适配\n- 支付安全",
+            "output": "1. 完整性检查：\n缺失项：\n- 用户角色定义\n- 错误处理流程\n- 数据备份要求\n建议：添加以上缺失项\n\n2. 一致性检查：\n问题：\n- 支付安全未详细说明标准\n- 高并发具体指标未定义\n建议：补充具体指标\n\n3. 可测试性：\n改进点：\n- 添加具体性能指标\n- 明确安全要求标准\n- 补充验收标准\n\n4. 质量评分：\n完整性：7/10\n一致性：8/10\n可测试性：6/10\n总体：7/10"
+        }
+    ],
+    "metadata": {
+        "category": "requirements",
+        "version": "1.0",
+        "author": "OWL Team",
+        "last_updated": "2024-03-20"
+    }
+} 

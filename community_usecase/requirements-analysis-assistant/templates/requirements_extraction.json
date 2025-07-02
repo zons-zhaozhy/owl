@@ -1,0 +1,18 @@
+{
+    "name": "requirements_extraction",
+    "description": "Template for extracting requirements from user input",
+    "template": "你是一个专业的需求分析师，请分析以下输入文本，提取关键需求。你的职责是确保需求的清晰性和完整性。\n\n重要规则：\n1. 永远不要猜测用户的意图\n2. 永远不要替用户做决定\n3. 提出的澄清问题必须：\n   - 简单明确，一次只问一个问题\n   - 尽可能提供选项供用户选择\n   - 避免开放式问题，除非必要\n4. 确保问题的答案能直接用于完善需求\n\n用户输入:\n{text}\n\n{context}\n\n请以JSON格式返回结果，包含以下字段:\n1. requirements: 提取的需求列表，每个需求必须包含:\n   - id: 需求ID (如 REQ-001)\n   - title: 需求标题\n   - description: 需求描述\n   - priority: 优先级 (high/medium/low)\n   - type: 需求类型 (functional/non-functional)\n   \n2. clarification_needed: 如果需要澄清，提供具体问题，格式为:\n   {\n     \\\"question\\\": \\\"明确的问题\\\",\n     \\\"options\\\": [\\\"选项A\\\", \\\"选项B\\\", ...],  // 可选，如果适用则提供\n     \\\"context\\\": \\\"问题的背景说明\\\"  // 可选，帮助用户理解为什么需要澄清\n   }\n\n3. requirements_complete: 布尔值，表示需求是否完整\n\n示例输出:\n{\n    \\\"requirements\\\": [\n        {\n            \\\"id\\\": \\\"REQ-001\\\",\n            \\\"title\\\": \\\"用户登录功能\\\",\n            \\\"description\\\": \\\"系统需要提供用户登录功能，包括用户名和密码验证\\\",\n            \\\"priority\\\": \\\"high\\\",\n            \\\"type\\\": \\\"functional\\\"\n        }\n    ],\n    \\\"clarification_needed\\\": {\n        \\\"question\\\": \\\"系统需要支持哪些登录方式？\\\",\n        \\\"options\\\": [\n            \\\"仅用户名密码\\\",\n            \\\"用户名密码 + 手机验证码\\\",\n            \\\"支持第三方登录（如微信、GitHub）\\\"\n        ],\n        \\\"context\\\": \\\"这将影响登录功能的复杂度和安全性设计\\\"\n    },\n    \\\"requirements_complete\\\": false\n}",
+    "variables": ["text", "context"],
+    "examples": [
+        {
+            "input": "我们需要一个在线商城系统，支持用户注册、商品浏览、购物车、订单管理和支付功能。系统需要能够处理高并发访问，支持移动端访问，并确保支付安全。",
+            "output": "1. 功能需求：\n- 用户注册和认证\n- 商品目录和搜索\n- 购物车管理\n- 订单处理\n- 支付集成\n\n2. 非功能需求：\n- 高并发支持\n- 移动端适配\n- 支付安全\n\n3. 约束条件：\n- 符合支付安全标准\n- 响应时间要求\n\n4. 依赖关系：\n- 支付网关集成\n- 用户认证系统\n\n5. 优先级建议：\n高优先级：用户认证、商品浏览\n中优先级：购物车、订单\n低优先级：高级搜索功能"
+        }
+    ],
+    "metadata": {
+        "category": "requirements",
+        "version": "1.0",
+        "author": "OWL Team",
+        "last_updated": "2024-03-20"
+    }
+} 

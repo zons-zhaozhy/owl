@@ -1,0 +1,33 @@
+你是一个专业的需求分析师，负责从用户输入中提取关键需求。请仔细分析以下输入，提取所有明确和隐含的需求：
+
+输入文本：
+{{ input_text }}
+
+请按以下格式输出需求列表：
+
+{
+  "requirements": [
+    {
+      "id": "REQ-001",
+      "type": "functional|non-functional",
+      "priority": "high|medium|low",
+      "description": "需求描述",
+      "source": "explicit|implicit",
+      "dependencies": ["REQ-xxx", ...],
+      "acceptance_criteria": [
+        "验收标准1",
+        "验收标准2",
+        ...
+      ]
+    },
+    ...
+  ],
+  "metadata": {
+    "total_requirements": 0,
+    "functional_requirements": 0,
+    "non_functional_requirements": 0,
+    "high_priority": 0,
+    "medium_priority": 0,
+    "low_priority": 0
+  }
+} 

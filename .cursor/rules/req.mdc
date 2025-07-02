@@ -1,0 +1,147 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# OWL Framework Requirements Tracking
+
+## Active Requirements
+
+### Core System Requirements
+1. MUST automatically collect and organize all user requirements in this file
+   - Priority: High
+   - Status: Active
+   - Added: June 2025
+   - Source: User direct request
+   - Implementation: Continuous requirement tracking and documentation
+
+### System Architecture Requirements
+1. **多智能体系统架构** - IN PROGRESS
+   - Priority: Critical
+   - Status: In Progress
+   - Issue: 需要实现基于 OWL 框架的需求分析系统
+   - Solution:
+     * 创建专门的需求分析智能体集群
+     * 实现智能体间的协作机制
+     * 集成 OWL 的工具包系统
+     * 保持框架的可扩展性
+
+2. **智能体交互界面** - PLANNED
+   - Priority: High
+   - Status: Planned
+   - Requirements: 实现智能体交互的用户界面
+   - Implementation:
+     * 基于 OWL 的 Web 界面
+     * 智能体状态可视化
+     * 需求分析过程展示
+     * 实时反馈机制
+     * WebSocket 通信
+     * 响应式设计
+
+3. **多模式交互支持** - PLANNED
+   - CLI 模式：python main.py --mode cli
+   - Web 模式：python main.py --mode web
+   - 单次模式：python main.py --mode once "需求描述"
+   - 统一使用 OWL 智能体系统
+
+### 智能体系统设计
+1. **需求提取智能体**
+   - Priority: High
+   - Status: Planned
+   - Added: June 2025
+   - Implementation:
+     * 使用 OWL 的自然语言处理能力
+     * 实现需求识别和分类
+     * 支持多种输入格式
+     * 集成上下文理解
+
+2. **需求分析智能体**
+   - Priority: High
+   - Status: Planned
+   - Added: June 2025
+   - Implementation:
+     * 深度需求分析
+     * 依赖关系识别
+     * 风险评估
+     * 可行性分析
+
+3. **文档生成智能体**
+   - Priority: Medium
+   - Status: Planned
+   - Added: June 2025
+   - Implementation:
+     * 结构化文档生成
+     * 多格式支持
+     * 版本控制集成
+     * 变更追踪
+
+4. **质量检查智能体**
+   - Priority: Medium
+   - Status: Planned
+   - Added: June 2025
+   - Implementation:
+     * 需求质量评估
+     * 一致性检查
+     * 完整性验证
+     * 建议生成
+
+5. **智能体协调器**
+   - Priority: High
+   - Status: Planned
+   - Added: June 2025
+   - Implementation:
+     * 智能体任务分配
+     * 状态监控
+     * 资源管理
+     * 错误处理
+
+## 系统接口实现
+**统一入口设计**:
+```bash
+# Web 界面模式（默认）
+python main.py
+
+# 交互式 CLI 模式
+python main.py --mode cli
+
+# 单次执行模式
+python main.py --mode once "系统需求描述"
+
+# Web 模式自定义配置
+python main.py --mode web --port 8080 --host 127.0.0.1
+```
+
+**系统特性**:
+- 🤖 多智能体协作系统
+- 📊 需求分析可视化
+- 🔄 实时状态更新
+- 📝 自动文档生成
+- 🔍 质量检查反馈
+- 📱 响应式设计
+
+## 需求跟踪指南
+
+1. 每个需求必须包含：
+   - 清晰的描述
+   - 优先级级别
+   - 当前状态
+   - 添加日期
+   - 来源/起源
+   - 实现细节
+
+2. 需求必须分类为：
+   - 活动
+   - 已完成
+   - 延期
+   - 已拒绝
+
+3. 定期需求审查必须：
+   - 验证当前状态
+   - 更新进度
+   - 调整优先级
+   - 归档已完成项目
+
+4. 架构决策必须记录：
+   - 上下文和问题陈述
+   - 决策和理由
+   - 结果和权衡

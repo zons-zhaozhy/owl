@@ -1,0 +1,111 @@
+{
+  "name": "requirements_extractor",
+  "description": "Template for extracting requirements from input text",
+  "template": "你是一个专业的需求分析师，负责从用户输入中提取关键需求。请仔细分析以下输入，提取所有明确和隐含的需求：\n\n输入文本：\n{input_text}\n\n请按以下格式输出需求列表：\n{\n  \"requirements\": [\n    {\n      \"id\": \"REQ-001\",\n      \"type\": \"functional\",\n      \"priority\": \"high\",\n      \"description\": \"需求描述\",\n      \"source\": \"explicit\",\n      \"dependencies\": [\"REQ-002\"],\n      \"acceptance_criteria\": [\n        \"验收标准1\",\n        \"验收标准2\"\n      ]\n    }\n  ],\n  \"metadata\": {\n    \"total_requirements\": 1,\n    \"functional_requirements\": 1,\n    \"non_functional_requirements\": 0,\n    \"high_priority\": 1,\n    \"medium_priority\": 0,\n    \"low_priority\": 0\n  }\n}\n\n注意事项：\n1. 每个需求必须有唯一的ID，格式为 REQ-XXX\n2. 类型必须是 functional 或 non-functional\n3. 优先级必须是 high、medium 或 low\n4. 来源必须是 explicit（明确提到）或 implicit（隐含的）\n5. 依赖关系必须引用有效的需求ID\n6. 验收标准必须清晰具体\n7. 元数据必须准确反映需求统计信息\n\n请以JSON格式返回提取的需求。",
+  "example_input": {
+    "input_text": "我们需要开发一个在线商城系统。系统需要支持用户注册和登录，商品浏览和搜索，购物车管理，订单处理，以及支付功能。系统必须能够支持1000个并发用户，页面加载时间不超过2秒。"
+  },
+  "example_output": {
+    "requirements": [
+      {
+        "id": "REQ-001",
+        "type": "functional",
+        "priority": "high",
+        "description": "系统必须支持用户注册和登录功能",
+        "source": "explicit",
+        "dependencies": [],
+        "acceptance_criteria": [
+          "用户能够使用邮箱和密码注册新账号",
+          "用户能够使用注册的账号和密码登录系统",
+          "系统应该验证用户输入的合法性"
+        ]
+      },
+      {
+        "id": "REQ-002",
+        "type": "functional",
+        "priority": "high",
+        "description": "系统必须支持商品浏览和搜索功能",
+        "source": "explicit",
+        "dependencies": ["REQ-001"],
+        "acceptance_criteria": [
+          "用户能够浏览商品列表",
+          "用户能够使用关键词搜索商品",
+          "搜索结果应该准确反映用户的搜索意图"
+        ]
+      },
+      {
+        "id": "REQ-003",
+        "type": "functional",
+        "priority": "high",
+        "description": "系统必须支持购物车管理功能",
+        "source": "explicit",
+        "dependencies": ["REQ-001", "REQ-002"],
+        "acceptance_criteria": [
+          "用户能够将商品添加到购物车",
+          "用户能够修改购物车中商品的数量",
+          "用户能够从购物车中删除商品"
+        ]
+      },
+      {
+        "id": "REQ-004",
+        "type": "functional",
+        "priority": "high",
+        "description": "系统必须支持订单处理功能",
+        "source": "explicit",
+        "dependencies": ["REQ-003"],
+        "acceptance_criteria": [
+          "用户能够从购物车创建订单",
+          "系统应该生成唯一的订单编号",
+          "用户能够查看订单状态"
+        ]
+      },
+      {
+        "id": "REQ-005",
+        "type": "functional",
+        "priority": "high",
+        "description": "系统必须支持支付功能",
+        "source": "explicit",
+        "dependencies": ["REQ-004"],
+        "acceptance_criteria": [
+          "用户能够选择支付方式",
+          "系统应该验证支付状态",
+          "支付成功后应该更新订单状态"
+        ]
+      },
+      {
+        "id": "REQ-006",
+        "type": "non-functional",
+        "priority": "high",
+        "description": "系统必须支持1000个并发用户",
+        "source": "explicit",
+        "dependencies": [],
+        "acceptance_criteria": [
+          "系统在1000个并发用户下保持稳定运行",
+          "系统响应时间不显著增加",
+          "系统资源使用率在可接受范围内"
+        ]
+      },
+      {
+        "id": "REQ-007",
+        "type": "non-functional",
+        "priority": "high",
+        "description": "系统页面加载时间不超过2秒",
+        "source": "explicit",
+        "dependencies": [],
+        "acceptance_criteria": [
+          "所有页面的加载时间都不超过2秒",
+          "在不同网络条件下测试页面加载时间",
+          "定期监控并优化页面性能"
+        ]
+      }
+    ],
+    "metadata": {
+      "total_requirements": 7,
+      "functional_requirements": 5,
+      "non_functional_requirements": 2,
+      "high_priority": 7,
+      "medium_priority": 0,
+      "low_priority": 0
+    }
+  }
+} 

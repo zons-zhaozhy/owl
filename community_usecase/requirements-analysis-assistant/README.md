@@ -1,176 +1,126 @@
 # OWL Requirements Analysis Assistant
 
-基于 OWL 框架的需求分析助手，用于自动化软件需求分析过程。
+基于OWL框架的需求分析助手，用于自动化需求提取、分析、文档生成和质量检查。
 
 ## 功能特点
 
-- 🤖 多智能体协作系统
-- 📝 自动需求提取和分析
-- 📊 需求质量评估
-- 📄 自动文档生成
-- 🔄 实时反馈和建议
-- 🌐 支持多种交互模式
-
-## 安装
-
-1. 克隆仓库：
-
-```bash
-git clone https://github.com/your-org/owl-requirements.git
-cd owl-requirements
-```
-
-2. 创建虚拟环境：
-
-```bash
-python -m venv venv
-source venv/bin/activate  # Linux/macOS
-# 或
-.\venv\Scripts\activate  # Windows
-```
-
-3. 安装依赖：
-
-```bash
-pip install -e .
-```
-
-## 使用方法
-
-### 命令行模式
-
-```bash
-# 启动交互式命令行界面
-python -m owl_requirements --mode cli
-
-# 单次分析模式
-python -m owl_requirements --mode once "您的需求描述"
-```
-
-### Web 界面模式
-
-```bash
-# 启动 Web 界面（默认）
-python -m owl_requirements
-
-# 自定义端口和主机
-python -m owl_requirements --mode web --port 8080 --host 127.0.0.1
-```
+- 🔍 智能需求提取：从自然语言输入中提取结构化需求
+- 📊 深度需求分析：评估可行性、复杂度和依赖关系
+- 📝 自动文档生成：生成标准格式的需求文档
+- ✅ 质量检查：确保需求的完整性、一致性和可测试性
+- 🤖 多智能体协作：基于OWL框架的智能体系统
 
 ## 项目结构
 
 ```
-owl-requirements/
+requirements-analysis-assistant/
 ├── src/
-│   └── owl_requirements/
-│       ├── agents/             # 智能体实现
-│       ├── core/              # 核心功能
-│       ├── utils/             # 工具函数
-│       ├── web/               # Web 界面
-│       └── cli/               # 命令行界面
-├── tests/                     # 测试用例
-├── docs/                      # 文档
-├── templates/                 # 模板文件
-├── setup.py                  # 包配置
-├── pyproject.toml            # 项目配置
-└── README.md                 # 项目说明
+│   ├── owl_requirements/      # 核心功能模块
+│   │   ├── agents/           # 智能体实现
+│   │   ├── core/             # 核心功能
+│   │   ├── services/         # 服务层
+│   │   └── utils/            # 通用工具
+│   ├── web/                  # Web界面
+│   ├── cli/                  # CLI接口
+│   └── config/               # 配置
+├── tests/                    # 测试用例
+└── docs/                     # 文档
+```
+
+## 安装
+
+1. 克隆仓库：
+```bash
+git clone <repository_url>
+cd requirements-analysis-assistant
+```
+
+2. 安装依赖：
+```bash
+pip install -r requirements.txt
+```
+
+3. 配置：
+```bash
+cp config.example.yaml config.yaml
+# 编辑 config.yaml 设置必要的配置项
+```
+
+## 使用方法
+
+### Web界面模式（默认）
+```bash
+python main.py
+```
+
+### CLI模式
+```bash
+python main.py --mode cli
+```
+
+### 单次执行模式
+```bash
+python main.py --mode once "需求描述"
+```
+
+### Web模式自定义配置
+```bash
+python main.py --mode web --port 8080 --host 127.0.0.1
 ```
 
 ## 开发指南
 
-1. 安装开发依赖：
-
+### 环境设置
 ```bash
-pip install -e ".[dev]"
-```
+# 安装开发依赖
+pip install -r requirements-dev.txt
 
-2. 安装 pre-commit hooks：
-
-```bash
+# 安装pre-commit hooks
 pre-commit install
 ```
 
-3. 运行测试：
-
+### 运行测试
 ```bash
-pytest
+pytest tests/
 ```
 
-4. 代码格式化：
-
-```bash
-black src tests
-isort src tests
-```
-
-5. 类型检查：
-
-```bash
-mypy src
-```
-
-## 配置
-
-1. 创建 `.env` 文件：
-
-```bash
-cp .env.example .env
-```
-
-2. 编辑配置：
-
-```env
-# OpenAI API 配置
-OPENAI_API_KEY=your-api-key
-
-# 日志配置
-LOG_LEVEL=INFO
-LOG_DIR=logs
-
-# Web 界面配置
-WEB_HOST=127.0.0.1
-WEB_PORT=8000
-```
+### 代码规范
+- 遵循PEP 8规范
+- 使用类型注解
+- 编写完整的文档字符串
+- 确保测试覆盖率
 
 ## 智能体系统
 
-系统由以下智能体组成：
+### 1. 需求提取智能体
+- 负责从用户输入中提取结构化需求
+- 支持多种输入格式
+- 使用LLM进行智能识别
 
-1. 需求提取智能体
-   - 从用户输入中提取需求
-   - 识别需求类型和优先级
-   - 标准化需求描述
+### 2. 需求分析智能体
+- 评估需求可行性
+- 分析依赖关系
+- 识别潜在风险
+- 提供实现建议
 
-2. 需求分析智能体
-   - 分析需求完整性
-   - 识别依赖关系
-   - 评估可行性
-   - 提供优化建议
+### 3. 文档生成智能体
+- 生成标准格式文档
+- 支持多种输出格式
+- 维护需求追踪性
 
-3. 文档生成智能体
-   - 生成标准格式文档
-   - 维护需求追踪
-   - 支持多种输出格式
-
-4. 质量检查智能体
-   - 评估需求质量
-   - 检查一致性
-   - 提供改进建议
+### 4. 质量检查智能体
+- 验证需求质量
+- 检查一致性
+- 提供改进建议
 
 ## 贡献指南
 
 1. Fork 项目
-2. 创建特性分支
+2. 创建功能分支
 3. 提交更改
 4. 推送到分支
 5. 创建 Pull Request
 
 ## 许可证
 
-本项目采用 MIT 许可证。详见 [LICENSE](LICENSE) 文件。
-
-## 联系方式
-
-- 项目主页：[GitHub](https://github.com/your-org/owl-requirements)
-- 问题反馈：[Issues](https://github.com/your-org/owl-requirements/issues)
-- 邮件：owl@example.com
+[License Name] - 查看 LICENSE 文件了解更多信息。
