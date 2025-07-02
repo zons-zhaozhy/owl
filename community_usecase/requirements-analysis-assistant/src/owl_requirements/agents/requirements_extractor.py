@@ -121,6 +121,9 @@ class RequirementsExtractor(BaseAgent):
         # 清理中文标点符号
         content = content.replace("，", ",").replace("：", ":")
         
+        # 记录原始内容的前100个字符（用于调试）
+        logger.debug(f"Attempting to extract JSON from content (first 100 chars): {content[:100]}...")
+        
         # 尝试提取 JSON 格式的内容
         patterns = [
             r"```json\s*(.*?)\s*```",  # ```json ... ```
@@ -132,38 +135,57 @@ class RequirementsExtractor(BaseAgent):
             matches = re.findall(pattern, content, re.DOTALL)
             if matches:
                 try:
-                    result = json.loads(matches[0])
+                    logger.debug(f"Found match with pattern '{pattern}', attempting to parse JSON")
+                    match_content = matches[0]
+                    logger.debug(f"JSON content to parse (first 100 chars): {match_content[:100]}...")
+                    result = json.loads(match_content)
+                    logger.debug(f"Successfully parsed JSON with keys: {list(result.keys())}")
                     return result
                 except json.JSONDecodeError as e:
-                    logger.debug(f"Failed to parse JSON with pattern {pattern}: {e}")
+                    logger.warning(f"Failed to parse JSON with pattern {pattern}: {e}")
+                    logger.debug(f"Problematic JSON content: {matches[0][:200]}...")
                     continue
         
+        # 如果所有模式都失败，记录完整内容以便调试
+        logger.error(f"No valid JSON found in content. Full content: {content}")
         raise ValueError("No valid JSON found in content")
         
     def _validate_result(self, result: Dict[str, Any]) -> bool:
         """Validate extraction result."""
         if not isinstance(result, dict):
+            logger.warning(f"Result is not a dictionary, but {type(result)}")
             return False
             
         # 检查是否包含必要的字段
         required_fields = ["requirements"]
         for field in required_fields:
             if field not in result:
+                logger.warning(f"Required field '{field}' not found in result. Available keys: {list(result.keys())}")
                 return False
                 
         # 验证需求列表的格式
         requirements = result["requirements"]
         if not isinstance(requirements, list):
+            logger.warning(f"'requirements' field is not a list, but {type(requirements)}")
             return False
             
-        for req in requirements:
+        if len(requirements) == 0:
+            logger.warning("'requirements' list is empty")
+            return False
+            
+        for i, req in enumerate(requirements):
             if not isinstance(req, dict):
+                logger.warning(f"Requirement #{i} is not a dictionary, but {type(req)}")
                 return False
+                
             required_req_fields = ["id", "title", "description", "priority", "type"]
-            for field in required_req_fields:
-                if field not in req:
-                    return False
+            missing_fields = [field for field in required_req_fields if field not in req]
+            
+            if missing_fields:
+                logger.warning(f"Requirement #{i} is missing required fields: {missing_fields}. Available keys: {list(req.keys())}")
+                return False
                     
+        logger.debug(f"Validation successful: Found {len(requirements)} valid requirements")
         return True
         
     async def process(self, input_text: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -180,23 +202,30 @@ class RequirementsExtractor(BaseAgent):
         
         # 准备 prompt
         prompt = await self._prepare_prompt(input_text, context)
+        logger.debug(f"Prepared prompt (first 200 chars): {prompt[:200]}...")
         
         # 调用 LLM 服务
         for i in range(self.max_retries):
             try:
+                logger.info(f"Calling LLM service (attempt {i+1}/{self.max_retries})")
                 response = await self.llm_service.generate(prompt)
-                logger.debug(f"LLM response: {json.dumps({'response': response.text}, cls=OWLJSONEncoder, indent=2)}")
+                
+                # 记录完整响应以便调试
+                logger.debug(f"LLM response (first 500 chars): {response.text[:500]}...")
                 
                 # 提取并验证结果
-                result = self._extract_json(response.text)
-                if self._validate_result(result):
-                    logger.info(f"Successfully extracted requirements: {json.dumps(result, cls=OWLJSONEncoder, indent=2)}")
-                    return result
+                try:
+                    result = self._extract_json(response.text)
+                    if self._validate_result(result):
+                        logger.info(f"Successfully extracted requirements: {json.dumps(result, cls=OWLJSONEncoder, indent=2)}")
+                        return result
                     
-                logger.warning("Invalid result format")
+                    logger.warning(f"Invalid result format: {json.dumps(result, cls=OWLJSONEncoder)}")
+                except ValueError as e:
+                    logger.warning(f"Failed to extract JSON: {e}")
                 
             except Exception as e:
-                logger.error(f"Failed to process input (attempt {i+1}/{self.max_retries}): {e}")
+                logger.error(f"Failed to process input (attempt {i+1}/{self.max_retries}): {e}", exc_info=True)
                 if i == self.max_retries - 1:
                     raise
                     
