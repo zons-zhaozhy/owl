@@ -22,27 +22,32 @@ __all__ = [
     "AgentConfig",
     "AgentRole",
     "AgentStatus",
-    "BaseAgent",
 ]
+
 
 class AgentStatus(Enum):
     """Status of an agent in the system."""
-    IDLE = "idle"
-    BUSY = "busy"
-    ERROR = "error"
-    TERMINATED = "terminated"
+
+    _IDLE = "idle"
+    _BUSY = "busy"
+    _ERROR = "error"
+    _TERMINATED = "terminated"
+
 
 class AgentRole(Enum):
     """Available roles for agents in the system."""
-    EXTRACTOR = "extractor"
-    ANALYZER = "analyzer"
-    DOCUMENTER = "documenter"
-    CHECKER = "checker"
-    COORDINATOR = "coordinator"
+
+    _EXTRACTOR = "extractor"
+    _ANALYZER = "analyzer"
+    _DOCUMENTER = "documenter"
+    _CHECKER = "checker"
+    _COORDINATOR = "coordinator"
+
 
 @dataclass
 class AgentConfig:
     """Configuration for an agent instance."""
+
     role: AgentRole
     name: str
     model: str

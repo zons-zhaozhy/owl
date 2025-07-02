@@ -1,17 +1,17 @@
 import logging
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional, List
-import asyncio
 from datetime import datetime
 
-from .config import AgentConfig, AgentStatus, AgentRole
 from .exceptions import AgentError, ConfigurationError
+from ..utils.enums import AgentStatus
 
 logger = logging.getLogger(__name__)
 
+
 class BaseAgent(ABC):
     """智能体基类，定义了所有智能体的基本接口和共同功能。
-    
+
     提供核心功能：
     - 配置管理
     - 状态跟踪
@@ -36,16 +36,16 @@ class BaseAgent(ABC):
             self.name = config.get("name", self.__class__.__name__)
             self.description = config.get("description", "")
             self.version = config.get("version", "1.0.0")
-            
+
             # 状态管理
             self.status = AgentStatus.IDLE
             self.last_error: Optional[Exception] = None
             self.start_time: Optional[datetime] = None
             self.end_time: Optional[datetime] = None
-            
+
             # 日志记录器
             self.logger = logging.getLogger(f"owl.agent.{self.name}")
-            
+
             # 性能指标
             self.metrics = {
                 "total_calls": 0,
@@ -53,9 +53,9 @@ class BaseAgent(ABC):
                 "failed_calls": 0,
                 "total_processing_time": 0.0,
                 "average_processing_time": 0.0,
-                "last_call_timestamp": None
+                "last_call_timestamp": None,
             }
-            
+
             # 状态存储
             self.state = {}
 
@@ -93,15 +93,10 @@ class BaseAgent(ABC):
             raise ConfigurationError("配置必须是字典类型")
 
         required_fields = self.get_required_config_fields()
-        missing_fields = [
-            field for field in required_fields
-            if field not in config
-        ]
+        missing_fields = [field for field in required_fields if field not in config]
 
         if missing_fields:
-            raise ConfigurationError(
-                f"配置缺少必要字段: {', '.join(missing_fields)}"
-            )
+            raise ConfigurationError(f"配置缺少必要字段: {', '.join(missing_fields)}")
 
     def get_required_config_fields(self) -> List[str]:
         """获取必需的配置字段列表。
@@ -133,10 +128,14 @@ class BaseAgent(ABC):
             "name": self.name,
             "role": self.config.get("role", "unknown"),
             "status": self.status.value,
-            "uptime": (datetime.now() - self.start_time).total_seconds() if self.start_time else 0,
+            "uptime": (
+                (datetime.now() - self.start_time).total_seconds()
+                if self.start_time
+                else 0
+            ),
             "metrics": self.metrics,
             "last_error": str(self.last_error) if self.last_error else None,
-            "config": self.config
+            "config": self.config,
         }
 
     async def handle_error(self, error: Exception) -> None:
@@ -165,8 +164,7 @@ class BaseAgent(ABC):
 
         self.metrics["total_processing_time"] += processing_time
         self.metrics["average_processing_time"] = (
-            self.metrics["total_processing_time"] /
-            self.metrics["total_calls"]
+            self.metrics["total_processing_time"] / self.metrics["total_calls"]
         )
         self.metrics["last_call_timestamp"] = datetime.now().isoformat()
 
@@ -237,4 +235,4 @@ class BaseAgent(ABC):
             f"name='{self.name}', "
             f"version='{self.version}', "
             f"description='{self.description}')"
-        ) 
+        )

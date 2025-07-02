@@ -6,4 +6,4 @@ OWL需求分析助手 - Web模块
 
 from .app import create_app
 
-__all__ = ['create_app'] 
+__all__ = ["create_app"]

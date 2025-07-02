@@ -1,132 +1,101 @@
-"""
-Web应用模块。
-"""
-
-import logging
-from typing import Dict, Optional
-
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.middleware.cors import CORSMiddleware
+from typing import Dict
+import json
+import uuid
+import logging
+from pathlib import Path
 
+from ..core.coordinator import RequirementsCoordinator
 from ..core.config import SystemConfig
-from ..services.llm_manager import LLMManager
+from ..core.models import RequirementsAnalysisResult, ProcessingStatus, WebSocketMessage
 
 
-# 创建日志记录器
-logger = logging.getLogger(__name__)
+def create_web_app(config: SystemConfig) -> FastAPI:
+    """创建Web应用实例"""
+    app = FastAPI(title="OWL需求分析助手")
 
+    # 配置静态文件和模板
+    base_path = Path(__file__).parent
+    static_path = base_path / "static"
+    templates_path = base_path / "templates"
 
-class RequirementsRequest(BaseModel):
-    """需求请求模型。"""
-    text: str
-    template: Optional[str] = "requirements_analysis"
+    app.mount("/static", StaticFiles(directory=str(static_path)), _name="static")
+    templates = Jinja2Templates(directory=str(templates_path))
 
-
-class RequirementsResponse(BaseModel):
-    """需求响应模型。"""
-    analysis: Dict[str, str]
-
-
-def create_app(
-    config: SystemConfig,
-    llm_manager: LLMManager
-) -> FastAPI:
-    """
-    创建Web应用。
-
-    Args:
-        config: 系统配置
-        llm_manager: LLM管理器
-
-    Returns:
-        FastAPI应用
-    """
-    # 创建应用
-    app = FastAPI(
-        title="OWL需求分析助手",
-        description="基于OWL框架的需求分析系统",
-        version="0.1.0"
-    )
-    
     # 配置CORS
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"]
+        _allow_origins=config.web.cors_origins,
+        _allow_credentials=True,
+        _allow_methods=["*"],
+        _allow_headers=["*"],
     )
-    
-    # 挂载静态文件
-    app.mount(
-        "/static",
-        StaticFiles(directory="static"),
-        name="static"
-    )
-    
+
+    # 会话管理
+    sessions: Dict[str, dict] = {}
+
     @app.get("/", response_class=HTMLResponse)
     async def root():
-        """根路径处理。"""
-        with open("static/index.html", "r", encoding="utf-8") as f:
-            return f.read()
-    
+        """根路径处理"""
+        return RedirectResponse(url="/index.html")
+
+    @app.get("/index.html", response_class=HTMLResponse)
+    async def index(request):
+        """主页"""
+        return templates.TemplateResponse("index.html", {"request": request})
+
+    @app.websocket("/ws")
+    async def websocket_endpoint(websocket: WebSocket):
+        """WebSocket处理"""
+        await websocket.accept()
+        session_id = str(uuid.uuid4())
+
+        try:
+            # 创建会话
+            coordinator = RequirementsCoordinator(config)
+            sessions[session_id] = {"websocket": websocket, "coordinator": coordinator}
+
+            # 发送会话ID
+            await websocket.send_json({"type": "session", "session_id": session_id})
+
+            # 处理消息
+            while True:
+                data = await websocket.receive_text()
+                message = json.loads(data)
+
+                if message["type"] == "analyze":
+                    # 处理需求分析请求
+                    requirements_text = message["text"]
+                    result = await coordinator.process(requirements_text)
+
+                    # 发送结果
+                    await websocket.send_json({"type": "result", "data": result.dict()})
+                elif message["type"] == "status":
+                    # 获取处理状态
+                    status = coordinator.get_status()
+                    await websocket.send_json({"type": "status", "data": status.dict()})
+
+        except WebSocketDisconnect:
+            logging.info(f"WebSocket连接断开: {session_id}")
+        except Exception as e:
+            logging.error(f"WebSocket错误: {str(e)}")
+            await websocket.send_json({"type": "error", "message": str(e)})
+        finally:
+            # 清理会话
+            if session_id in sessions:
+                del sessions[session_id]
+
     @app.get("/health")
     async def health_check():
-        """健康检查。"""
-        return {"status": "ok"}
-    
-    @app.post("/api/analyze", response_model=RequirementsResponse)
-    async def analyze_requirements(request: RequirementsRequest):
-        """
-        分析需求。
+        """健康检查"""
+        return {"status": "healthy"}
 
-        Args:
-            request: 需求请求
+    return app
 
-        Returns:
-            需求分析结果
-        """
-        try:
-            # 生成响应
-            response = await llm_manager.generate(
-                prompt=request.text,
-                template_name=request.template
-            )
-            
-            # 解析响应
-            analysis = {}
-            current_section = None
-            current_content = []
-            
-            for line in response.content.split("\n"):
-                line = line.strip()
-                if not line:
-                    continue
-                
-                if line.startswith(("1.", "2.", "3.", "4.", "5.", "6.")):
-                    # 保存上一个部分
-                    if current_section and current_content:
-                        analysis[current_section] = "\n".join(current_content)
-                        current_content = []
-                    
-                    # 开始新部分
-                    current_section = line.split(".", 1)[1].strip()
-                else:
-                    current_content.append(line)
-            
-            # 保存最后一个部分
-            if current_section and current_content:
-                analysis[current_section] = "\n".join(current_content)
-            
-            return RequirementsResponse(analysis=analysis)
-        except Exception as e:
-            logger.error(f"需求分析失败: {str(e)}")
-            raise HTTPException(
-                status_code=500,
-                detail=f"需求分析失败: {str(e)}"
-            )
-    
-    return app 
+
+# 创建默认应用实例
+_app = create_web_app(SystemConfig())

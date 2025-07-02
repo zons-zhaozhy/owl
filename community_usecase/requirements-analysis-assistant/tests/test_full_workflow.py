@@ -9,10 +9,10 @@ from pathlib import Path
 from typing import Dict, Any
 from unittest.mock import patch, MagicMock
 
-from src.owl_requirements.core.config import Config
-from src.owl_requirements.services.analyzer import RequirementsAnalyzer
-from src.owl_requirements.services.llm import LLMService
-from src.main import main
+from owl_requirements.core.config import Config
+from owl_requirements.services.analyzer import RequirementsAnalyzer
+from owl_requirements.services.llm import LLMService
+from main import main
 
 class TestFullWorkflow:
     """完整工作流程测试类"""

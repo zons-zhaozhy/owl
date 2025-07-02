@@ -12,5 +12,5 @@ __all__ = [
     "AgentRole",
     "ConfigManager",
     "config_manager",
-    "config"
+    "config",
 ]

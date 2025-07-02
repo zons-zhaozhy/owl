@@ -4,7 +4,6 @@
 此模块提供了用于生成结构化需求文档的核心功能。
 """
 
-import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -13,46 +12,57 @@ from typing import Any, Dict, List, Optional, Union
 from ..utils.exceptions import (
     DocumentationError,
     TemplateError,
-    ValidationError
+    ValidationError,
 )
 from ..utils.json_utils import load_json_safe, save_json_safe
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class ProjectInfo:
     """项目信息数据类"""
+
     name: str
     description: str
     version: str
 
+
 @dataclass
 class Requirement:
     """需求数据类"""
+
     id: str
     title: str
     description: str
     category: Optional[str] = None
 
+
 @dataclass
 class Requirements:
     """需求集合数据类"""
+
     functional: List[Requirement]
     non_functional: List[Requirement]
+
 
 @dataclass
 class Analysis:
     """分析结果数据类"""
+
     feasibility: float
     complexity: float
     risks: Dict[str, List[str]]
 
+
 @dataclass
 class QualityMetrics:
     """质量指标数据类"""
+
     overall_score: float
     metrics: Dict[str, float]
     improvements: List[str]
+
 
 class DocumentationGenerator:
     """需求文档生成器类"""
@@ -94,12 +104,14 @@ class DocumentationGenerator:
             return ProjectInfo(
                 name=info["name"],
                 description=info["description"],
-                version=info["version"]
+                version=info["version"],
             )
         except KeyError as e:
             raise ValidationError(f"项目信息缺少必要字段：{e}") from e
 
-    def _validate_requirements(self, reqs: Dict[str, List[Dict[str, Any]]]) -> Requirements:
+    def _validate_requirements(
+        self, reqs: Dict[str, List[Dict[str, Any]]]
+    ) -> Requirements:
         """
         验证需求数据
 
@@ -110,13 +122,9 @@ class DocumentationGenerator:
             Requirements: 验证后的需求对象
         """
         try:
-            functional = [
-                Requirement(**req)
-                for req in reqs.get("functional", [])
-            ]
+            functional = [Requirement(**req) for req in reqs.get("functional", [])]
             non_functional = [
-                Requirement(**req)
-                for req in reqs.get("non_functional", [])
+                Requirement(**req) for req in reqs.get("non_functional", [])
             ]
             return Requirements(functional=functional, non_functional=non_functional)
         except (KeyError, TypeError) as e:
@@ -136,7 +144,7 @@ class DocumentationGenerator:
             return Analysis(
                 feasibility=float(analysis["feasibility"]),
                 complexity=float(analysis["complexity"]),
-                risks=analysis["risks"]
+                risks=analysis["risks"],
             )
         except (KeyError, ValueError) as e:
             raise ValidationError(f"分析结果格式错误：{e}") from e
@@ -155,7 +163,7 @@ class DocumentationGenerator:
             return QualityMetrics(
                 overall_score=float(quality["overall_score"]),
                 metrics=quality["metrics"],
-                improvements=quality["improvements"]
+                improvements=quality["improvements"],
             )
         except (KeyError, ValueError) as e:
             raise ValidationError(f"质量指标格式错误：{e}") from e
@@ -166,7 +174,7 @@ class DocumentationGenerator:
         requirements: Dict[str, List[Dict[str, Any]]],
         analysis: Dict[str, Any],
         quality: Dict[str, Any],
-        output_path: Optional[str] = None
+        output_path: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         生成需求文档
@@ -193,14 +201,14 @@ class DocumentationGenerator:
                 "project": {
                     "name": validated_info.name,
                     "description": validated_info.description,
-                    "version": validated_info.version
+                    "version": validated_info.version,
                 },
                 "requirements": {
                     "functional": [
                         {
                             "id": req.id,
                             "title": req.title,
-                            "description": req.description
+                            "description": req.description,
                         }
                         for req in validated_reqs.functional
                     ],
@@ -209,25 +217,25 @@ class DocumentationGenerator:
                             "id": req.id,
                             "title": req.title,
                             "description": req.description,
-                            "category": req.category
+                            "category": req.category,
                         }
                         for req in validated_reqs.non_functional
-                    ]
+                    ],
                 },
                 "analysis": {
                     "feasibility_score": validated_analysis.feasibility,
                     "complexity_score": validated_analysis.complexity,
-                    "risk_assessment": validated_analysis.risks
+                    "risk_assessment": validated_analysis.risks,
                 },
                 "quality": {
                     "overall_quality_score": validated_quality.overall_score,
                     "quality_metrics": validated_quality.metrics,
-                    "improvement_suggestions": validated_quality.improvements
+                    "improvement_suggestions": validated_quality.improvements,
                 },
                 "metadata": {
                     "generated_at": "2024-03-21T10:00:00Z",
-                    "generator_version": "1.0.0"
-                }
+                    "generator_version": "1.0.0",
+                },
             }
 
             # 保存文档（如果指定了输出路径）
@@ -240,4 +248,4 @@ class DocumentationGenerator:
         except (ValidationError, TemplateError) as e:
             raise DocumentationError(f"生成文档失败：{e}") from e
         except Exception as e:
-            raise DocumentationError(f"生成文档时发生未知错误：{e}") from e 
+            raise DocumentationError(f"生成文档时发生未知错误：{e}") from e

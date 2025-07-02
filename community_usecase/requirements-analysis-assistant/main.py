@@ -19,14 +19,14 @@ import logging
 import json
 from typing import Optional, Dict, Any
 
-from src.owl_requirements.services.llm_manager import LLMManager
-from src.owl_requirements.agents.requirements_extractor import RequirementsExtractor
-from src.owl_requirements.agents.requirements_analyzer import RequirementsAnalyzer
-from src.owl_requirements.agents.quality_checker import QualityChecker
-from src.owl_requirements.agents.documentation_generator import DocumentationGenerator
-from src.owl_requirements.core.logging import setup_logging
-from src.owl_requirements.core.coordinator import AgentCoordinator
-from src.owl_requirements.core.config import SystemConfig
+from owl_requirements.services.llm_manager import LLMManager
+from owl_requirements.agents.requirements_extractor import RequirementsExtractor
+from owl_requirements.agents.requirements_analyzer import RequirementsAnalyzer
+from owl_requirements.agents.quality_checker import QualityChecker
+from owl_requirements.agents.documentation_generator import DocumentationGenerator
+from owl_requirements.core.logging import setup_logging
+from owl_requirements.core.coordinator import AgentCoordinator
+from owl_requirements.core.config import SystemConfig
 
 # 设置日志
 setup_logging()
@@ -37,11 +37,17 @@ class RequirementsAnalysisSystem:
     
     def __init__(self):
         """初始化系统"""
+        from owl_requirements.core.config import SystemConfig
+        
+        # 初始化配置
+        self.config = SystemConfig()
+        
+        # 初始化服务和智能体
         self.llm_manager = LLMManager()
-        self.extractor = RequirementsExtractor()
-        self.analyzer = RequirementsAnalyzer()
-        self.quality_checker = QualityChecker()
-        self.doc_generator = DocumentationGenerator()
+        self.extractor = RequirementsExtractor(self.config)
+        self.analyzer = RequirementsAnalyzer(self.config)
+        self.quality_checker = QualityChecker(self.config)
+        self.doc_generator = DocumentationGenerator(self.config)
         
         logger.info("需求分析系统初始化完成")
     
@@ -195,27 +201,26 @@ def run_cli_mode(args):
     print("输入 'help' 查看帮助，输入 'quit' 退出")
     print()
     
-    # 这是一个测试注释，用于强制更新文件
     # 导入CLI应用和相关依赖
-    from src.owl_requirements.cli.app import create_cli_app
-    from src.owl_requirements.core.coordinator import AgentCoordinator
-    from src.owl_requirements.core.config import SystemConfig
-    from src.owl_requirements.services.llm_manager import LLMManager
-    from src.owl_requirements.agents.requirements_extractor import RequirementsExtractor
-    from src.owl_requirements.agents.requirements_analyzer import RequirementsAnalyzer
-    from src.owl_requirements.agents.quality_checker import QualityChecker
-    from src.owl_requirements.agents.documentation_generator import DocumentationGenerator
+    from owl_requirements.cli.app import create_cli_app
+    from owl_requirements.core.coordinator import AgentCoordinator
+    from owl_requirements.core.config import SystemConfig
+    from owl_requirements.services.llm_manager import LLMManager
+    from owl_requirements.agents.requirements_extractor import RequirementsExtractor
+    from owl_requirements.agents.requirements_analyzer import RequirementsAnalyzer
+    from owl_requirements.agents.quality_checker import QualityChecker
+    from owl_requirements.agents.documentation_generator import DocumentationGenerator
 
     try:
         # 初始化配置和LLM管理器
         config = SystemConfig()
         llm_manager = LLMManager()
 
-        # 实例化智能体，只传递配置字典
-        extractor = RequirementsExtractor()
-        analyzer = RequirementsAnalyzer()
-        checker = QualityChecker()
-        generator = DocumentationGenerator()
+        # 实例化智能体，传递配置
+        extractor = RequirementsExtractor(config)
+        analyzer = RequirementsAnalyzer(config)
+        checker = QualityChecker(config)
+        generator = DocumentationGenerator(config)
 
         # 初始化协调器，只传递智能体实例
         coordinator = AgentCoordinator(extractor, analyzer, checker, generator)
@@ -239,9 +244,9 @@ def run_web_mode(args):
     print("=" * 50)
     
     # 导入Web应用
-    from src.owl_requirements.web.app import create_app
-    from src.owl_requirements.core.config import SystemConfig
-    from src.owl_requirements.services.llm_manager import LLMManager
+    from owl_requirements.web.app import create_app
+    from owl_requirements.core.config import SystemConfig
+    from owl_requirements.services.llm_manager import LLMManager
     
     try:
         import uvicorn
@@ -393,13 +398,15 @@ def main():
             run_cli_mode(args)
         elif args.mode == "web":
             run_web_mode(args)
+        else:
+            print(f"❌ 错误: 未知模式 {args.mode}")
+            sys.exit(1)
     except KeyboardInterrupt:
         print("\n👋 再见!")
+        sys.exit(0)
     except Exception as e:
         print(f"❌ 运行错误: {str(e)}")
-        if args.verbose:
-            import traceback
-            traceback.print_exc()
+        logger.error(f"运行错误: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":

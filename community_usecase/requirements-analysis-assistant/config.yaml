@@ -5,16 +5,20 @@ system:
   name: "OWL需求分析助手"
   version: "0.1.0"
   description: "基于多智能体的需求分析系统"
-  log_level: "INFO"
-  log_file: "logs/owl.log"
+  mode: web  # 运行模式：web, cli, once
+  port: 8082  # Web服务端口
+  host: "0.0.0.0"  # Web服务主机
+  log_level: INFO
+  log_file: "logs/app.log"
 
 # LLM配置
 llm:
-  provider: "openai"  # openai, anthropic, azure
-  model: "gpt-4-turbo-preview"  # 或其他模型
+  provider: ollama  # LLM提供商
+  model: mistral  # 模型名称
   api_key: ""  # 从环境变量获取
   temperature: 0.7
-  max_tokens: 4000
+  max_tokens: 2000
+  timeout: 60
 
 # Web服务器配置
 web:
@@ -24,6 +28,10 @@ web:
   cors_origins: ["*"]
   static_dir: "static"
   templates_dir: "templates"
+  static_path: "static"
+  templates_path: "templates"
+  session_timeout: 3600  # 会话超时时间（秒）
+  max_connections: 100  # 最大并发连接数
 
 # 智能体配置
 agents:
@@ -43,7 +51,6 @@ agents:
       3. 约束条件
       4. 优先级
       5. 依赖关系
-
   requirements_analyzer:
     name: "需求分析智能体"
     role: "analyzer"
@@ -59,7 +66,6 @@ agents:
       3. 风险分析
       4. 实现复杂度评估
       5. 建议的技术方案
-
   quality_checker:
     name: "质量检查智能体"
     role: "checker"
@@ -75,7 +81,8 @@ agents:
       3. 需求的一致性
       4. 需求的可测试性
       5. 需求的可追踪性
-
+    enabled: true
+    threshold: 0.8
   documentation_generator:
     name: "文档生成智能体"
     role: "generator"
@@ -91,6 +98,8 @@ agents:
       3. 技术方案
       4. 实现计划
       5. 风险管理
+    enabled: true
+    format: markdown
 
 # System Configuration
 templates:

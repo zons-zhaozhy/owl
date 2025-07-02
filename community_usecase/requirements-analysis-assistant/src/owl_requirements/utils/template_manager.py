@@ -3,9 +3,10 @@ import logging
 from pathlib import Path
 from typing import Dict, Any, Optional
 
-from ..core.exceptions import TemplateError
+from .exceptions import TemplateError
 
 logger = logging.getLogger(__name__)
+
 
 class TemplateManager:
     """模板管理器，负责加载和管理文档模板。"""
@@ -87,7 +88,9 @@ class TemplateManager:
             logger.warning("模板内容必须是字符串")
             return False
 
-        if "variables" in template_data and not isinstance(template_data["variables"], dict):
+        if "variables" in template_data and not isinstance(
+            template_data["variables"], dict
+        ):
             logger.warning("变量定义必须是字典格式")
             return False
 
@@ -106,9 +109,7 @@ class TemplateManager:
         return self.variables.get(template_name, {})
 
     def format_template(
-        self,
-        template_name: str,
-        variables: Dict[str, Any]
+        self, template_name: str, variables: Dict[str, Any]
     ) -> Optional[str]:
         """
         使用提供的变量格式化模板。
@@ -131,19 +132,59 @@ class TemplateManager:
 
             # 验证变量
             required_vars = self.variables.get(template_name, {})
-            missing_vars = [
-                var for var in required_vars
-                if var not in variables
-            ]
+            missing_vars = [var for var in required_vars if var not in variables]
 
             if missing_vars:
-                raise TemplateError(
-                    f"缺少必要变量: {', '.join(missing_vars)}"
-                )
+                raise TemplateError(f"缺少必要变量: {', '.join(missing_vars)}")
 
             # 格式化模板
             return template.format(**variables)
 
         except Exception as e:
             logger.error(f"模板格式化失败: {str(e)}")
-            raise TemplateError(f"模板格式化失败: {str(e)}") from e 
+            raise TemplateError(f"模板格式化失败: {str(e)}") from e
+
+
+# 便捷函数
+def load_template(template_path: str) -> str:
+    """
+    加载模板文件。
+
+    Args:
+        template_path: 模板文件路径
+
+    Returns:
+        str: 模板内容
+
+    Raises:
+        TemplateError: 模板加载失败
+    """
+    try:
+        with open(template_path, "r", encoding="utf-8") as f:
+            if template_path.endswith(".json"):
+                template_data = json.load(f)
+                return template_data.get("template", "")
+            else:
+                return f.read()
+    except Exception as e:
+        raise TemplateError(f"模板加载失败: {str(e)}") from e
+
+
+def render_template(template: str, variables: Dict[str, Any]) -> str:
+    """
+    渲染模板。
+
+    Args:
+        template: 模板内容
+        variables: 变量字典
+
+    Returns:
+        str: 渲染后的内容
+
+    Raises:
+        TemplateError: 模板渲染失败
+    """
+    try:
+        return template.format(**variables)
+    except Exception as e:
+        raise TemplateError(f"模板渲染失败: {str(e)}") from e

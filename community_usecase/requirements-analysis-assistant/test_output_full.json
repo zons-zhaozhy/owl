@@ -1,0 +1,150 @@
+{
+  "status": "success",
+  "input_text": "开发一个简单的任务管理系统",
+  "extraction": {
+    "status": "success",
+    "requirements": {
+      "functional_requirements": [
+        {
+          "id": "FR1",
+          "description": "用户可以创建任务",
+          "priority": "高",
+          "category": "任务管理"
+        },
+        {
+          "id": "FR2",
+          "description": "用户可以查看任务列表",
+          "priority": "高",
+          "category": "任务管理"
+        },
+        {
+          "id": "FR3",
+          "description": "用户可以编辑任务",
+          "priority": "中",
+          "category": "任务管理"
+        },
+        {
+          "id": "FR4",
+          "description": "用户可以删除任务",
+          "priority": "中",
+          "category": "任务管理"
+        },
+        {
+          "id": "FR5",
+          "description": "用户可以标记任务为完成",
+          "priority": "高",
+          "category": "任务管理"
+        }
+      ],
+      "non_functional_requirements": [
+        {
+          "id": "NFR1",
+          "description": "系统应支持至少1000个任务同时存在",
+          "type": "性能",
+          "constraint": "任务数量上限"
+        },
+        {
+          "id": "NFR2",
+          "description": "系统应在1秒内响应用户操作",
+          "type": "性能",
+          "constraint": "响应时间"
+        },
+        {
+          "id": "NFR3",
+          "description": "系统应保证用户数据安全",
+          "type": "安全",
+          "constraint": "数据加密存储"
+        },
+        {
+          "id": "NFR4",
+          "description": "系统应支持多用户同时使用",
+          "type": "可用性",
+          "constraint": "并发用户数"
+        }
+      ]
+    }
+  },
+  "analysis": {
+    "status": "success",
+    "analysis": {
+      "feasibility_analysis": {
+        "technical_feasibility": "high",
+        "resource_feasibility": "high",
+        "time_feasibility": "high",
+        "analysis_details": "功能需求为常见的任务管理功能，技术实现成熟。非功能需求中的性能和安全要求也较为常见，现有技术栈如数据库和加密技术可满足。"
+      },
+      "complexity_assessment": {
+        "overall_complexity": "low",
+        "technical_complexity": "low",
+        "integration_complexity": "low",
+        "complexity_factors": [
+          "并发用户数未明确具体数值",
+          "数据加密存储的具体实现方式未明确"
+        ]
+      },
+      "risk_analysis": [
+        {
+          "risk_id": "RISK-001",
+          "description": "并发用户数超出预期导致性能下降",
+          "probability": "medium",
+          "impact": "high",
+          "mitigation": "进行性能测试，优化数据库查询和缓存策略"
+        },
+        {
+          "risk_id": "RISK-002",
+          "description": "数据加密存储实现不当导致安全漏洞",
+          "probability": "low",
+          "impact": "high",
+          "mitigation": "采用成熟的加密库，进行安全审计"
+        }
+      ],
+      "effort_estimation": {
+        "development_effort": "2-3周",
+        "testing_effort": "1周",
+        "deployment_effort": "1周",
+        "total_effort": "4-5周"
+      },
+      "recommendations": [
+        {
+          "type": "architecture",
+          "description": "采用分层架构，分离业务逻辑和数据访问层",
+          "rationale": "提高代码可维护性和可扩展性"
+        },
+        {
+          "type": "technology",
+          "description": "使用关系型数据库如MySQL或PostgreSQL",
+          "rationale": "满足数据一致性和性能需求"
+        },
+        {
+          "type": "process",
+          "description": "实施持续集成和自动化测试",
+          "rationale": "确保代码质量和快速反馈"
+        }
+      ]
+    },
+    "metadata": {
+      "requirements_count": {
+        "functional": 5,
+        "non_functional": 4,
+        "constraints": 0,
+        "total": 9
+      },
+      "analysis_method": "llm_template"
+    }
+  },
+  "quality": {
+    "status": "error",
+    "error": "模板LLM调用失败: 提示词模板 quality_check 不存在",
+    "quality_report": null
+  },
+  "documentation": {
+    "status": "error",
+    "error": "模板LLM调用失败: 提示词模板 documentation_generation 不存在",
+    "document": null
+  },
+  "provider_used": "deepseek",
+  "available_providers": [
+    "deepseek",
+    "ollama"
+  ]
+}

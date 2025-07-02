@@ -1,7 +1,48 @@
 {
-    "name": "requirements_analysis",
-    "template": "请根据以下提取的需求，进行详细的需求分析，包括功能需求、非功能需求、技术约束和风险评估。以JSON格式输出分析结果。\n\n需求：{requirements}",
-    "description": "对提取的需求进行详细分析",
-    "variables": ["requirements"],
-    "examples": []
-}
+  "instruction": "你是一个资深的系统分析师。请对提供的需求进行深入分析，评估可行性、复杂度和风险。",
+  "context": "需求信息：{requirements}\n约束条件：{constraints}\n项目范围：{project_scope}\n时间线：{timeline}\n可用资源：{resources}",
+  "task": "请分析需求的技术可行性、资源需求、实现复杂度和潜在风险，并提供改进建议。",
+  "output_format": {
+    "feasibility_analysis": {
+      "technical_feasibility": "high/medium/low",
+      "resource_feasibility": "high/medium/low", 
+      "time_feasibility": "high/medium/low",
+      "analysis_details": "详细分析说明"
+    },
+    "complexity_assessment": {
+      "overall_complexity": "high/medium/low",
+      "technical_complexity": "high/medium/low",
+      "integration_complexity": "high/medium/low",
+      "complexity_factors": ["复杂度因素1", "复杂度因素2"]
+    },
+    "risk_analysis": [
+      {
+        "risk_id": "RISK-001",
+        "description": "风险描述",
+        "probability": "high/medium/low",
+        "impact": "high/medium/low",
+        "mitigation": "缓解措施"
+      }
+    ],
+    "effort_estimation": {
+      "development_effort": "工作量估算",
+      "testing_effort": "测试工作量",
+      "deployment_effort": "部署工作量",
+      "total_effort": "总工作量"
+    },
+    "recommendations": [
+      {
+        "type": "architecture/process/technology",
+        "description": "建议描述",
+        "rationale": "建议理由"
+      }
+    ]
+  },
+  "guidelines": [
+    "基于实际经验进行评估",
+    "考虑技术栈的成熟度和团队能力",
+    "识别关键风险点和依赖关系",
+    "提供可操作的建议"
+  ],
+  "response_format": "请严格按照上述JSON格式返回结果，不要添加额外的文本说明。"
+} 

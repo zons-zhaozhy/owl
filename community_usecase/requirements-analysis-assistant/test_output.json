@@ -1,0 +1,87 @@
+{
+  "status": "success",
+  "input_text": "开发一个简单的任务管理系统",
+  "extraction": {
+    "status": "success",
+    "requirements": {
+      "functional_requirements": [
+        {
+          "id": "FR1",
+          "description": "用户可以创建任务",
+          "priority": "高",
+          "category": "任务管理"
+        },
+        {
+          "id": "FR2",
+          "description": "用户可以查看任务列表",
+          "priority": "高",
+          "category": "任务管理"
+        },
+        {
+          "id": "FR3",
+          "description": "用户可以编辑任务",
+          "priority": "中",
+          "category": "任务管理"
+        },
+        {
+          "id": "FR4",
+          "description": "用户可以删除任务",
+          "priority": "中",
+          "category": "任务管理"
+        },
+        {
+          "id": "FR5",
+          "description": "用户可以标记任务为完成状态",
+          "priority": "高",
+          "category": "任务管理"
+        }
+      ],
+      "non_functional_requirements": [
+        {
+          "id": "NFR1",
+          "description": "系统应支持至少1000个任务同时存储",
+          "type": "性能",
+          "constraint": "存储容量"
+        },
+        {
+          "id": "NFR2",
+          "description": "系统应在1秒内响应用户操作",
+          "type": "性能",
+          "constraint": "响应时间"
+        },
+        {
+          "id": "NFR3",
+          "description": "系统应保证用户数据安全",
+          "type": "安全",
+          "constraint": "数据加密"
+        },
+        {
+          "id": "NFR4",
+          "description": "系统应支持多用户同时使用",
+          "type": "可用性",
+          "constraint": "并发用户数"
+        }
+      ]
+    }
+  },
+  "analysis": {
+    "status": "error",
+    "error": "模板LLM调用失败: 提示词模板 requirements_analysis 不存在",
+    "analysis": null
+  },
+  "quality": {
+    "status": "error",
+    "error": "模板LLM调用失败: 提示词模板 quality_check 不存在",
+    "quality_report": null
+  },
+  "documentation": {
+    "status": "error",
+    "error": "模板LLM调用失败: 提示词模板 documentation_generation 不存在",
+    "document": null
+  },
+  "provider_used": "deepseek",
+  "available_providers": [
+    "deepseek",
+    "ollama"
+  ]
+}

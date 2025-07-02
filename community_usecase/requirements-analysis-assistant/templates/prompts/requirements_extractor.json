@@ -1,6 +1,17 @@
 {
     "name": "requirements_extractor",
-    "description": "Extract requirements from input text",
-    "template": "# Role\n需求提取专家\n\n# Instructions\n- 从输入文本中提取功能性和非功能性需求\n- 对需求进行分类和组织\n- 确保需求的完整性和清晰度\n- 标识关键需求和优先级\n- 必须严格按照指定的JSON格式输出\n- 不要输出任何其他文本，只输出JSON\n\n# Input Variables\n- input_text: 包含需求描述的文本\n\n# Output Format\n{\n    \"functional_requirements\": [\n        {\n            \"id\": \"F1\",\n            \"category\": \"用户功能\",\n            \"description\": \"需求描述\",\n            \"priority\": \"高/中/低\",\n            \"stakeholders\": [\"相关方\"]\n        }\n    ],\n    \"non_functional_requirements\": [\n        {\n            \"id\": \"NF1\",\n            \"category\": \"性能/安全/可用性\",\n            \"description\": \"需求描述\",\n            \"priority\": \"高/中/低\",\n            \"constraints\": [\"相关约束\"]\n        }\n    ]\n}\n\n# Example\nInput:\n{\n    \"input_text\": \"系统需要支持用户注册和登录，并且要求响应时间不超过1秒\"\n}\n\nOutput:\n{\n    \"functional_requirements\": [\n        {\n            \"id\": \"F1\",\n            \"category\": \"用户管理\",\n            \"description\": \"支持用户注册功能\",\n            \"priority\": \"高\",\n            \"stakeholders\": [\"最终用户\"]\n        },\n        {\n            \"id\": \"F2\",\n            \"category\": \"用户管理\",\n            \"description\": \"支持用户登录功能\",\n            \"priority\": \"高\",\n            \"stakeholders\": [\"最终用户\"]\n        }\n    ],\n    \"non_functional_requirements\": [\n        {\n            \"id\": \"NF1\",\n            \"category\": \"性能\",\n            \"description\": \"系统响应时间不超过1秒\",\n            \"priority\": \"高\",\n            \"constraints\": [\"硬件配置\", \"网络带宽\"]\n        }\n    ]\n}\n\n# Your Task\n请分析以下输入并按照指定格式提供输出。注意：只输出JSON格式的结果，不要包含任何其他文本或解释。\n\nInput:\n{input_text}",
-    "variables": ["input_text"]
+    "description": "Template for extracting requirements from input text",
+    "template": "你是一个专业的需求分析师。请仔细分析以下输入文本，提取所有需求：\n\n输入文本：\n{input_text}\n\n请严格按照以下JSON格式输出需求（确保输出是有效的JSON）：\n\n```json\n{\n  \"functional_requirements\": [\n    {\n      \"id\": \"F1\",\n      \"category\": \"用户管理/数据处理/系统功能\",\n      \"description\": \"具体的需求描述\",\n      \"priority\": \"high\",\n      \"stakeholders\": [\"用户角色1\", \"用户角色2\"],\n      \"acceptance_criteria\": [\"验收标准1\", \"验收标准2\"]\n    }\n  ],\n  \"non_functional_requirements\": [\n    {\n      \"id\": \"NF1\",\n      \"category\": \"性能/安全性/可用性\",\n      \"description\": \"具体的非功能需求描述\",\n      \"priority\": \"high\",\n      \"constraints\": [\"约束1\", \"约束2\"],\n      \"metrics\": [\"度量指标1\", \"度量指标2\"]\n    }\n  ]\n}\n```\n\n注意事项：\n1. 必须使用英文的 high/medium/low 作为优先级值\n2. 必须包含 functional_requirements 和 non_functional_requirements 两个顶级字段\n3. 每个需求必须包含示例中的所有字段\n4. 输出必须是有效的JSON格式，使用英文标点符号\n5. 将JSON包含在 ```json 和 ``` 标记之间",
+    "variables": ["input_text"],
+    "examples": [
+        {
+            "input_text": "系统需要支持用户注册和登录，并且能够处理1000个并发用户",
+            "output": "```json\n{\n  \"functional_requirements\": [\n    {\n      \"id\": \"F1\",\n      \"category\": \"用户管理\",\n      \"description\": \"系统支持用户注册功能\",\n      \"priority\": \"high\",\n      \"stakeholders\": [\"最终用户\"],\n      \"acceptance_criteria\": [\"用户能够成功注册账号\", \"系统发送验证邮件\"]\n    }\n  ],\n  \"non_functional_requirements\": [\n    {\n      \"id\": \"NF1\",\n      \"category\": \"性能\",\n      \"description\": \"系统支持1000个并发用户\",\n      \"priority\": \"high\",\n      \"constraints\": [\"服务器配置要求\", \"网络带宽要求\"],\n      \"metrics\": [\"并发用户数>=1000\", \"响应时间<=2秒\"]\n    }\n  ]\n}\n```"
+        }
+    ],
+    "metadata": {
+        "version": "1.0",
+        "author": "OWL Framework",
+        "last_updated": "2024-03-20"
+    }
 } 
