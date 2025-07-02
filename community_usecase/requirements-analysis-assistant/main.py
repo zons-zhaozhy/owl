@@ -1,140 +1,114 @@
-import os
-import sys
-import argparse
+"""Main entry point for the requirements analysis system."""
+
+import typer
 import asyncio
 import logging
 from pathlib import Path
 from typing import Optional
+from enum import Enum
+from rich.console import Console
 
-# Add the project root to the Python path
-project_root = os.path.abspath(os.path.dirname(__file__))
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
+from owl_requirements.core.config import SystemConfig, load_config, AgentRole
+from owl_requirements.core.coordinator import AgentCoordinator
+from owl_requirements.services.llm import create_llm_service, LLMConfig, LLMProvider
+from owl_requirements.cli.app import get_cli_app
+from owl_requirements.web.app import create_web_app
+from owl_requirements.agents.requirements_extractor import RequirementsExtractor
+from owl_requirements.agents.requirements_analyzer import RequirementsAnalyzer
+from owl_requirements.agents.quality_checker import QualityChecker
+from owl_requirements.agents.documentation_generator import DocumentationGenerator
+from owl_requirements.core.logging import setup_logging
 
-from src.config import config
-from src.owl_requirements.agents.requirements import RequirementsAgent
-from src.owl_requirements.web.web_app import app as web_app
-from src.owl_requirements.cli.cli_app import CLIApp
-from src.owl_requirements.utils.exceptions import RequirementsAnalysisError
-
-# 设置日志
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
 logger = logging.getLogger(__name__)
 
-async def run_web_mode() -> None:
-    """运行Web界面模式"""
-    try:
-        logger.info(f"Starting web server at http://{config.web.host}:{config.web.port}")
-        import uvicorn
-        uvicorn.run(
-            web_app,
-            host=config.web.host,
-            port=config.web.port,
-            debug=config.web.debug,
-            allowed_hosts=config.web.allowed_hosts
-        )
-    except Exception as e:
-        logger.error(f"Web server error: {str(e)}")
-        raise
+app = typer.Typer()
 
-async def run_cli_mode() -> None:
-    """运行CLI交互模式"""
-    try:
-        cli = CLIApp()
-        await cli.run()
-    except Exception as e:
-        logger.error(f"CLI interface error: {str(e)}")
-        raise
+class Mode(str, Enum):
+    """运行模式"""
+    CLI = "cli"
+    WEB = "web"
+    ONCE = "once"
 
-async def run_once_mode(requirements: str) -> None:
-    """运行单次执行模式
-    
-    Args:
-        requirements: Requirements to analyze
-    """
-    try:
-        analyzer = RequirementsAgent()
-        result = await analyzer.analyze(requirements)
-        print(result)
-    except RequirementsAnalysisError as e:
-        logger.error(f"Requirements analysis error: {str(e)}")
-        raise
-    except Exception as e:
-        logger.error(f"Unexpected error: {str(e)}")
-        raise
+def initialize_coordinator(system_config: SystemConfig) -> AgentCoordinator:
+    """Initializes the LLM service and AgentCoordinator with all agents."""
+    # 创建LLM配置和服务
+    llm_config = LLMConfig(
+        provider=LLMProvider(system_config.llm_provider),  # 将字符串转换为枚举
+        model=system_config.llm_model,
+        api_key=system_config.llm_api_key,
+        temperature=system_config.llm_temperature,
+        max_tokens=system_config.llm_max_tokens
+    )
+    llm_service = create_llm_service(llm_config)
 
-async def main(mode: str = "web", requirements: Optional[str] = None) -> None:
-    """主函数
-    
-    Args:
-        mode: Running mode (web, cli, once)
-        requirements: Requirements for once mode
-    """
+    # 直接传递system_config给智能体构造函数
+    extractor = RequirementsExtractor(llm_service=llm_service, config=system_config)
+    analyzer = RequirementsAnalyzer(llm_service=llm_service, config=system_config)
+    checker = QualityChecker(llm_service=llm_service, config=system_config)
+    generator = DocumentationGenerator(llm_service=llm_service, config=system_config)
+
+    coordinator = AgentCoordinator(
+        extractor=extractor,
+        analyzer=analyzer,
+        checker=checker,
+        generator=generator
+    )
+    return coordinator
+
+@app.command("run")
+def run_app(
+    mode: Mode = typer.Option(Mode.WEB, "--mode", "-m", help="运行模式：cli, web, once"),
+    text: str = typer.Option(None, "--text", "-t", help="单次模式下的需求文本"),
+    config_path: str = typer.Option("config.yaml", "--config", "-c", help="配置文件路径"),
+    port: Optional[int] = typer.Option(None, "--port", "-p", help="Web服务器端口 (仅用于web模式)"),
+):
+    """运行需求分析助手。"""
+    console = Console()
+
     try:
-        if mode == "web":
-            await run_web_mode()
-        elif mode == "cli":
-            await run_cli_mode()
-        elif mode == "once":
-            if not requirements:
-                logger.error("Requirements must be provided in once mode")
-                sys.exit(1)
-            await run_once_mode(requirements)
+        # 加载配置
+        system_config = load_config(config_path)
+        
+        # 设置日志
+        setup_logging({
+            "log_level": system_config.log_level,
+            "log_file": system_config.log_file,
+            "log_format": "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
+            "log_rotation": "1 day",
+            "log_retention": "7 days",
+            "log_compression": "zip"
+        })
+
+        coordinator = initialize_coordinator(system_config)
+        logger.info(f"启动需求分析助手 - 模式: {mode.value}")
+
+        if mode == Mode.WEB:
+            if port:
+                system_config.web_port = port
+            console.print("[bold green]启动Web界面...[/bold green]")
+            import uvicorn
+            uvicorn.run(create_web_app(coordinator, system_config), host=system_config.web_host, port=system_config.web_port)
+        elif mode == Mode.CLI:
+            console.print("[bold green]启动CLI交互模式...[/bold green]")
+            cli_app = get_cli_app(coordinator, system_config)
+            cli_app()  # 直接调用CLI应用
+        elif mode == Mode.ONCE:
+            if not text:
+                console.print("[bold red]错误：单次模式需要通过 --text 或 -t 提供需求文本。[/bold red]\n")
+                raise typer.Exit(code=1)
+            console.print(f"[bold green]处理单次需求: {text}[/bold green]")
+            result = asyncio.run(coordinator.process_input(session_id="once_session", input_text=text))
+            console.print("[bold yellow]分析结果:[/bold yellow]")
+            console.print(result)
+            if result.get("needs_clarification"):
+                console.print("[bold red]注意：单次模式下无法进行澄清，请修改需求描述使其更清晰。[/bold red]")
         else:
-            logger.error(f"Unsupported mode: {mode}")
-            sys.exit(1)
-            
-    except RequirementsAnalysisError as e:
-        logger.error(f"Requirements analysis failed: {str(e)}")
-        sys.exit(1)
-    except KeyboardInterrupt:
-        logger.info("Interrupted by user")
-        sys.exit(0)
+            console.print(f"[bold red]不支持的运行模式: {mode}[/bold red]\n")
+            raise typer.Exit(code=1)
     except Exception as e:
-        logger.error(f"Unexpected error: {str(e)}")
-        sys.exit(1)
+        logger.exception("应用运行失败")
+        console.print(f"[bold red]应用运行失败: {e}[/bold red]\n")
+        raise typer.Exit(code=1)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="OWL Requirements Analysis Assistant",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  Run web interface:
-    python main.py
-    python main.py --mode web
-    
-  Run CLI interface:
-    python main.py --mode cli
-    
-  Run once and exit:
-    python main.py --mode once "Your requirements here"
-"""
-    )
-    
-    parser.add_argument(
-        "--mode",
-        choices=["web", "cli", "once"],
-        default="web",
-        help="Running mode: web (default), cli, once"
-    )
-    
-    parser.add_argument(
-        "requirements",
-        nargs="?",
-        help="Requirements for once mode"
-    )
-    
-    args = parser.parse_args()
-    
-    if args.mode == "once" and not args.requirements:
-        parser.error("Requirements must be provided in once mode")
-        
-    try:
-        asyncio.run(main(args.mode, args.requirements))
-    except KeyboardInterrupt:
-        print("\nGoodbye!")
-        sys.exit(0) 
+    app() 
